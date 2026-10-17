@@ -1,0 +1,2570 @@
+{
+  "apps/backend": {
+    "root": [
+      "apps/backend/project.json",
+      "nx/core/project-json"
+    ],
+    "targets": [
+      "apps/backend/eslint.config.mjs",
+      "@nx/eslint/plugin"
+    ],
+    "targets.lint": [
+      "apps/backend/eslint.config.mjs",
+      "@nx/eslint/plugin"
+    ],
+    "targets.lint.cache": [
+      "apps/backend/eslint.config.mjs",
+      "@nx/eslint/plugin"
+    ],
+    "targets.lint.inputs.0": [
+      "apps/backend/eslint.config.mjs",
+      "@nx/eslint/plugin"
+    ],
+    "targets.lint.inputs.1": [
+      "apps/backend/eslint.config.mjs",
+      "@nx/eslint/plugin"
+    ],
+    "targets.lint.inputs.2": [
+      "apps/backend/eslint.config.mjs",
+      "@nx/eslint/plugin"
+    ],
+    "targets.lint.inputs.3": [
+      "apps/backend/eslint.config.mjs",
+      "@nx/eslint/plugin"
+    ],
+    "targets.lint.inputs.4": [
+      "apps/backend/eslint.config.mjs",
+      "@nx/eslint/plugin"
+    ],
+    "targets.lint.inputs.5": [
+      "apps/backend/eslint.config.mjs",
+      "@nx/eslint/plugin"
+    ],
+    "targets.lint.inputs": [
+      "apps/backend/eslint.config.mjs",
+      "@nx/eslint/plugin"
+    ],
+    "targets.lint.outputs.0": [
+      "apps/backend/eslint.config.mjs",
+      "@nx/eslint/plugin"
+    ],
+    "targets.lint.outputs": [
+      "apps/backend/eslint.config.mjs",
+      "@nx/eslint/plugin"
+    ],
+    "targets.lint.metadata": [
+      "apps/backend/eslint.config.mjs",
+      "@nx/eslint/plugin"
+    ],
+    "targets.lint.executor": [
+      "apps/backend/eslint.config.mjs",
+      "@nx/eslint/plugin"
+    ],
+    "targets.lint.options.cwd": [
+      "apps/backend/eslint.config.mjs",
+      "@nx/eslint/plugin"
+    ],
+    "targets.lint.options.command": [
+      "apps/backend/eslint.config.mjs",
+      "@nx/eslint/plugin"
+    ],
+    "targets.lint.options": [
+      "apps/backend/eslint.config.mjs",
+      "@nx/eslint/plugin"
+    ],
+    "targets.lint.metadata.technologies": [
+      "apps/backend/eslint.config.mjs",
+      "@nx/eslint/plugin"
+    ],
+    "targets.lint.metadata.technologies.0": [
+      "apps/backend/eslint.config.mjs",
+      "@nx/eslint/plugin"
+    ],
+    "targets.lint.metadata.description": [
+      "apps/backend/eslint.config.mjs",
+      "@nx/eslint/plugin"
+    ],
+    "targets.lint.metadata.help": [
+      "apps/backend/eslint.config.mjs",
+      "@nx/eslint/plugin"
+    ],
+    "targets.lint.metadata.help.command": [
+      "apps/backend/eslint.config.mjs",
+      "@nx/eslint/plugin"
+    ],
+    "targets.lint.metadata.help.example": [
+      "apps/backend/eslint.config.mjs",
+      "@nx/eslint/plugin"
+    ],
+    "projectType": [
+      "apps/backend/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build": [
+      "apps/backend/webpack.config.js",
+      "@nx/webpack/plugin"
+    ],
+    "targets.build.cache": [
+      "apps/backend/webpack.config.js",
+      "@nx/webpack/plugin"
+    ],
+    "targets.build.dependsOn.0": [
+      "apps/backend/webpack.config.js",
+      "@nx/webpack/plugin"
+    ],
+    "targets.build.dependsOn": [
+      "apps/backend/webpack.config.js",
+      "@nx/webpack/plugin"
+    ],
+    "targets.build.inputs.0": [
+      "apps/backend/webpack.config.js",
+      "@nx/webpack/plugin"
+    ],
+    "targets.build.inputs.1": [
+      "apps/backend/webpack.config.js",
+      "@nx/webpack/plugin"
+    ],
+    "targets.build.inputs.2": [
+      "apps/backend/webpack.config.js",
+      "@nx/webpack/plugin"
+    ],
+    "targets.build.inputs.3": [
+      "apps/backend/webpack.config.js",
+      "@nx/webpack/plugin"
+    ],
+    "targets.build.inputs": [
+      "apps/backend/webpack.config.js",
+      "@nx/webpack/plugin"
+    ],
+    "targets.build.outputs.0": [
+      "apps/backend/webpack.config.js",
+      "@nx/webpack/plugin"
+    ],
+    "targets.build.outputs": [
+      "apps/backend/webpack.config.js",
+      "@nx/webpack/plugin"
+    ],
+    "targets.build.metadata": [
+      "apps/backend/webpack.config.js",
+      "@nx/webpack/plugin"
+    ],
+    "targets.build.executor": [
+      "apps/backend/webpack.config.js",
+      "@nx/webpack/plugin"
+    ],
+    "targets.build.options.cwd": [
+      "apps/backend/webpack.config.js",
+      "@nx/webpack/plugin"
+    ],
+    "targets.build.options.env": [
+      "apps/backend/webpack.config.js",
+      "@nx/webpack/plugin"
+    ],
+    "targets.build.options.command": [
+      "apps/backend/webpack.config.js",
+      "@nx/webpack/plugin"
+    ],
+    "targets.build.options": [
+      "apps/backend/webpack.config.js",
+      "@nx/webpack/plugin"
+    ],
+    "targets.build.configurations.development.env": [
+      "apps/backend/webpack.config.js",
+      "@nx/webpack/plugin"
+    ],
+    "targets.build.configurations.development": [
+      "apps/backend/webpack.config.js",
+      "@nx/webpack/plugin"
+    ],
+    "targets.build.configurations": [
+      "apps/backend/webpack.config.js",
+      "@nx/webpack/plugin"
+    ],
+    "targets.build.metadata.technologies": [
+      "apps/backend/webpack.config.js",
+      "@nx/webpack/plugin"
+    ],
+    "targets.build.metadata.technologies.0": [
+      "apps/backend/webpack.config.js",
+      "@nx/webpack/plugin"
+    ],
+    "targets.build.metadata.description": [
+      "apps/backend/webpack.config.js",
+      "@nx/webpack/plugin"
+    ],
+    "targets.build.metadata.help": [
+      "apps/backend/webpack.config.js",
+      "@nx/webpack/plugin"
+    ],
+    "targets.build.metadata.help.command": [
+      "apps/backend/webpack.config.js",
+      "@nx/webpack/plugin"
+    ],
+    "targets.build.metadata.help.example": [
+      "apps/backend/webpack.config.js",
+      "@nx/webpack/plugin"
+    ],
+    "targets.preview": [
+      "apps/backend/webpack.config.js",
+      "@nx/webpack/plugin"
+    ],
+    "targets.preview.continuous": [
+      "apps/backend/webpack.config.js",
+      "@nx/webpack/plugin"
+    ],
+    "targets.preview.inputs.0": [
+      "apps/backend/webpack.config.js",
+      "@nx/webpack/plugin"
+    ],
+    "targets.preview.inputs.1": [
+      "apps/backend/webpack.config.js",
+      "@nx/webpack/plugin"
+    ],
+    "targets.preview.inputs.2": [
+      "apps/backend/webpack.config.js",
+      "@nx/webpack/plugin"
+    ],
+    "targets.preview.inputs.3": [
+      "apps/backend/webpack.config.js",
+      "@nx/webpack/plugin"
+    ],
+    "targets.preview.inputs": [
+      "apps/backend/webpack.config.js",
+      "@nx/webpack/plugin"
+    ],
+    "targets.preview.metadata": [
+      "apps/backend/webpack.config.js",
+      "@nx/webpack/plugin"
+    ],
+    "targets.preview.executor": [
+      "apps/backend/webpack.config.js",
+      "@nx/webpack/plugin"
+    ],
+    "targets.preview.options.cwd": [
+      "apps/backend/webpack.config.js",
+      "@nx/webpack/plugin"
+    ],
+    "targets.preview.options.env": [
+      "apps/backend/webpack.config.js",
+      "@nx/webpack/plugin"
+    ],
+    "targets.preview.options.command": [
+      "apps/backend/webpack.config.js",
+      "@nx/webpack/plugin"
+    ],
+    "targets.preview.options": [
+      "apps/backend/webpack.config.js",
+      "@nx/webpack/plugin"
+    ],
+    "targets.preview.metadata.technologies": [
+      "apps/backend/webpack.config.js",
+      "@nx/webpack/plugin"
+    ],
+    "targets.preview.metadata.technologies.0": [
+      "apps/backend/webpack.config.js",
+      "@nx/webpack/plugin"
+    ],
+    "targets.preview.metadata.description": [
+      "apps/backend/webpack.config.js",
+      "@nx/webpack/plugin"
+    ],
+    "targets.preview.metadata.help": [
+      "apps/backend/webpack.config.js",
+      "@nx/webpack/plugin"
+    ],
+    "targets.preview.metadata.help.command": [
+      "apps/backend/webpack.config.js",
+      "@nx/webpack/plugin"
+    ],
+    "targets.preview.metadata.help.example": [
+      "apps/backend/webpack.config.js",
+      "@nx/webpack/plugin"
+    ],
+    "targets.build-deps": [
+      "apps/backend/webpack.config.js",
+      "@nx/webpack/plugin"
+    ],
+    "targets.build-deps.dependsOn.0": [
+      "apps/backend/webpack.config.js",
+      "@nx/webpack/plugin"
+    ],
+    "targets.build-deps.dependsOn": [
+      "apps/backend/webpack.config.js",
+      "@nx/webpack/plugin"
+    ],
+    "targets.watch-deps": [
+      "apps/backend/webpack.config.js",
+      "@nx/webpack/plugin"
+    ],
+    "targets.watch-deps.continuous": [
+      "apps/backend/webpack.config.js",
+      "@nx/webpack/plugin"
+    ],
+    "targets.watch-deps.dependsOn.0": [
+      "apps/backend/webpack.config.js",
+      "@nx/webpack/plugin"
+    ],
+    "targets.watch-deps.dependsOn": [
+      "apps/backend/webpack.config.js",
+      "@nx/webpack/plugin"
+    ],
+    "targets.watch-deps.executor": [
+      "apps/backend/webpack.config.js",
+      "@nx/webpack/plugin"
+    ],
+    "targets.watch-deps.options.command": [
+      "apps/backend/webpack.config.js",
+      "@nx/webpack/plugin"
+    ],
+    "targets.watch-deps.options": [
+      "apps/backend/webpack.config.js",
+      "@nx/webpack/plugin"
+    ],
+    "targets.test": [
+      "apps/backend/jest.config.cts",
+      "@nx/jest/plugin"
+    ],
+    "targets.test.metadata": [
+      "apps/backend/jest.config.cts",
+      "@nx/jest/plugin"
+    ],
+    "targets.test.cache": [
+      "apps/backend/jest.config.cts",
+      "@nx/jest/plugin"
+    ],
+    "targets.test.inputs.0": [
+      "apps/backend/jest.config.cts",
+      "@nx/jest/plugin"
+    ],
+    "targets.test.inputs.1": [
+      "apps/backend/jest.config.cts",
+      "@nx/jest/plugin"
+    ],
+    "targets.test.inputs.2": [
+      "apps/backend/jest.config.cts",
+      "@nx/jest/plugin"
+    ],
+    "targets.test.inputs.3": [
+      "apps/backend/jest.config.cts",
+      "@nx/jest/plugin"
+    ],
+    "targets.test.inputs.4": [
+      "apps/backend/jest.config.cts",
+      "@nx/jest/plugin"
+    ],
+    "targets.test.inputs": [
+      "apps/backend/jest.config.cts",
+      "@nx/jest/plugin"
+    ],
+    "targets.test.outputs.0": [
+      "apps/backend/jest.config.cts",
+      "@nx/jest/plugin"
+    ],
+    "targets.test.outputs": [
+      "apps/backend/jest.config.cts",
+      "@nx/jest/plugin"
+    ],
+    "targets.test.executor": [
+      "apps/backend/jest.config.cts",
+      "@nx/jest/plugin"
+    ],
+    "targets.test.options.cwd": [
+      "apps/backend/jest.config.cts",
+      "@nx/jest/plugin"
+    ],
+    "targets.test.options.env": [
+      "apps/backend/jest.config.cts",
+      "@nx/jest/plugin"
+    ],
+    "targets.test.options.command": [
+      "apps/backend/jest.config.cts",
+      "@nx/jest/plugin"
+    ],
+    "targets.test.options": [
+      "apps/backend/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.test.metadata.technologies": [
+      "apps/backend/jest.config.cts",
+      "@nx/jest/plugin"
+    ],
+    "targets.test.metadata.technologies.0": [
+      "apps/backend/jest.config.cts",
+      "@nx/jest/plugin"
+    ],
+    "targets.test.metadata.description": [
+      "apps/backend/jest.config.cts",
+      "@nx/jest/plugin"
+    ],
+    "targets.test.metadata.help": [
+      "apps/backend/jest.config.cts",
+      "@nx/jest/plugin"
+    ],
+    "targets.test.metadata.help.command": [
+      "apps/backend/jest.config.cts",
+      "@nx/jest/plugin"
+    ],
+    "targets.test.metadata.help.example": [
+      "apps/backend/jest.config.cts",
+      "@nx/jest/plugin"
+    ],
+    "targets.tsc:typecheck": [
+      "apps/backend/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.dependsOn.0": [
+      "apps/backend/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.dependsOn": [
+      "apps/backend/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.cache": [
+      "apps/backend/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.inputs.0": [
+      "apps/backend/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.inputs.1": [
+      "apps/backend/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.inputs.2": [
+      "apps/backend/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.inputs.3": [
+      "apps/backend/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.inputs.4": [
+      "apps/backend/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.inputs.5": [
+      "apps/backend/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.inputs.6": [
+      "apps/backend/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.inputs.7": [
+      "apps/backend/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.inputs.8": [
+      "apps/backend/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.inputs.9": [
+      "apps/backend/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.inputs.10": [
+      "apps/backend/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.inputs.11": [
+      "apps/backend/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.inputs.12": [
+      "apps/backend/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.inputs.13": [
+      "apps/backend/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.inputs": [
+      "apps/backend/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.outputs.0": [
+      "apps/backend/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.outputs.1": [
+      "apps/backend/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.outputs.2": [
+      "apps/backend/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.outputs.3": [
+      "apps/backend/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.outputs": [
+      "apps/backend/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.syncGenerators.0": [
+      "apps/backend/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.syncGenerators": [
+      "apps/backend/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.metadata": [
+      "apps/backend/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.executor": [
+      "apps/backend/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.options.cwd": [
+      "apps/backend/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.options.command": [
+      "apps/backend/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.options": [
+      "apps/backend/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.metadata.technologies": [
+      "apps/backend/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.metadata.technologies.0": [
+      "apps/backend/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.metadata.description": [
+      "apps/backend/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.metadata.help": [
+      "apps/backend/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.metadata.help.command": [
+      "apps/backend/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.metadata.help.example": [
+      "apps/backend/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "name": [
+      "apps/backend/project.json",
+      "nx/core/project-json"
+    ],
+    "$schema": [
+      "apps/backend/project.json",
+      "nx/core/project-json"
+    ],
+    "sourceRoot": [
+      "apps/backend/project.json",
+      "nx/core/project-json"
+    ],
+    "tags": [
+      "apps/backend/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.prune-lockfile": [
+      "apps/backend/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.prune-lockfile.dependsOn.0": [
+      "apps/backend/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.prune-lockfile.dependsOn": [
+      "apps/backend/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.prune-lockfile.cache": [
+      "apps/backend/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.prune-lockfile.executor": [
+      "apps/backend/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.prune-lockfile.outputs.0": [
+      "apps/backend/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.prune-lockfile.outputs.1": [
+      "apps/backend/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.prune-lockfile.outputs": [
+      "apps/backend/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.prune-lockfile.options.buildTarget": [
+      "apps/backend/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.prune-lockfile.options": [
+      "apps/backend/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.copy-workspace-modules": [
+      "apps/backend/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.copy-workspace-modules.dependsOn.0": [
+      "apps/backend/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.copy-workspace-modules.dependsOn": [
+      "apps/backend/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.copy-workspace-modules.cache": [
+      "apps/backend/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.copy-workspace-modules.outputs.0": [
+      "apps/backend/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.copy-workspace-modules.outputs": [
+      "apps/backend/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.copy-workspace-modules.executor": [
+      "apps/backend/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.copy-workspace-modules.options.buildTarget": [
+      "apps/backend/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.copy-workspace-modules.options": [
+      "apps/backend/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.prune": [
+      "apps/backend/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.prune.dependsOn.0": [
+      "apps/backend/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.prune.dependsOn.1": [
+      "apps/backend/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.prune.dependsOn": [
+      "apps/backend/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.prune.executor": [
+      "apps/backend/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.serve.continuous": [
+      "apps/backend/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.serve.executor": [
+      "apps/backend/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.serve.defaultConfiguration": [
+      "apps/backend/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.serve.dependsOn.0": [
+      "apps/backend/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.serve.dependsOn": [
+      "apps/backend/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.serve": [
+      "apps/backend/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.serve.options.buildTarget": [
+      "apps/backend/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.serve.options.runBuildTargetDependencies": [
+      "apps/backend/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.serve.options": [
+      "apps/backend/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.serve.configurations.development.buildTarget": [
+      "apps/backend/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.serve.configurations.development": [
+      "apps/backend/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.serve.configurations.production.buildTarget": [
+      "apps/backend/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.serve.configurations.production": [
+      "apps/backend/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.serve.configurations": [
+      "apps/backend/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.test.options.passWithNoTests": [
+      "apps/backend/project.json",
+      "nx/core/project-json"
+    ]
+  },
+  "apps/backend-e2e": {
+    "root": [
+      "apps/backend-e2e/project.json",
+      "nx/core/project-json"
+    ],
+    "targets": [
+      "apps/backend-e2e/eslint.config.mjs",
+      "@nx/eslint/plugin"
+    ],
+    "targets.lint": [
+      "apps/backend-e2e/eslint.config.mjs",
+      "@nx/eslint/plugin"
+    ],
+    "targets.lint.cache": [
+      "apps/backend-e2e/eslint.config.mjs",
+      "@nx/eslint/plugin"
+    ],
+    "targets.lint.inputs.0": [
+      "apps/backend-e2e/eslint.config.mjs",
+      "@nx/eslint/plugin"
+    ],
+    "targets.lint.inputs.1": [
+      "apps/backend-e2e/eslint.config.mjs",
+      "@nx/eslint/plugin"
+    ],
+    "targets.lint.inputs.2": [
+      "apps/backend-e2e/eslint.config.mjs",
+      "@nx/eslint/plugin"
+    ],
+    "targets.lint.inputs.3": [
+      "apps/backend-e2e/eslint.config.mjs",
+      "@nx/eslint/plugin"
+    ],
+    "targets.lint.inputs.4": [
+      "apps/backend-e2e/eslint.config.mjs",
+      "@nx/eslint/plugin"
+    ],
+    "targets.lint.inputs.5": [
+      "apps/backend-e2e/eslint.config.mjs",
+      "@nx/eslint/plugin"
+    ],
+    "targets.lint.inputs": [
+      "apps/backend-e2e/eslint.config.mjs",
+      "@nx/eslint/plugin"
+    ],
+    "targets.lint.outputs.0": [
+      "apps/backend-e2e/eslint.config.mjs",
+      "@nx/eslint/plugin"
+    ],
+    "targets.lint.outputs": [
+      "apps/backend-e2e/eslint.config.mjs",
+      "@nx/eslint/plugin"
+    ],
+    "targets.lint.metadata": [
+      "apps/backend-e2e/eslint.config.mjs",
+      "@nx/eslint/plugin"
+    ],
+    "targets.lint.executor": [
+      "apps/backend-e2e/eslint.config.mjs",
+      "@nx/eslint/plugin"
+    ],
+    "targets.lint.options.cwd": [
+      "apps/backend-e2e/eslint.config.mjs",
+      "@nx/eslint/plugin"
+    ],
+    "targets.lint.options.command": [
+      "apps/backend-e2e/eslint.config.mjs",
+      "@nx/eslint/plugin"
+    ],
+    "targets.lint.options": [
+      "apps/backend-e2e/eslint.config.mjs",
+      "@nx/eslint/plugin"
+    ],
+    "targets.lint.metadata.technologies": [
+      "apps/backend-e2e/eslint.config.mjs",
+      "@nx/eslint/plugin"
+    ],
+    "targets.lint.metadata.technologies.0": [
+      "apps/backend-e2e/eslint.config.mjs",
+      "@nx/eslint/plugin"
+    ],
+    "targets.lint.metadata.description": [
+      "apps/backend-e2e/eslint.config.mjs",
+      "@nx/eslint/plugin"
+    ],
+    "targets.lint.metadata.help": [
+      "apps/backend-e2e/eslint.config.mjs",
+      "@nx/eslint/plugin"
+    ],
+    "targets.lint.metadata.help.command": [
+      "apps/backend-e2e/eslint.config.mjs",
+      "@nx/eslint/plugin"
+    ],
+    "targets.lint.metadata.help.example": [
+      "apps/backend-e2e/eslint.config.mjs",
+      "@nx/eslint/plugin"
+    ],
+    "targets.tsc:typecheck": [
+      "apps/backend-e2e/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.dependsOn.0": [
+      "apps/backend-e2e/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.dependsOn": [
+      "apps/backend-e2e/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.cache": [
+      "apps/backend-e2e/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.inputs.0": [
+      "apps/backend-e2e/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.inputs.1": [
+      "apps/backend-e2e/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.inputs.2": [
+      "apps/backend-e2e/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.inputs.3": [
+      "apps/backend-e2e/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.inputs.4": [
+      "apps/backend-e2e/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.inputs.5": [
+      "apps/backend-e2e/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.inputs.6": [
+      "apps/backend-e2e/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.inputs.7": [
+      "apps/backend-e2e/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.inputs.8": [
+      "apps/backend-e2e/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.inputs": [
+      "apps/backend-e2e/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.outputs.0": [
+      "apps/backend-e2e/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.outputs.1": [
+      "apps/backend-e2e/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.outputs.2": [
+      "apps/backend-e2e/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.outputs": [
+      "apps/backend-e2e/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.syncGenerators.0": [
+      "apps/backend-e2e/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.syncGenerators": [
+      "apps/backend-e2e/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.metadata": [
+      "apps/backend-e2e/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.executor": [
+      "apps/backend-e2e/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.options.cwd": [
+      "apps/backend-e2e/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.options.command": [
+      "apps/backend-e2e/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.options": [
+      "apps/backend-e2e/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.metadata.technologies": [
+      "apps/backend-e2e/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.metadata.technologies.0": [
+      "apps/backend-e2e/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.metadata.description": [
+      "apps/backend-e2e/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.metadata.help": [
+      "apps/backend-e2e/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.metadata.help.command": [
+      "apps/backend-e2e/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.metadata.help.example": [
+      "apps/backend-e2e/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "name": [
+      "apps/backend-e2e/project.json",
+      "nx/core/project-json"
+    ],
+    "$schema": [
+      "apps/backend-e2e/project.json",
+      "nx/core/project-json"
+    ],
+    "projectType": [
+      "apps/backend-e2e/project.json",
+      "nx/core/project-json"
+    ],
+    "implicitDependencies": [
+      "apps/backend-e2e/project.json",
+      "nx/core/project-json"
+    ],
+    "implicitDependencies.backend": [
+      "apps/backend-e2e/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.e2e": [
+      "apps/backend-e2e/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.e2e.executor": [
+      "apps/backend-e2e/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.e2e.outputs.0": [
+      "apps/backend-e2e/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.e2e.outputs": [
+      "apps/backend-e2e/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.e2e.dependsOn.0": [
+      "apps/backend-e2e/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.e2e.dependsOn.1": [
+      "apps/backend-e2e/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.e2e.dependsOn": [
+      "apps/backend-e2e/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.e2e.options.jestConfig": [
+      "apps/backend-e2e/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.e2e.options.passWithNoTests": [
+      "apps/backend-e2e/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.e2e.options": [
+      "apps/backend-e2e/project.json",
+      "nx/core/project-json"
+    ]
+  },
+  "apps/frontend": {
+    "root": [
+      "apps/frontend/project.json",
+      "nx/core/project-json"
+    ],
+    "targets": [
+      "apps/frontend/eslint.config.mjs",
+      "@nx/eslint/plugin"
+    ],
+    "targets.lint": [
+      "apps/frontend/eslint.config.mjs",
+      "@nx/eslint/plugin"
+    ],
+    "targets.lint.cache": [
+      "apps/frontend/eslint.config.mjs",
+      "@nx/eslint/plugin"
+    ],
+    "targets.lint.inputs.0": [
+      "apps/frontend/eslint.config.mjs",
+      "@nx/eslint/plugin"
+    ],
+    "targets.lint.inputs.1": [
+      "apps/frontend/eslint.config.mjs",
+      "@nx/eslint/plugin"
+    ],
+    "targets.lint.inputs.2": [
+      "apps/frontend/eslint.config.mjs",
+      "@nx/eslint/plugin"
+    ],
+    "targets.lint.inputs.3": [
+      "apps/frontend/eslint.config.mjs",
+      "@nx/eslint/plugin"
+    ],
+    "targets.lint.inputs.4": [
+      "apps/frontend/eslint.config.mjs",
+      "@nx/eslint/plugin"
+    ],
+    "targets.lint.inputs.5": [
+      "apps/frontend/eslint.config.mjs",
+      "@nx/eslint/plugin"
+    ],
+    "targets.lint.inputs": [
+      "apps/frontend/eslint.config.mjs",
+      "@nx/eslint/plugin"
+    ],
+    "targets.lint.outputs.0": [
+      "apps/frontend/eslint.config.mjs",
+      "@nx/eslint/plugin"
+    ],
+    "targets.lint.outputs": [
+      "apps/frontend/eslint.config.mjs",
+      "@nx/eslint/plugin"
+    ],
+    "targets.lint.metadata": [
+      "apps/frontend/eslint.config.mjs",
+      "@nx/eslint/plugin"
+    ],
+    "targets.lint.executor": [
+      "apps/frontend/eslint.config.mjs",
+      "@nx/eslint/plugin"
+    ],
+    "targets.lint.options.cwd": [
+      "apps/frontend/eslint.config.mjs",
+      "@nx/eslint/plugin"
+    ],
+    "targets.lint.options.command": [
+      "apps/frontend/eslint.config.mjs",
+      "@nx/eslint/plugin"
+    ],
+    "targets.lint.options": [
+      "apps/frontend/eslint.config.mjs",
+      "@nx/eslint/plugin"
+    ],
+    "targets.lint.metadata.technologies": [
+      "apps/frontend/eslint.config.mjs",
+      "@nx/eslint/plugin"
+    ],
+    "targets.lint.metadata.technologies.0": [
+      "apps/frontend/eslint.config.mjs",
+      "@nx/eslint/plugin"
+    ],
+    "targets.lint.metadata.description": [
+      "apps/frontend/eslint.config.mjs",
+      "@nx/eslint/plugin"
+    ],
+    "targets.lint.metadata.help": [
+      "apps/frontend/eslint.config.mjs",
+      "@nx/eslint/plugin"
+    ],
+    "targets.lint.metadata.help.command": [
+      "apps/frontend/eslint.config.mjs",
+      "@nx/eslint/plugin"
+    ],
+    "targets.lint.metadata.help.example": [
+      "apps/frontend/eslint.config.mjs",
+      "@nx/eslint/plugin"
+    ],
+    "projectType": [
+      "apps/frontend/project.json",
+      "nx/core/project-json"
+    ],
+    "targets.build": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.build.cache": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.build.dependsOn.0": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.build.dependsOn": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.build.inputs.0": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.build.inputs.1": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.build.inputs.2": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.build.inputs": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.build.outputs.0": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.build.outputs": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.build.metadata": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.build.executor": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.build.options.cwd": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.build.options.command": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.build.options": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.build.metadata.technologies": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.build.metadata.technologies.0": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.build.metadata.description": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.build.metadata.help": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.build.metadata.help.command": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.build.metadata.help.example": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.serve": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.serve.continuous": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.serve.inputs.0": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.serve.inputs.1": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.serve.inputs.2": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.serve.inputs": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.serve.metadata": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.serve.executor": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.serve.options.cwd": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.serve.options.command": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.serve.options": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.serve.metadata.technologies": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.serve.metadata.technologies.0": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.serve.metadata.description": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.serve.metadata.help": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.serve.metadata.help.command": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.serve.metadata.help.example": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.serve.metadata.deprecated": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.dev": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.dev.continuous": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.dev.inputs.0": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.dev.inputs.1": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.dev.inputs.2": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.dev.inputs": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.dev.metadata": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.dev.executor": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.dev.options.cwd": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.dev.options.command": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.dev.options": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.dev.metadata.technologies": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.dev.metadata.technologies.0": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.dev.metadata.description": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.dev.metadata.help": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.dev.metadata.help.command": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.dev.metadata.help.example": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.preview": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.preview.continuous": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.preview.inputs.0": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.preview.inputs.1": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.preview.inputs.2": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.preview.inputs": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.preview.dependsOn.0": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.preview.dependsOn": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.preview.metadata": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.preview.executor": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.preview.options.cwd": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.preview.options.command": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.preview.options": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.preview.metadata.technologies": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.preview.metadata.technologies.0": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.preview.metadata.description": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.preview.metadata.help": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.preview.metadata.help.command": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.preview.metadata.help.example": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.serve-static": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.serve-static.continuous": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.serve-static.inputs.0": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.serve-static.inputs.1": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.serve-static.inputs.2": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.serve-static.inputs": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.serve-static.executor": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.serve-static.options.buildTarget": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.serve-static.options.spa": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.serve-static.options": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.typecheck": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.typecheck.cache": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.typecheck.inputs.0": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.typecheck.inputs.1": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.typecheck.inputs.2": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.typecheck.inputs": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.typecheck.metadata": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.typecheck.executor": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.typecheck.options.cwd": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.typecheck.options.command": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.typecheck.options": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.typecheck.metadata.description": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.typecheck.metadata.technologies": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.typecheck.metadata.technologies.0": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.typecheck.metadata.help": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.typecheck.metadata.help.command": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.typecheck.metadata.help.example": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.build-deps": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.build-deps.dependsOn.0": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.build-deps.dependsOn": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.watch-deps": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.watch-deps.continuous": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.watch-deps.dependsOn.0": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.watch-deps.dependsOn": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.watch-deps.executor": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.watch-deps.options.command": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "targets.watch-deps.options": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vite/plugin"
+    ],
+    "metadata.targetGroups": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vitest"
+    ],
+    "metadata.targetGroups.TEST (CI)": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vitest"
+    ],
+    "metadata.targetGroups.TEST (CI).0": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vitest"
+    ],
+    "metadata.targetGroups.TEST (CI).1": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vitest"
+    ],
+    "targets.test": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vitest"
+    ],
+    "targets.test.cache": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vitest"
+    ],
+    "targets.test.inputs.0": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vitest"
+    ],
+    "targets.test.inputs.1": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vitest"
+    ],
+    "targets.test.inputs.2": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vitest"
+    ],
+    "targets.test.inputs.3": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vitest"
+    ],
+    "targets.test.inputs.4": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vitest"
+    ],
+    "targets.test.inputs": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vitest"
+    ],
+    "targets.test.outputs.0": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vitest"
+    ],
+    "targets.test.outputs": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vitest"
+    ],
+    "targets.test.metadata": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vitest"
+    ],
+    "targets.test.executor": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vitest"
+    ],
+    "targets.test.options.cwd": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vitest"
+    ],
+    "targets.test.options.command": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vitest"
+    ],
+    "targets.test.options": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vitest"
+    ],
+    "targets.test.metadata.technologies": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vitest"
+    ],
+    "targets.test.metadata.technologies.0": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vitest"
+    ],
+    "targets.test.metadata.description": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vitest"
+    ],
+    "targets.test.metadata.help": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vitest"
+    ],
+    "targets.test.metadata.help.command": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vitest"
+    ],
+    "targets.test.metadata.help.example": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vitest"
+    ],
+    "targets.test-ci--src/app/app.spec.tsx": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vitest"
+    ],
+    "targets.test-ci--src/app/app.spec.tsx.cache": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vitest"
+    ],
+    "targets.test-ci--src/app/app.spec.tsx.inputs.0": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vitest"
+    ],
+    "targets.test-ci--src/app/app.spec.tsx.inputs.1": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vitest"
+    ],
+    "targets.test-ci--src/app/app.spec.tsx.inputs.2": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vitest"
+    ],
+    "targets.test-ci--src/app/app.spec.tsx.inputs.3": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vitest"
+    ],
+    "targets.test-ci--src/app/app.spec.tsx.inputs.4": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vitest"
+    ],
+    "targets.test-ci--src/app/app.spec.tsx.inputs": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vitest"
+    ],
+    "targets.test-ci--src/app/app.spec.tsx.outputs.0": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vitest"
+    ],
+    "targets.test-ci--src/app/app.spec.tsx.outputs": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vitest"
+    ],
+    "targets.test-ci--src/app/app.spec.tsx.metadata": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vitest"
+    ],
+    "targets.test-ci--src/app/app.spec.tsx.executor": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vitest"
+    ],
+    "targets.test-ci--src/app/app.spec.tsx.options.cwd": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vitest"
+    ],
+    "targets.test-ci--src/app/app.spec.tsx.options.command": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vitest"
+    ],
+    "targets.test-ci--src/app/app.spec.tsx.options": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vitest"
+    ],
+    "targets.test-ci--src/app/app.spec.tsx.metadata.technologies": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vitest"
+    ],
+    "targets.test-ci--src/app/app.spec.tsx.metadata.technologies.0": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vitest"
+    ],
+    "targets.test-ci--src/app/app.spec.tsx.metadata.description": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vitest"
+    ],
+    "targets.test-ci--src/app/app.spec.tsx.metadata.help": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vitest"
+    ],
+    "targets.test-ci--src/app/app.spec.tsx.metadata.help.command": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vitest"
+    ],
+    "targets.test-ci--src/app/app.spec.tsx.metadata.help.example": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vitest"
+    ],
+    "targets.test-ci": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vitest"
+    ],
+    "targets.test-ci.executor": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vitest"
+    ],
+    "targets.test-ci.cache": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vitest"
+    ],
+    "targets.test-ci.inputs.0": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vitest"
+    ],
+    "targets.test-ci.inputs.1": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vitest"
+    ],
+    "targets.test-ci.inputs.2": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vitest"
+    ],
+    "targets.test-ci.inputs.3": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vitest"
+    ],
+    "targets.test-ci.inputs.4": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vitest"
+    ],
+    "targets.test-ci.inputs": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vitest"
+    ],
+    "targets.test-ci.outputs.0": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vitest"
+    ],
+    "targets.test-ci.outputs": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vitest"
+    ],
+    "targets.test-ci.dependsOn.0": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vitest"
+    ],
+    "targets.test-ci.dependsOn": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vitest"
+    ],
+    "targets.test-ci.metadata": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vitest"
+    ],
+    "targets.test-ci.metadata.technologies": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vitest"
+    ],
+    "targets.test-ci.metadata.technologies.0": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vitest"
+    ],
+    "targets.test-ci.metadata.description": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vitest"
+    ],
+    "targets.test-ci.metadata.nonAtomizedTarget": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vitest"
+    ],
+    "targets.test-ci.metadata.help": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vitest"
+    ],
+    "targets.test-ci.metadata.help.command": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vitest"
+    ],
+    "targets.test-ci.metadata.help.example": [
+      "apps/frontend/vite.config.mts",
+      "@nx/vitest"
+    ],
+    "targets.tsc:typecheck": [
+      "apps/frontend/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.dependsOn.0": [
+      "apps/frontend/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.dependsOn": [
+      "apps/frontend/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.cache": [
+      "apps/frontend/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.inputs.0": [
+      "apps/frontend/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.inputs.1": [
+      "apps/frontend/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.inputs.2": [
+      "apps/frontend/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.inputs.3": [
+      "apps/frontend/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.inputs.4": [
+      "apps/frontend/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.inputs.5": [
+      "apps/frontend/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.inputs.6": [
+      "apps/frontend/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.inputs.7": [
+      "apps/frontend/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.inputs.8": [
+      "apps/frontend/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.inputs.9": [
+      "apps/frontend/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.inputs.10": [
+      "apps/frontend/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.inputs.11": [
+      "apps/frontend/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.inputs.12": [
+      "apps/frontend/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.inputs.13": [
+      "apps/frontend/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.inputs.14": [
+      "apps/frontend/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.inputs.15": [
+      "apps/frontend/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.inputs.16": [
+      "apps/frontend/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.inputs.17": [
+      "apps/frontend/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.inputs.18": [
+      "apps/frontend/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.inputs.19": [
+      "apps/frontend/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.inputs.20": [
+      "apps/frontend/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.inputs.21": [
+      "apps/frontend/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.inputs.22": [
+      "apps/frontend/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.inputs.23": [
+      "apps/frontend/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.inputs.24": [
+      "apps/frontend/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.inputs": [
+      "apps/frontend/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.outputs.0": [
+      "apps/frontend/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.outputs.1": [
+      "apps/frontend/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.outputs.2": [
+      "apps/frontend/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.outputs.3": [
+      "apps/frontend/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.outputs": [
+      "apps/frontend/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.syncGenerators.0": [
+      "apps/frontend/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.syncGenerators": [
+      "apps/frontend/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.metadata": [
+      "apps/frontend/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.executor": [
+      "apps/frontend/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.options.cwd": [
+      "apps/frontend/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.options.command": [
+      "apps/frontend/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.options": [
+      "apps/frontend/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.metadata.technologies": [
+      "apps/frontend/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.metadata.technologies.0": [
+      "apps/frontend/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.metadata.description": [
+      "apps/frontend/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.metadata.help": [
+      "apps/frontend/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.metadata.help.command": [
+      "apps/frontend/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.metadata.help.example": [
+      "apps/frontend/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "name": [
+      "apps/frontend/project.json",
+      "nx/core/project-json"
+    ],
+    "$schema": [
+      "apps/frontend/project.json",
+      "nx/core/project-json"
+    ],
+    "sourceRoot": [
+      "apps/frontend/project.json",
+      "nx/core/project-json"
+    ],
+    "// targets": [
+      "apps/frontend/project.json",
+      "nx/core/project-json"
+    ],
+    "tags": [
+      "apps/frontend/project.json",
+      "nx/core/project-json"
+    ]
+  },
+  "libs/shared": {
+    "root": [
+      "libs/shared/project.json",
+      "nx/core/project-json"
+    ],
+    "targets": [
+      "libs/shared/eslint.config.mjs",
+      "@nx/eslint/plugin"
+    ],
+    "targets.lint": [
+      "libs/shared/eslint.config.mjs",
+      "@nx/eslint/plugin"
+    ],
+    "targets.lint.cache": [
+      "libs/shared/eslint.config.mjs",
+      "@nx/eslint/plugin"
+    ],
+    "targets.lint.inputs.0": [
+      "libs/shared/eslint.config.mjs",
+      "@nx/eslint/plugin"
+    ],
+    "targets.lint.inputs.1": [
+      "libs/shared/eslint.config.mjs",
+      "@nx/eslint/plugin"
+    ],
+    "targets.lint.inputs.2": [
+      "libs/shared/eslint.config.mjs",
+      "@nx/eslint/plugin"
+    ],
+    "targets.lint.inputs.3": [
+      "libs/shared/eslint.config.mjs",
+      "@nx/eslint/plugin"
+    ],
+    "targets.lint.inputs.4": [
+      "libs/shared/eslint.config.mjs",
+      "@nx/eslint/plugin"
+    ],
+    "targets.lint.inputs.5": [
+      "libs/shared/eslint.config.mjs",
+      "@nx/eslint/plugin"
+    ],
+    "targets.lint.inputs": [
+      "libs/shared/eslint.config.mjs",
+      "@nx/eslint/plugin"
+    ],
+    "targets.lint.outputs.0": [
+      "libs/shared/eslint.config.mjs",
+      "@nx/eslint/plugin"
+    ],
+    "targets.lint.outputs": [
+      "libs/shared/eslint.config.mjs",
+      "@nx/eslint/plugin"
+    ],
+    "targets.lint.metadata": [
+      "libs/shared/eslint.config.mjs",
+      "@nx/eslint/plugin"
+    ],
+    "targets.lint.executor": [
+      "libs/shared/eslint.config.mjs",
+      "@nx/eslint/plugin"
+    ],
+    "targets.lint.options.cwd": [
+      "libs/shared/eslint.config.mjs",
+      "@nx/eslint/plugin"
+    ],
+    "targets.lint.options.command": [
+      "libs/shared/eslint.config.mjs",
+      "@nx/eslint/plugin"
+    ],
+    "targets.lint.options": [
+      "libs/shared/eslint.config.mjs",
+      "@nx/eslint/plugin"
+    ],
+    "targets.lint.metadata.technologies": [
+      "libs/shared/eslint.config.mjs",
+      "@nx/eslint/plugin"
+    ],
+    "targets.lint.metadata.technologies.0": [
+      "libs/shared/eslint.config.mjs",
+      "@nx/eslint/plugin"
+    ],
+    "targets.lint.metadata.description": [
+      "libs/shared/eslint.config.mjs",
+      "@nx/eslint/plugin"
+    ],
+    "targets.lint.metadata.help": [
+      "libs/shared/eslint.config.mjs",
+      "@nx/eslint/plugin"
+    ],
+    "targets.lint.metadata.help.command": [
+      "libs/shared/eslint.config.mjs",
+      "@nx/eslint/plugin"
+    ],
+    "targets.lint.metadata.help.example": [
+      "libs/shared/eslint.config.mjs",
+      "@nx/eslint/plugin"
+    ],
+    "targets.test": [
+      "libs/shared/jest.config.cts",
+      "@nx/jest/plugin"
+    ],
+    "targets.test.metadata": [
+      "libs/shared/jest.config.cts",
+      "@nx/jest/plugin"
+    ],
+    "targets.test.cache": [
+      "libs/shared/jest.config.cts",
+      "@nx/jest/plugin"
+    ],
+    "targets.test.inputs.0": [
+      "libs/shared/jest.config.cts",
+      "@nx/jest/plugin"
+    ],
+    "targets.test.inputs.1": [
+      "libs/shared/jest.config.cts",
+      "@nx/jest/plugin"
+    ],
+    "targets.test.inputs.2": [
+      "libs/shared/jest.config.cts",
+      "@nx/jest/plugin"
+    ],
+    "targets.test.inputs.3": [
+      "libs/shared/jest.config.cts",
+      "@nx/jest/plugin"
+    ],
+    "targets.test.inputs.4": [
+      "libs/shared/jest.config.cts",
+      "@nx/jest/plugin"
+    ],
+    "targets.test.inputs": [
+      "libs/shared/jest.config.cts",
+      "@nx/jest/plugin"
+    ],
+    "targets.test.outputs.0": [
+      "libs/shared/jest.config.cts",
+      "@nx/jest/plugin"
+    ],
+    "targets.test.outputs": [
+      "libs/shared/jest.config.cts",
+      "@nx/jest/plugin"
+    ],
+    "targets.test.executor": [
+      "libs/shared/jest.config.cts",
+      "@nx/jest/plugin"
+    ],
+    "targets.test.options.cwd": [
+      "libs/shared/jest.config.cts",
+      "@nx/jest/plugin"
+    ],
+    "targets.test.options.env": [
+      "libs/shared/jest.config.cts",
+      "@nx/jest/plugin"
+    ],
+    "targets.test.options.command": [
+      "libs/shared/jest.config.cts",
+      "@nx/jest/plugin"
+    ],
+    "targets.test.options": [
+      "libs/shared/jest.config.cts",
+      "@nx/jest/plugin"
+    ],
+    "targets.test.metadata.technologies": [
+      "libs/shared/jest.config.cts",
+      "@nx/jest/plugin"
+    ],
+    "targets.test.metadata.technologies.0": [
+      "libs/shared/jest.config.cts",
+      "@nx/jest/plugin"
+    ],
+    "targets.test.metadata.description": [
+      "libs/shared/jest.config.cts",
+      "@nx/jest/plugin"
+    ],
+    "targets.test.metadata.help": [
+      "libs/shared/jest.config.cts",
+      "@nx/jest/plugin"
+    ],
+    "targets.test.metadata.help.command": [
+      "libs/shared/jest.config.cts",
+      "@nx/jest/plugin"
+    ],
+    "targets.test.metadata.help.example": [
+      "libs/shared/jest.config.cts",
+      "@nx/jest/plugin"
+    ],
+    "targets.tsc:typecheck": [
+      "libs/shared/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.dependsOn.0": [
+      "libs/shared/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.dependsOn.1": [
+      "libs/shared/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.dependsOn": [
+      "libs/shared/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.cache": [
+      "libs/shared/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.inputs.0": [
+      "libs/shared/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.inputs.1": [
+      "libs/shared/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.inputs.2": [
+      "libs/shared/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.inputs.3": [
+      "libs/shared/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.inputs.4": [
+      "libs/shared/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.inputs.5": [
+      "libs/shared/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.inputs.6": [
+      "libs/shared/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.inputs.7": [
+      "libs/shared/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.inputs.8": [
+      "libs/shared/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.inputs.9": [
+      "libs/shared/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.inputs.10": [
+      "libs/shared/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.inputs.11": [
+      "libs/shared/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.inputs.12": [
+      "libs/shared/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.inputs.13": [
+      "libs/shared/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.inputs": [
+      "libs/shared/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.outputs.0": [
+      "libs/shared/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.outputs.1": [
+      "libs/shared/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.outputs.2": [
+      "libs/shared/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.outputs.3": [
+      "libs/shared/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.outputs": [
+      "libs/shared/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.syncGenerators.0": [
+      "libs/shared/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.syncGenerators": [
+      "libs/shared/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.metadata": [
+      "libs/shared/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.executor": [
+      "libs/shared/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.options.cwd": [
+      "libs/shared/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.options.command": [
+      "libs/shared/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.options": [
+      "libs/shared/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.metadata.technologies": [
+      "libs/shared/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.metadata.technologies.0": [
+      "libs/shared/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.metadata.description": [
+      "libs/shared/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.metadata.help": [
+      "libs/shared/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.metadata.help.command": [
+      "libs/shared/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.tsc:typecheck.metadata.help.example": [
+      "libs/shared/tsconfig.json",
+      "@nx/js/typescript"
+    ],
+    "targets.build": [
+      "libs/shared/tsconfig.lib.json",
+      "@nx/js/typescript"
+    ],
+    "targets.build.dependsOn.0": [
+      "libs/shared/tsconfig.lib.json",
+      "@nx/js/typescript"
+    ],
+    "targets.build.dependsOn": [
+      "libs/shared/tsconfig.lib.json",
+      "@nx/js/typescript"
+    ],
+    "targets.build.cache": [
+      "libs/shared/tsconfig.lib.json",
+      "@nx/js/typescript"
+    ],
+    "targets.build.inputs.0": [
+      "libs/shared/tsconfig.lib.json",
+      "@nx/js/typescript"
+    ],
+    "targets.build.inputs.1": [
+      "libs/shared/tsconfig.lib.json",
+      "@nx/js/typescript"
+    ],
+    "targets.build.inputs.2": [
+      "libs/shared/tsconfig.lib.json",
+      "@nx/js/typescript"
+    ],
+    "targets.build.inputs.3": [
+      "libs/shared/tsconfig.lib.json",
+      "@nx/js/typescript"
+    ],
+    "targets.build.inputs.4": [
+      "libs/shared/tsconfig.lib.json",
+      "@nx/js/typescript"
+    ],
+    "targets.build.inputs.5": [
+      "libs/shared/tsconfig.lib.json",
+      "@nx/js/typescript"
+    ],
+    "targets.build.inputs.6": [
+      "libs/shared/tsconfig.lib.json",
+      "@nx/js/typescript"
+    ],
+    "targets.build.inputs.7": [
+      "libs/shared/tsconfig.lib.json",
+      "@nx/js/typescript"
+    ],
+    "targets.build.inputs.8": [
+      "libs/shared/tsconfig.lib.json",
+      "@nx/js/typescript"
+    ],
+    "targets.build.inputs.9": [
+      "libs/shared/tsconfig.lib.json",
+      "@nx/js/typescript"
+    ],
+    "targets.build.inputs": [
+      "libs/shared/tsconfig.lib.json",
+      "@nx/js/typescript"
+    ],
+    "targets.build.outputs.0": [
+      "libs/shared/tsconfig.lib.json",
+      "@nx/js/typescript"
+    ],
+    "targets.build.outputs.1": [
+      "libs/shared/tsconfig.lib.json",
+      "@nx/js/typescript"
+    ],
+    "targets.build.outputs": [
+      "libs/shared/tsconfig.lib.json",
+      "@nx/js/typescript"
+    ],
+    "targets.build.syncGenerators.0": [
+      "libs/shared/tsconfig.lib.json",
+      "@nx/js/typescript"
+    ],
+    "targets.build.syncGenerators": [
+      "libs/shared/tsconfig.lib.json",
+      "@nx/js/typescript"
+    ],
+    "targets.build.metadata": [
+      "libs/shared/tsconfig.lib.json",
+      "@nx/js/typescript"
+    ],
+    "targets.build.executor": [
+      "libs/shared/tsconfig.lib.json",
+      "@nx/js/typescript"
+    ],
+    "targets.build.options.cwd": [
+      "libs/shared/tsconfig.lib.json",
+      "@nx/js/typescript"
+    ],
+    "targets.build.options.command": [
+      "libs/shared/tsconfig.lib.json",
+      "@nx/js/typescript"
+    ],
+    "targets.build.options": [
+      "libs/shared/tsconfig.lib.json",
+      "@nx/js/typescript"
+    ],
+    "targets.build.metadata.technologies": [
+      "libs/shared/tsconfig.lib.json",
+      "@nx/js/typescript"
+    ],
+    "targets.build.metadata.technologies.0": [
+      "libs/shared/tsconfig.lib.json",
+      "@nx/js/typescript"
+    ],
+    "targets.build.metadata.description": [
+      "libs/shared/tsconfig.lib.json",
+      "@nx/js/typescript"
+    ],
+    "targets.build.metadata.help": [
+      "libs/shared/tsconfig.lib.json",
+      "@nx/js/typescript"
+    ],
+    "targets.build.metadata.help.command": [
+      "libs/shared/tsconfig.lib.json",
+      "@nx/js/typescript"
+    ],
+    "targets.build.metadata.help.example": [
+      "libs/shared/tsconfig.lib.json",
+      "@nx/js/typescript"
+    ],
+    "targets.build-deps": [
+      "libs/shared/tsconfig.lib.json",
+      "@nx/js/typescript"
+    ],
+    "targets.build-deps.dependsOn.0": [
+      "libs/shared/tsconfig.lib.json",
+      "@nx/js/typescript"
+    ],
+    "targets.build-deps.dependsOn": [
+      "libs/shared/tsconfig.lib.json",
+      "@nx/js/typescript"
+    ],
+    "targets.watch-deps": [
+      "libs/shared/tsconfig.lib.json",
+      "@nx/js/typescript"
+    ],
+    "targets.watch-deps.continuous": [
+      "libs/shared/tsconfig.lib.json",
+      "@nx/js/typescript"
+    ],
+    "targets.watch-deps.dependsOn.0": [
+      "libs/shared/tsconfig.lib.json",
+      "@nx/js/typescript"
+    ],
+    "targets.watch-deps.dependsOn": [
+      "libs/shared/tsconfig.lib.json",
+      "@nx/js/typescript"
+    ],
+    "targets.watch-deps.executor": [
+      "libs/shared/tsconfig.lib.json",
+      "@nx/js/typescript"
+    ],
+    "targets.watch-deps.options.command": [
+      "libs/shared/tsconfig.lib.json",
+      "@nx/js/typescript"
+    ],
+    "targets.watch-deps.options": [
+      "libs/shared/tsconfig.lib.json",
+      "@nx/js/typescript"
+    ],
+    "name": [
+      "libs/shared/project.json",
+      "nx/core/project-json"
+    ],
+    "$schema": [
+      "libs/shared/project.json",
+      "nx/core/project-json"
+    ],
+    "sourceRoot": [
+      "libs/shared/project.json",
+      "nx/core/project-json"
+    ],
+    "projectType": [
+      "libs/shared/project.json",
+      "nx/core/project-json"
+    ],
+    "// targets": [
+      "libs/shared/project.json",
+      "nx/core/project-json"
+    ],
+    "tags": [
+      "libs/shared/project.json",
+      "nx/core/project-json"
+    ]
+  }
+}
