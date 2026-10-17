@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "nx": "^23.3.0"
+  },
+  "devDependencies": {
+    "nx": "23.3.0"
+  }
+}
