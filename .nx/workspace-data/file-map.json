@@ -70,48 +70,52 @@
   "fileMap": {
     "nonProjectFiles": [
       {
-        "file": ".gitignore",
-        "hash": "3627746824112950497"
-      },
-      {
-        "file": ".vscode/launch.json",
-        "hash": "4095267532870178451"
-      },
-      {
-        "file": "LICENSE",
-        "hash": "9498173712385157660"
+        "file": "vitest.config.mts",
+        "hash": "8732862068995563651"
       },
       {
         "file": "eslint.config.mjs",
         "hash": "3009167784836919272"
       },
       {
-        "file": "jest.config.ts",
-        "hash": "14236175072743533737"
-      },
-      {
         "file": "jest.preset.js",
         "hash": "13737983450217408137"
+      },
+      {
+        "file": ".gitignore",
+        "hash": "3627746824112950497"
+      },
+      {
+        "file": "LICENSE",
+        "hash": "9498173712385157660"
       },
       {
         "file": "nx.json",
         "hash": "17944716410416788984"
       },
       {
-        "file": "package-lock.json",
-        "hash": "7811315962325912987"
+        "file": "docker-compose.yaml",
+        "hash": "5349125222064298832"
+      },
+      {
+        "file": ".vscode/launch.json",
+        "hash": "4095267532870178451"
       },
       {
         "file": "package.json",
         "hash": "4528767081229306688"
       },
       {
-        "file": "tsconfig.base.json",
-        "hash": "11923528383094066048"
+        "file": "package-lock.json",
+        "hash": "7811315962325912987"
       },
       {
-        "file": "vitest.config.mts",
-        "hash": "8732862068995563651"
+        "file": "jest.config.ts",
+        "hash": "14236175072743533737"
+      },
+      {
+        "file": "tsconfig.base.json",
+        "hash": "11923528383094066048"
       }
     ],
     "projectFileMap": {
