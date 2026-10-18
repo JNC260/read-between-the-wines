@@ -1,5 +1,5 @@
 {
-  "key": "10653886223271541149",
+  "key": "4157348926707572890",
   "data": [
     {
       "source": "npm:@asamuzakjp/css-color",
@@ -2179,6 +2179,16 @@
     {
       "source": "npm:@csstools/css-syntax-patches-for-csstree",
       "target": "npm:css-tree",
+      "type": "static"
+    },
+    {
+      "source": "npm:@electric-sql/pglite-socket",
+      "target": "npm:@electric-sql/pglite",
+      "type": "static"
+    },
+    {
+      "source": "npm:@electric-sql/pglite-tools",
+      "target": "npm:@electric-sql/pglite",
       "type": "static"
     },
     {
@@ -6562,6 +6572,386 @@
       "type": "static"
     },
     {
+      "source": "npm:@prisma/client",
+      "target": "npm:prisma",
+      "type": "static"
+    },
+    {
+      "source": "npm:@prisma/client",
+      "target": "npm:typescript",
+      "type": "static"
+    },
+    {
+      "source": "npm:@prisma/client",
+      "target": "npm:@prisma/client-runtime-utils",
+      "type": "static"
+    },
+    {
+      "source": "npm:@prisma/config",
+      "target": "npm:c12",
+      "type": "static"
+    },
+    {
+      "source": "npm:@prisma/config",
+      "target": "npm:deepmerge-ts",
+      "type": "static"
+    },
+    {
+      "source": "npm:@prisma/config",
+      "target": "npm:effect",
+      "type": "static"
+    },
+    {
+      "source": "npm:@prisma/config",
+      "target": "npm:empathic",
+      "type": "static"
+    },
+    {
+      "source": "npm:@prisma/dev",
+      "target": "npm:@electric-sql/pglite",
+      "type": "static"
+    },
+    {
+      "source": "npm:@prisma/dev",
+      "target": "npm:@electric-sql/pglite-socket",
+      "type": "static"
+    },
+    {
+      "source": "npm:@prisma/dev",
+      "target": "npm:@electric-sql/pglite-tools",
+      "type": "static"
+    },
+    {
+      "source": "npm:@prisma/dev",
+      "target": "npm:@prisma/get-platform",
+      "type": "static"
+    },
+    {
+      "source": "npm:@prisma/dev",
+      "target": "npm:@prisma/query-plan-executor",
+      "type": "static"
+    },
+    {
+      "source": "npm:@prisma/dev",
+      "target": "npm:@prisma/streams-local",
+      "type": "static"
+    },
+    {
+      "source": "npm:@prisma/dev",
+      "target": "npm:find-my-way",
+      "type": "static"
+    },
+    {
+      "source": "npm:@prisma/dev",
+      "target": "npm:foreground-child",
+      "type": "static"
+    },
+    {
+      "source": "npm:@prisma/dev",
+      "target": "npm:get-port-please",
+      "type": "static"
+    },
+    {
+      "source": "npm:@prisma/dev",
+      "target": "npm:pathe",
+      "type": "static"
+    },
+    {
+      "source": "npm:@prisma/dev",
+      "target": "npm:proper-lockfile",
+      "type": "static"
+    },
+    {
+      "source": "npm:@prisma/dev",
+      "target": "npm:remeda",
+      "type": "static"
+    },
+    {
+      "source": "npm:@prisma/dev",
+      "target": "npm:std-env@3.10.0",
+      "type": "static"
+    },
+    {
+      "source": "npm:@prisma/dev",
+      "target": "npm:valibot",
+      "type": "static"
+    },
+    {
+      "source": "npm:@prisma/dev",
+      "target": "npm:zeptomatch",
+      "type": "static"
+    },
+    {
+      "source": "npm:@prisma/engines",
+      "target": "npm:@prisma/debug",
+      "type": "static"
+    },
+    {
+      "source": "npm:@prisma/engines",
+      "target": "npm:@prisma/engines-version",
+      "type": "static"
+    },
+    {
+      "source": "npm:@prisma/engines",
+      "target": "npm:@prisma/fetch-engine",
+      "type": "static"
+    },
+    {
+      "source": "npm:@prisma/engines",
+      "target": "npm:@prisma/get-platform@7.10.1",
+      "type": "static"
+    },
+    {
+      "source": "npm:@prisma/get-platform@7.10.1",
+      "target": "npm:@prisma/debug",
+      "type": "static"
+    },
+    {
+      "source": "npm:@prisma/fetch-engine",
+      "target": "npm:@prisma/debug",
+      "type": "static"
+    },
+    {
+      "source": "npm:@prisma/fetch-engine",
+      "target": "npm:@prisma/engines-version",
+      "type": "static"
+    },
+    {
+      "source": "npm:@prisma/fetch-engine",
+      "target": "npm:@prisma/get-platform@7.10.1",
+      "type": "static"
+    },
+    {
+      "source": "npm:@prisma/get-platform@7.10.1",
+      "target": "npm:@prisma/debug",
+      "type": "static"
+    },
+    {
+      "source": "npm:@prisma/get-platform",
+      "target": "npm:@prisma/debug@7.2.0",
+      "type": "static"
+    },
+    {
+      "source": "npm:@prisma/streams-local",
+      "target": "npm:ajv",
+      "type": "static"
+    },
+    {
+      "source": "npm:@prisma/streams-local",
+      "target": "npm:better-result",
+      "type": "static"
+    },
+    {
+      "source": "npm:@prisma/streams-local",
+      "target": "npm:env-paths@3.0.0",
+      "type": "static"
+    },
+    {
+      "source": "npm:@prisma/streams-local",
+      "target": "npm:proper-lockfile",
+      "type": "static"
+    },
+    {
+      "source": "npm:@prisma/studio-core",
+      "target": "npm:@types/react",
+      "type": "static"
+    },
+    {
+      "source": "npm:@prisma/studio-core",
+      "target": "npm:react",
+      "type": "static"
+    },
+    {
+      "source": "npm:@prisma/studio-core",
+      "target": "npm:react-dom",
+      "type": "static"
+    },
+    {
+      "source": "npm:@prisma/studio-core",
+      "target": "npm:@radix-ui/react-toggle",
+      "type": "static"
+    },
+    {
+      "source": "npm:@prisma/studio-core",
+      "target": "npm:@visx/curve",
+      "type": "static"
+    },
+    {
+      "source": "npm:@prisma/studio-core",
+      "target": "npm:@visx/event",
+      "type": "static"
+    },
+    {
+      "source": "npm:@prisma/studio-core",
+      "target": "npm:@visx/grid",
+      "type": "static"
+    },
+    {
+      "source": "npm:@prisma/studio-core",
+      "target": "npm:@visx/group",
+      "type": "static"
+    },
+    {
+      "source": "npm:@prisma/studio-core",
+      "target": "npm:@visx/responsive",
+      "type": "static"
+    },
+    {
+      "source": "npm:@prisma/studio-core",
+      "target": "npm:@visx/scale",
+      "type": "static"
+    },
+    {
+      "source": "npm:@prisma/studio-core",
+      "target": "npm:@visx/shape",
+      "type": "static"
+    },
+    {
+      "source": "npm:@prisma/studio-core",
+      "target": "npm:d3-array",
+      "type": "static"
+    },
+    {
+      "source": "npm:@prisma/studio-core",
+      "target": "npm:d3-shape",
+      "type": "static"
+    },
+    {
+      "source": "npm:@prisma/studio-core",
+      "target": "npm:elkjs",
+      "type": "static"
+    },
+    {
+      "source": "npm:@radix-ui/react-compose-refs",
+      "target": "npm:@types/react",
+      "type": "static"
+    },
+    {
+      "source": "npm:@radix-ui/react-compose-refs",
+      "target": "npm:react",
+      "type": "static"
+    },
+    {
+      "source": "npm:@radix-ui/react-primitive",
+      "target": "npm:@types/react",
+      "type": "static"
+    },
+    {
+      "source": "npm:@radix-ui/react-primitive",
+      "target": "npm:@types/react-dom",
+      "type": "static"
+    },
+    {
+      "source": "npm:@radix-ui/react-primitive",
+      "target": "npm:react",
+      "type": "static"
+    },
+    {
+      "source": "npm:@radix-ui/react-primitive",
+      "target": "npm:react-dom",
+      "type": "static"
+    },
+    {
+      "source": "npm:@radix-ui/react-primitive",
+      "target": "npm:@radix-ui/react-slot",
+      "type": "static"
+    },
+    {
+      "source": "npm:@radix-ui/react-slot",
+      "target": "npm:@types/react",
+      "type": "static"
+    },
+    {
+      "source": "npm:@radix-ui/react-slot",
+      "target": "npm:react",
+      "type": "static"
+    },
+    {
+      "source": "npm:@radix-ui/react-slot",
+      "target": "npm:@radix-ui/react-compose-refs",
+      "type": "static"
+    },
+    {
+      "source": "npm:@radix-ui/react-toggle",
+      "target": "npm:@types/react",
+      "type": "static"
+    },
+    {
+      "source": "npm:@radix-ui/react-toggle",
+      "target": "npm:@types/react-dom",
+      "type": "static"
+    },
+    {
+      "source": "npm:@radix-ui/react-toggle",
+      "target": "npm:react",
+      "type": "static"
+    },
+    {
+      "source": "npm:@radix-ui/react-toggle",
+      "target": "npm:react-dom",
+      "type": "static"
+    },
+    {
+      "source": "npm:@radix-ui/react-toggle",
+      "target": "npm:@radix-ui/primitive",
+      "type": "static"
+    },
+    {
+      "source": "npm:@radix-ui/react-toggle",
+      "target": "npm:@radix-ui/react-primitive",
+      "type": "static"
+    },
+    {
+      "source": "npm:@radix-ui/react-toggle",
+      "target": "npm:@radix-ui/react-use-controllable-state",
+      "type": "static"
+    },
+    {
+      "source": "npm:@radix-ui/react-use-controllable-state",
+      "target": "npm:@types/react",
+      "type": "static"
+    },
+    {
+      "source": "npm:@radix-ui/react-use-controllable-state",
+      "target": "npm:react",
+      "type": "static"
+    },
+    {
+      "source": "npm:@radix-ui/react-use-controllable-state",
+      "target": "npm:@radix-ui/react-use-effect-event",
+      "type": "static"
+    },
+    {
+      "source": "npm:@radix-ui/react-use-controllable-state",
+      "target": "npm:@radix-ui/react-use-layout-effect",
+      "type": "static"
+    },
+    {
+      "source": "npm:@radix-ui/react-use-effect-event",
+      "target": "npm:@types/react",
+      "type": "static"
+    },
+    {
+      "source": "npm:@radix-ui/react-use-effect-event",
+      "target": "npm:react",
+      "type": "static"
+    },
+    {
+      "source": "npm:@radix-ui/react-use-effect-event",
+      "target": "npm:@radix-ui/react-use-layout-effect",
+      "type": "static"
+    },
+    {
+      "source": "npm:@radix-ui/react-use-layout-effect",
+      "target": "npm:@types/react",
+      "type": "static"
+    },
+    {
+      "source": "npm:@radix-ui/react-use-layout-effect",
+      "target": "npm:react",
+      "type": "static"
+    },
+    {
       "source": "npm:@sinonjs/commons",
       "target": "npm:type-detect",
       "type": "static"
@@ -7147,6 +7537,26 @@
       "type": "static"
     },
     {
+      "source": "npm:@types/d3-geo",
+      "target": "npm:@types/geojson",
+      "type": "static"
+    },
+    {
+      "source": "npm:@types/d3-interpolate",
+      "target": "npm:@types/d3-color",
+      "type": "static"
+    },
+    {
+      "source": "npm:@types/d3-scale",
+      "target": "npm:@types/d3-time",
+      "type": "static"
+    },
+    {
+      "source": "npm:@types/d3-shape",
+      "target": "npm:@types/d3-path",
+      "type": "static"
+    },
+    {
       "source": "npm:@types/esquery",
       "target": "npm:@types/estree",
       "type": "static"
@@ -7584,6 +7994,266 @@
     {
       "source": "npm:@tybys/wasm-util@0.10.4",
       "target": "npm:tslib",
+      "type": "static"
+    },
+    {
+      "source": "npm:@visx/curve",
+      "target": "npm:@visx/vendor",
+      "type": "static"
+    },
+    {
+      "source": "npm:@visx/event",
+      "target": "npm:@types/react",
+      "type": "static"
+    },
+    {
+      "source": "npm:@visx/event",
+      "target": "npm:@visx/point",
+      "type": "static"
+    },
+    {
+      "source": "npm:@visx/grid",
+      "target": "npm:react",
+      "type": "static"
+    },
+    {
+      "source": "npm:@visx/grid",
+      "target": "npm:@types/react",
+      "type": "static"
+    },
+    {
+      "source": "npm:@visx/grid",
+      "target": "npm:@visx/curve",
+      "type": "static"
+    },
+    {
+      "source": "npm:@visx/grid",
+      "target": "npm:@visx/group",
+      "type": "static"
+    },
+    {
+      "source": "npm:@visx/grid",
+      "target": "npm:@visx/point",
+      "type": "static"
+    },
+    {
+      "source": "npm:@visx/grid",
+      "target": "npm:@visx/scale",
+      "type": "static"
+    },
+    {
+      "source": "npm:@visx/grid",
+      "target": "npm:@visx/shape",
+      "type": "static"
+    },
+    {
+      "source": "npm:@visx/grid",
+      "target": "npm:classnames",
+      "type": "static"
+    },
+    {
+      "source": "npm:@visx/group",
+      "target": "npm:react",
+      "type": "static"
+    },
+    {
+      "source": "npm:@visx/group",
+      "target": "npm:@types/react",
+      "type": "static"
+    },
+    {
+      "source": "npm:@visx/group",
+      "target": "npm:classnames",
+      "type": "static"
+    },
+    {
+      "source": "npm:@visx/responsive",
+      "target": "npm:react",
+      "type": "static"
+    },
+    {
+      "source": "npm:@visx/responsive",
+      "target": "npm:@types/lodash",
+      "type": "static"
+    },
+    {
+      "source": "npm:@visx/responsive",
+      "target": "npm:@types/react",
+      "type": "static"
+    },
+    {
+      "source": "npm:@visx/responsive",
+      "target": "npm:lodash",
+      "type": "static"
+    },
+    {
+      "source": "npm:@visx/scale",
+      "target": "npm:@visx/vendor",
+      "type": "static"
+    },
+    {
+      "source": "npm:@visx/shape",
+      "target": "npm:react",
+      "type": "static"
+    },
+    {
+      "source": "npm:@visx/shape",
+      "target": "npm:@types/lodash",
+      "type": "static"
+    },
+    {
+      "source": "npm:@visx/shape",
+      "target": "npm:@types/react",
+      "type": "static"
+    },
+    {
+      "source": "npm:@visx/shape",
+      "target": "npm:@visx/curve",
+      "type": "static"
+    },
+    {
+      "source": "npm:@visx/shape",
+      "target": "npm:@visx/group",
+      "type": "static"
+    },
+    {
+      "source": "npm:@visx/shape",
+      "target": "npm:@visx/scale",
+      "type": "static"
+    },
+    {
+      "source": "npm:@visx/shape",
+      "target": "npm:@visx/vendor",
+      "type": "static"
+    },
+    {
+      "source": "npm:@visx/shape",
+      "target": "npm:classnames",
+      "type": "static"
+    },
+    {
+      "source": "npm:@visx/shape",
+      "target": "npm:lodash",
+      "type": "static"
+    },
+    {
+      "source": "npm:@visx/vendor",
+      "target": "npm:@types/d3-array",
+      "type": "static"
+    },
+    {
+      "source": "npm:@visx/vendor",
+      "target": "npm:@types/d3-color",
+      "type": "static"
+    },
+    {
+      "source": "npm:@visx/vendor",
+      "target": "npm:@types/d3-delaunay",
+      "type": "static"
+    },
+    {
+      "source": "npm:@visx/vendor",
+      "target": "npm:@types/d3-format",
+      "type": "static"
+    },
+    {
+      "source": "npm:@visx/vendor",
+      "target": "npm:@types/d3-geo",
+      "type": "static"
+    },
+    {
+      "source": "npm:@visx/vendor",
+      "target": "npm:@types/d3-interpolate",
+      "type": "static"
+    },
+    {
+      "source": "npm:@visx/vendor",
+      "target": "npm:@types/d3-path",
+      "type": "static"
+    },
+    {
+      "source": "npm:@visx/vendor",
+      "target": "npm:@types/d3-scale",
+      "type": "static"
+    },
+    {
+      "source": "npm:@visx/vendor",
+      "target": "npm:@types/d3-shape",
+      "type": "static"
+    },
+    {
+      "source": "npm:@visx/vendor",
+      "target": "npm:@types/d3-time",
+      "type": "static"
+    },
+    {
+      "source": "npm:@visx/vendor",
+      "target": "npm:@types/d3-time-format",
+      "type": "static"
+    },
+    {
+      "source": "npm:@visx/vendor",
+      "target": "npm:d3-array@3.2.1",
+      "type": "static"
+    },
+    {
+      "source": "npm:@visx/vendor",
+      "target": "npm:d3-color",
+      "type": "static"
+    },
+    {
+      "source": "npm:@visx/vendor",
+      "target": "npm:d3-delaunay",
+      "type": "static"
+    },
+    {
+      "source": "npm:@visx/vendor",
+      "target": "npm:d3-format",
+      "type": "static"
+    },
+    {
+      "source": "npm:@visx/vendor",
+      "target": "npm:d3-geo",
+      "type": "static"
+    },
+    {
+      "source": "npm:@visx/vendor",
+      "target": "npm:d3-interpolate",
+      "type": "static"
+    },
+    {
+      "source": "npm:@visx/vendor",
+      "target": "npm:d3-path",
+      "type": "static"
+    },
+    {
+      "source": "npm:@visx/vendor",
+      "target": "npm:d3-scale",
+      "type": "static"
+    },
+    {
+      "source": "npm:@visx/vendor",
+      "target": "npm:d3-shape",
+      "type": "static"
+    },
+    {
+      "source": "npm:@visx/vendor",
+      "target": "npm:d3-time",
+      "type": "static"
+    },
+    {
+      "source": "npm:@visx/vendor",
+      "target": "npm:d3-time-format",
+      "type": "static"
+    },
+    {
+      "source": "npm:@visx/vendor",
+      "target": "npm:internmap",
+      "type": "static"
+    },
+    {
+      "source": "npm:d3-array@3.2.1",
+      "target": "npm:internmap",
       "type": "static"
     },
     {
@@ -8942,6 +9612,71 @@
       "type": "static"
     },
     {
+      "source": "npm:c12",
+      "target": "npm:magicast",
+      "type": "static"
+    },
+    {
+      "source": "npm:c12",
+      "target": "npm:chokidar",
+      "type": "static"
+    },
+    {
+      "source": "npm:c12",
+      "target": "npm:confbox",
+      "type": "static"
+    },
+    {
+      "source": "npm:c12",
+      "target": "npm:defu",
+      "type": "static"
+    },
+    {
+      "source": "npm:c12",
+      "target": "npm:dotenv@17.4.2",
+      "type": "static"
+    },
+    {
+      "source": "npm:c12",
+      "target": "npm:exsolve",
+      "type": "static"
+    },
+    {
+      "source": "npm:c12",
+      "target": "npm:giget",
+      "type": "static"
+    },
+    {
+      "source": "npm:c12",
+      "target": "npm:jiti@2.7.0",
+      "type": "static"
+    },
+    {
+      "source": "npm:c12",
+      "target": "npm:ohash",
+      "type": "static"
+    },
+    {
+      "source": "npm:c12",
+      "target": "npm:pathe",
+      "type": "static"
+    },
+    {
+      "source": "npm:c12",
+      "target": "npm:perfect-debounce",
+      "type": "static"
+    },
+    {
+      "source": "npm:c12",
+      "target": "npm:pkg-types",
+      "type": "static"
+    },
+    {
+      "source": "npm:c12",
+      "target": "npm:rc9",
+      "type": "static"
+    },
+    {
       "source": "npm:cacheable-request",
       "target": "npm:@types/http-cache-semantics",
       "type": "static"
@@ -9577,6 +10312,66 @@
       "type": "static"
     },
     {
+      "source": "npm:d3-array",
+      "target": "npm:internmap",
+      "type": "static"
+    },
+    {
+      "source": "npm:d3-delaunay",
+      "target": "npm:delaunator",
+      "type": "static"
+    },
+    {
+      "source": "npm:d3-geo",
+      "target": "npm:d3-array",
+      "type": "static"
+    },
+    {
+      "source": "npm:d3-interpolate",
+      "target": "npm:d3-color",
+      "type": "static"
+    },
+    {
+      "source": "npm:d3-scale",
+      "target": "npm:d3-array",
+      "type": "static"
+    },
+    {
+      "source": "npm:d3-scale",
+      "target": "npm:d3-format",
+      "type": "static"
+    },
+    {
+      "source": "npm:d3-scale",
+      "target": "npm:d3-interpolate",
+      "type": "static"
+    },
+    {
+      "source": "npm:d3-scale",
+      "target": "npm:d3-time",
+      "type": "static"
+    },
+    {
+      "source": "npm:d3-scale",
+      "target": "npm:d3-time-format",
+      "type": "static"
+    },
+    {
+      "source": "npm:d3-shape",
+      "target": "npm:d3-path",
+      "type": "static"
+    },
+    {
+      "source": "npm:d3-time",
+      "target": "npm:d3-array",
+      "type": "static"
+    },
+    {
+      "source": "npm:d3-time-format",
+      "target": "npm:d3-time",
+      "type": "static"
+    },
+    {
       "source": "npm:data-urls",
       "target": "npm:whatwg-mimetype@5.0.0",
       "type": "static"
@@ -9692,6 +10487,11 @@
       "type": "static"
     },
     {
+      "source": "npm:delaunator",
+      "target": "npm:robust-predicates",
+      "type": "static"
+    },
+    {
       "source": "npm:detect-port",
       "target": "npm:address",
       "type": "static"
@@ -9769,6 +10569,16 @@
     {
       "source": "npm:dunder-proto",
       "target": "npm:gopd",
+      "type": "static"
+    },
+    {
+      "source": "npm:effect",
+      "target": "npm:@standard-schema/spec",
+      "type": "static"
+    },
+    {
+      "source": "npm:effect",
+      "target": "npm:fast-check",
       "type": "static"
     },
     {
@@ -11212,6 +12022,16 @@
       "type": "static"
     },
     {
+      "source": "npm:fast-check",
+      "target": "npm:pure-rand@6.1.0",
+      "type": "static"
+    },
+    {
+      "source": "npm:fast-querystring",
+      "target": "npm:fast-decode-uri-component",
+      "type": "static"
+    },
+    {
       "source": "npm:fast-string-width",
       "target": "npm:fast-string-truncated-width",
       "type": "static"
@@ -11314,6 +12134,21 @@
     {
       "source": "npm:find-cache-dir",
       "target": "npm:pkg-dir",
+      "type": "static"
+    },
+    {
+      "source": "npm:find-my-way",
+      "target": "npm:fast-deep-equal",
+      "type": "static"
+    },
+    {
+      "source": "npm:find-my-way",
+      "target": "npm:fast-querystring",
+      "type": "static"
+    },
+    {
+      "source": "npm:find-my-way",
+      "target": "npm:safe-regex2",
       "type": "static"
     },
     {
@@ -11604,6 +12439,11 @@
     {
       "source": "npm:function.prototype.name",
       "target": "npm:is-document.all",
+      "type": "static"
+    },
+    {
+      "source": "npm:generate-function",
+      "target": "npm:is-property",
       "type": "static"
     },
     {
@@ -17027,6 +17867,56 @@
       "type": "static"
     },
     {
+      "source": "npm:mysql2",
+      "target": "npm:@types/node",
+      "type": "static"
+    },
+    {
+      "source": "npm:mysql2",
+      "target": "npm:aws-ssl-profiles",
+      "type": "static"
+    },
+    {
+      "source": "npm:mysql2",
+      "target": "npm:generate-function",
+      "type": "static"
+    },
+    {
+      "source": "npm:mysql2",
+      "target": "npm:iconv-lite@0.7.3",
+      "type": "static"
+    },
+    {
+      "source": "npm:mysql2",
+      "target": "npm:long",
+      "type": "static"
+    },
+    {
+      "source": "npm:mysql2",
+      "target": "npm:lru.min",
+      "type": "static"
+    },
+    {
+      "source": "npm:mysql2",
+      "target": "npm:named-placeholders",
+      "type": "static"
+    },
+    {
+      "source": "npm:mysql2",
+      "target": "npm:sql-escaper",
+      "type": "static"
+    },
+    {
+      "source": "npm:iconv-lite@0.7.3",
+      "target": "npm:safer-buffer",
+      "type": "static"
+    },
+    {
+      "source": "npm:named-placeholders",
+      "target": "npm:lru.min",
+      "type": "static"
+    },
+    {
       "source": "npm:needle",
       "target": "npm:iconv-lite",
       "type": "static"
@@ -17962,6 +18852,21 @@
       "type": "static"
     },
     {
+      "source": "npm:pkg-types",
+      "target": "npm:confbox@0.3.1",
+      "type": "static"
+    },
+    {
+      "source": "npm:pkg-types",
+      "target": "npm:exsolve",
+      "type": "static"
+    },
+    {
+      "source": "npm:pkg-types",
+      "target": "npm:pathe",
+      "type": "static"
+    },
+    {
       "source": "npm:pkijs",
       "target": "npm:@noble/hashes",
       "type": "static"
@@ -18567,6 +19472,41 @@
       "type": "static"
     },
     {
+      "source": "npm:prisma",
+      "target": "npm:typescript",
+      "type": "static"
+    },
+    {
+      "source": "npm:prisma",
+      "target": "npm:@prisma/config",
+      "type": "static"
+    },
+    {
+      "source": "npm:prisma",
+      "target": "npm:@prisma/dev",
+      "type": "static"
+    },
+    {
+      "source": "npm:prisma",
+      "target": "npm:@prisma/engines",
+      "type": "static"
+    },
+    {
+      "source": "npm:prisma",
+      "target": "npm:@prisma/studio-core",
+      "type": "static"
+    },
+    {
+      "source": "npm:prisma",
+      "target": "npm:mysql2",
+      "type": "static"
+    },
+    {
+      "source": "npm:prisma",
+      "target": "npm:postgres",
+      "type": "static"
+    },
+    {
       "source": "npm:probe-image-size",
       "target": "npm:lodash.merge",
       "type": "static"
@@ -18622,6 +19562,21 @@
       "type": "static"
     },
     {
+      "source": "npm:proper-lockfile",
+      "target": "npm:graceful-fs",
+      "type": "static"
+    },
+    {
+      "source": "npm:proper-lockfile",
+      "target": "npm:retry@0.12.0",
+      "type": "static"
+    },
+    {
+      "source": "npm:proper-lockfile",
+      "target": "npm:signal-exit",
+      "type": "static"
+    },
+    {
       "source": "npm:proxy-addr",
       "target": "npm:forwarded",
       "type": "static"
@@ -18669,6 +19624,16 @@
     {
       "source": "npm:iconv-lite@0.7.3",
       "target": "npm:safer-buffer",
+      "type": "static"
+    },
+    {
+      "source": "npm:rc9",
+      "target": "npm:defu",
+      "type": "static"
+    },
+    {
+      "source": "npm:rc9",
+      "target": "npm:destr",
       "type": "static"
     },
     {
@@ -19044,6 +20009,11 @@
     {
       "source": "npm:safe-regex-test",
       "target": "npm:is-regex",
+      "type": "static"
+    },
+    {
+      "source": "npm:safe-regex2",
+      "target": "npm:ret",
       "type": "static"
     },
     {
@@ -20907,6 +21877,11 @@
       "type": "static"
     },
     {
+      "source": "npm:valibot",
+      "target": "npm:typescript",
+      "type": "static"
+    },
+    {
       "source": "npm:vite",
       "target": "npm:@types/node",
       "type": "static"
@@ -21919,6 +22894,16 @@
     {
       "source": "npm:yauzl",
       "target": "npm:pend",
+      "type": "static"
+    },
+    {
+      "source": "npm:zeptomatch",
+      "target": "npm:grammex",
+      "type": "static"
+    },
+    {
+      "source": "npm:zeptomatch",
+      "target": "npm:graphmatch",
       "type": "static"
     }
   ]

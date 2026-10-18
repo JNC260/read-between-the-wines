@@ -70,55 +70,97 @@
   "fileMap": {
     "nonProjectFiles": [
       {
-        "file": "vitest.config.mts",
-        "hash": "8732862068995563651"
-      },
-      {
-        "file": "eslint.config.mjs",
-        "hash": "3009167784836919272"
-      },
-      {
-        "file": "jest.preset.js",
-        "hash": "13737983450217408137"
-      },
-      {
         "file": ".gitignore",
         "hash": "3627746824112950497"
-      },
-      {
-        "file": "LICENSE",
-        "hash": "9498173712385157660"
-      },
-      {
-        "file": "nx.json",
-        "hash": "17944716410416788984"
-      },
-      {
-        "file": "docker-compose.yaml",
-        "hash": "5349125222064298832"
       },
       {
         "file": ".vscode/launch.json",
         "hash": "4095267532870178451"
       },
       {
-        "file": "package.json",
-        "hash": "4528767081229306688"
+        "file": "LICENSE",
+        "hash": "9498173712385157660"
       },
       {
-        "file": "package-lock.json",
-        "hash": "7811315962325912987"
+        "file": "docker-compose.yaml",
+        "hash": "5349125222064298832"
+      },
+      {
+        "file": "eslint.config.mjs",
+        "hash": "3009167784836919272"
       },
       {
         "file": "jest.config.ts",
         "hash": "14236175072743533737"
       },
       {
+        "file": "jest.preset.js",
+        "hash": "13737983450217408137"
+      },
+      {
+        "file": "nx.json",
+        "hash": "17944716410416788984"
+      },
+      {
+        "file": "package-lock.json",
+        "hash": "10220915308800640800"
+      },
+      {
+        "file": "package.json",
+        "hash": "18073483327089977616"
+      },
+      {
         "file": "tsconfig.base.json",
         "hash": "11923528383094066048"
+      },
+      {
+        "file": "vitest.config.mts",
+        "hash": "8732862068995563651"
       }
     ],
     "projectFileMap": {
+      "shared": [
+        {
+          "file": "libs/shared/README.md",
+          "hash": "4177710660839030163"
+        },
+        {
+          "file": "libs/shared/eslint.config.mjs",
+          "hash": "1965792974734046140"
+        },
+        {
+          "file": "libs/shared/jest.config.cts",
+          "hash": "9578653566820894452"
+        },
+        {
+          "file": "libs/shared/project.json",
+          "hash": "2214406144155872643"
+        },
+        {
+          "file": "libs/shared/src/index.ts",
+          "hash": "15721632429446788800"
+        },
+        {
+          "file": "libs/shared/src/lib/shared.spec.ts",
+          "hash": "18178926149186732135"
+        },
+        {
+          "file": "libs/shared/src/lib/shared.ts",
+          "hash": "3815621113879200261"
+        },
+        {
+          "file": "libs/shared/tsconfig.json",
+          "hash": "12975668481162286788"
+        },
+        {
+          "file": "libs/shared/tsconfig.lib.json",
+          "hash": "3269066908872457000"
+        },
+        {
+          "file": "libs/shared/tsconfig.spec.json",
+          "hash": "16513543508098967277"
+        }
+      ],
       "backend-e2e": [
         {
           "file": "apps/backend-e2e/eslint.config.mjs",
@@ -213,48 +255,6 @@
           ]
         }
       ],
-      "shared": [
-        {
-          "file": "libs/shared/README.md",
-          "hash": "4177710660839030163"
-        },
-        {
-          "file": "libs/shared/eslint.config.mjs",
-          "hash": "1965792974734046140"
-        },
-        {
-          "file": "libs/shared/jest.config.cts",
-          "hash": "9578653566820894452"
-        },
-        {
-          "file": "libs/shared/project.json",
-          "hash": "2214406144155872643"
-        },
-        {
-          "file": "libs/shared/src/index.ts",
-          "hash": "15721632429446788800"
-        },
-        {
-          "file": "libs/shared/src/lib/shared.spec.ts",
-          "hash": "18178926149186732135"
-        },
-        {
-          "file": "libs/shared/src/lib/shared.ts",
-          "hash": "3815621113879200261"
-        },
-        {
-          "file": "libs/shared/tsconfig.json",
-          "hash": "12975668481162286788"
-        },
-        {
-          "file": "libs/shared/tsconfig.lib.json",
-          "hash": "3269066908872457000"
-        },
-        {
-          "file": "libs/shared/tsconfig.spec.json",
-          "hash": "16513543508098967277"
-        }
-      ],
       "frontend": [
         {
           "file": "apps/frontend/eslint.config.mjs",
@@ -339,5 +339,5 @@
       ]
     }
   },
-  "externalNodesHash": "11172964491998158874"
+  "externalNodesHash": "13861484166548309684"
 }
