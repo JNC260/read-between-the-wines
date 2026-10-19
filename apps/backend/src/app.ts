@@ -3,7 +3,7 @@ import rootRoutes from "./root.routes";
 
 export const app = express();
 
-app.use("/", rootRoutes);
+app.use("/api", rootRoutes);
 
 const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
   console.error(err);
