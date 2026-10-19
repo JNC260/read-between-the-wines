@@ -5,6 +5,32 @@
   "projectType": "application",
   "tags": [],
   "targets": {
+    "prisma-generate": {
+      "executor": "nx:run-commands",
+      "cache": true,
+      "inputs": [
+        "{projectRoot}/prisma/schema.prisma",
+        "{projectRoot}/prisma.config.ts",
+        {
+          "externalDependencies": [
+            "prisma"
+          ]
+        }
+      ],
+      "outputs": [
+        "{projectRoot}/generated"
+      ],
+      "options": {
+        "cwd": "{projectRoot}",
+        "command": "prisma generate"
+      }
+    },
+    "build": {
+      "dependsOn": [
+        "^build",
+        "prisma-generate"
+      ]
+    },
     "prune-lockfile": {
       "dependsOn": [
         "build"

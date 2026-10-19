@@ -1,0 +1,8 @@
+{
+  "name": "backend",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "@prisma/client": "^7.10.1"
+  }
+}

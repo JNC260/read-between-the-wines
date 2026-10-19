@@ -1,8 +1,8 @@
-import express, { type Express, type Request, type Response } from "express";
-import app from "../main";
+import express from "express";
+import { userList } from "./users.controller";
 
-app.get("/users", (req: Request, res: Response) => {
-  console.log("REQ", req);
-  console.log("RES", res);
-  return [];
-});
+const router = express.Router();
+
+router.get("/", userList);
+
+export default router;

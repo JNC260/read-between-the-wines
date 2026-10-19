@@ -1,8 +1,7 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "target": "esnext",
-    "module": "nodenext",
+    "target": "es2022",
     "forceConsistentCasingInFileNames": true,
     "strict": true,
     "noEmit": true,
@@ -13,8 +12,7 @@
     "noPropertyAccessFromIndexSignature": true,
     "skipLibCheck": true,
     "erasableSyntaxOnly": true,
-    "verbatimModuleSyntax": true,
-    "rewriteRelativeImportExtensions": true
+    "verbatimModuleSyntax": true
   },
   "files": [],
   "include": [],
