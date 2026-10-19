@@ -1,6 +1,11 @@
 {
   "$schema": "./node_modules/nx/schemas/nx-schema.json",
   "analytics": false,
+  "sync": {
+    "disabledTaskSyncGenerators": [
+      "@nx/js:typescript-sync"
+    ]
+  },
   "plugins": [
     {
       "plugin": "@nx/eslint/plugin",

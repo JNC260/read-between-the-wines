@@ -6,8 +6,8 @@ const UsersPage = () => {
       {isLoading && <p>Loading...</p>}
       {!isLoading && (
         <div>
-          {users.map((user) => (
-            <li>{user.email}</li>
+          {users?.map((user) => (
+            <li key={user.id}>{user.email}</li>
           ))}
         </div>
       )}

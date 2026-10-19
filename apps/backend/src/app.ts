@@ -3,6 +3,8 @@ import rootRoutes from "./root.routes";
 
 export const app = express();
 
+app.use(express.json());
+
 app.use("/api", rootRoutes);
 
 const errorHandler: ErrorRequestHandler = (err, req, res, next) => {
