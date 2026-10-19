@@ -7,3 +7,4 @@ vitest.config.*.timestamp*
 .vitest
 .nx/cache
 .nx/workspace-data
+apps/backend/generated
