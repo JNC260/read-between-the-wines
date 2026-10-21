@@ -158,14 +158,15 @@ model Venue {
 
 model Meeting {
   id          String   @id @default(uuid())
+  title       String
   start       DateTime
   end         DateTime
   description String?
-  venueId     String
+  venueId     String? // null until a venue is picked
   bookId      String?  @unique // one book per meeting; null until a book is assigned
 
-  venue Venue @relation(fields: [venueId], references: [id])
-  book  Book? @relation(fields: [bookId], references: [id])
+  venue Venue? @relation(fields: [venueId], references: [id])
+  book  Book?  @relation(fields: [bookId], references: [id])
   rsvps Rsvp[]
 }
 
