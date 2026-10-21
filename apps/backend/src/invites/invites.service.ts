@@ -1,5 +1,5 @@
 import { createHash, randomBytes } from "node:crypto";
-import { type InviteDTO } from "shared";
+import { type InviteDTO, type InviteLookupDTO } from "shared";
 import { sendEmail } from "../lib/email";
 import { ConflictError, NotFoundError } from "../lib/errors";
 import { prisma } from "../lib/prisma";
@@ -49,7 +49,7 @@ export const inviteMember = async (
     throw new Error("BETTER_AUTH_URL is not set");
   }
   const { invite, token } = await createInvite(email, invitedById);
-  const url = `${appUrl}/sign-up?invite=${token}`;
+  const url = `${appUrl}/invite/${token}`;
   await sendEmail({
     to: invite.email,
     subject: "You're invited to Read Between the Wines",
@@ -71,6 +71,18 @@ export const revokeInvite = async (id: string): Promise<void> => {
     throw new ConflictError("That invite has already been used");
   }
   await prisma.invite.delete({ where: { id } });
+};
+
+// For the public invite page. Every kind of bad link gets the same 404, so
+// the page can't be used to learn whether a token ever existed.
+export const lookupInvite = async (token: string): Promise<InviteLookupDTO> => {
+  const invite = await prisma.invite.findUnique({
+    where: { tokenHash: hashToken(token) },
+  });
+  if (!invite || invite.usedAt || invite.expiresAt <= new Date()) {
+    throw new NotFoundError("This invite has expired or isn't valid");
+  }
+  return invite;
 };
 
 // Used by the sign-up hook in lib/auth.ts. The token proves the person can

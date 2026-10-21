@@ -18,3 +18,12 @@ export const CreateInviteSchema = z.object({
 });
 
 export type CreateInviteDTO = z.infer<typeof CreateInviteSchema>;
+
+// Public lookup for the invite page, so it can pre-fill the email. Anyone
+// with the link can see this, which is fine: only the invitee has the link.
+export const InviteLookupSchema = z.object({
+  email: z.email(),
+  expiresAt: isoDate,
+});
+
+export type InviteLookupDTO = z.output<typeof InviteLookupSchema>;
