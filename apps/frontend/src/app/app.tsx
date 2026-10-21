@@ -43,12 +43,6 @@ const Nav = () => {
           <Link to="/">Home</Link>
         </li>
         <li>
-          <Link to="/page-1">Page 1</Link>
-        </li>
-        <li>
-          <Link to="/page-2">Page 2</Link>
-        </li>
-        <li>
           <Link to="/users">Users</Link>
         </li>
         <li>
@@ -107,24 +101,6 @@ export function App() {
               <RequireAuth admin>
                 <EditEventPage />
               </RequireAuth>
-            }
-          />
-          {/* Placeholder pages from the Nx template, moved off "/" */}
-          <Route
-            path="/page-1"
-            element={
-              <div>
-                This is the generated root route.{" "}
-                <Link to="/page-2">Click here for page 2.</Link>
-              </div>
-            }
-          />
-          <Route
-            path="/page-2"
-            element={
-              <div>
-                <Link to="/page-1">Click here to go back to page 1.</Link>
-              </div>
             }
           />
         </Routes>
