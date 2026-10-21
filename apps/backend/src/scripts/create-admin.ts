@@ -43,12 +43,13 @@ const main = async () => {
   }
 
   // Sign-up is invite-only, so invite ourselves first (no inviter: null).
-  const { token } = await createInvite(email, null);
+  const { token } = await createInvite(null);
 
   // Goes through Better Auth so the password is hashed its way and stored on
   // a "credential" Account row. A random password nobody knows is replaced
   // via the reset email below, so a real one never sits in a shell or file.
-  // The invite also marks the email verified.
+  // Sign-up also emails a verification link, which is harmless: we mark the
+  // email verified below, since the reset link proves the inbox anyway.
   //
   // Built separately because Better Auth's types don't know about
   // inviteToken, though the endpoint accepts extra fields and passes them to

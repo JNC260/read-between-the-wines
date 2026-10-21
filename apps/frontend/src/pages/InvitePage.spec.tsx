@@ -1,23 +1,18 @@
 import { fireEvent, screen } from "@testing-library/react";
 import { getInvite, signUpWithInvite } from "../api";
-import { mockSession, renderRoutes, Route, testUser } from "../test-utils";
+import { renderRoutes, Route } from "../test-utils";
 import InvitePage from "./InvitePage";
 
-vi.mock("../lib/auth-client", () => ({ authClient: { useSession: vi.fn() } }));
 vi.mock("../api", () => ({ getInvite: vi.fn(), signUpWithInvite: vi.fn() }));
 
 const renderInvite = () =>
   renderRoutes(
     "/invite/the-token",
-    <>
-      <Route path="/invite/:token" element={<InvitePage />} />
-      <Route path="/" element="landing page" />
-    </>,
+    <Route path="/invite/:token" element={<InvitePage />} />,
   );
 
 const validInvite = () =>
   vi.mocked(getInvite).mockResolvedValue({
-    email: "invitee@example.com",
     expiresAt: new Date(Date.now() + 60_000),
   });
 
@@ -25,6 +20,7 @@ const fill = (label: string, value: string) =>
   fireEvent.change(screen.getByLabelText(label), { target: { value } });
 
 const fillForm = (confirm = "correct-horse-battery") => {
+  fill("Email", "invitee@example.com");
   fill("First name", "Ada");
   fill("Last name", "Lovelace");
   fill("Password", "correct-horse-battery");
@@ -33,21 +29,11 @@ const fillForm = (confirm = "correct-horse-battery") => {
 };
 
 describe("InvitePage", () => {
-  beforeEach(() => mockSession(null));
-
   it("looks up the invite from the link's token", async () => {
     validInvite();
     renderInvite();
     await screen.findByLabelText("Email");
     expect(vi.mocked(getInvite).mock.calls[0][0]).toBe("the-token");
-  });
-
-  it("shows the invited email pre-filled and locked", async () => {
-    validInvite();
-    renderInvite();
-    const email = (await screen.findByLabelText("Email")) as HTMLInputElement;
-    expect(email.value).toBe("invitee@example.com");
-    expect(email.readOnly).toBe(true);
   });
 
   it("shows a friendly message for an invalid or expired invite", async () => {
@@ -70,15 +56,16 @@ describe("InvitePage", () => {
     expect(signUpWithInvite).not.toHaveBeenCalled();
   });
 
-  it("signs up with the token and goes to the landing page signed in", async () => {
-    const refetch = mockSession(null);
+  it("signs up with the token and asks them to verify their email", async () => {
     validInvite();
-    vi.mocked(signUpWithInvite).mockResolvedValue(testUser() as never);
+    vi.mocked(signUpWithInvite).mockResolvedValue();
     renderInvite();
     await screen.findByLabelText("Email");
     fillForm();
-    expect(await screen.findByText("landing page")).toBeTruthy();
-    expect(refetch).toHaveBeenCalled();
+    expect(
+      await screen.findByRole("heading", { name: "Check your email" }),
+    ).toBeTruthy();
+    expect(screen.getByText(/sent a link to invitee@example.com/)).toBeTruthy();
     expect(vi.mocked(signUpWithInvite).mock.calls[0][0]).toEqual({
       token: "the-token",
       email: "invitee@example.com",

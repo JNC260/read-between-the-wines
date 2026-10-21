@@ -33,14 +33,14 @@ export const auth = betterAuth({
     },
   },
   databaseHooks: {
-    // Sign-up is invite-only: the body must include the inviteToken from the
-    // invite email, for exactly this email. Runs for every way a user is
-    // created, so the create-admin script goes through it too.
+    // Sign-up is invite-only: the body must include the inviteToken from a
+    // member's invite link. Runs for every way a user is created, so the
+    // create-admin script goes through it too.
     user: {
       create: {
-        before: async (user, ctx) => {
+        before: async (_user, ctx) => {
           const token = ctx?.body?.inviteToken;
-          if (typeof token !== "string" || !(await isInviteValid(token, user.email))) {
+          if (typeof token !== "string" || !(await isInviteValid(token))) {
             // 400, not 403: Better Auth turns a 403 here into its fake
             // "success" response for duplicate emails, hiding the error.
             throw new APIError("BAD_REQUEST", {
@@ -48,9 +48,9 @@ export const auth = betterAuth({
               code: "INVITE_INVALID",
             });
           }
-          // The token arrived by email, so they've already proved they can
-          // read this inbox. No separate verification step needed.
-          return { data: { ...user, emailVerified: true } };
+          // The token only shows a member vouched for them. It says nothing
+          // about the email (the inviter saw the link too), so they still
+          // verify it like anyone else.
         },
         after: async (_user, ctx) => {
           await markInviteUsed(ctx?.body?.inviteToken);
@@ -79,12 +79,13 @@ export const auth = betterAuth({
   },
   emailVerification: {
     sendOnSignUp: true,
+    // Logging in before verifying sends a fresh link, since this one expires
+    // after an hour.
+    sendOnSignIn: true,
+    // Clicking the link signs them in, so a new member goes straight from
+    // the email to the club without typing their password again.
+    autoSignInAfterVerification: true,
     sendVerificationEmail: async ({ user, url }) => {
-      // Better Auth sends this after every sign-up, but invited members are
-      // verified by the sign-up hook above.
-      if (user.emailVerified) {
-        return;
-      }
       sendInBackground({
         to: user.email,
         subject: "Verify your email for Read Between the Wines",

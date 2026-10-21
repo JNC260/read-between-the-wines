@@ -8,6 +8,7 @@ import RequireAuth from "../components/RequireAuth";
 import SignOutButton from "../components/SignOutButton";
 import { authClient } from "../lib/auth-client";
 import ForgotPasswordPage from "../pages/ForgotPasswordPage";
+import InviteMemberPage from "../pages/InviteMemberPage";
 import InvitePage from "../pages/InvitePage";
 import LandingPage from "../pages/LandingPage";
 import LoginPage from "../pages/LoginPage";
@@ -48,6 +49,9 @@ const Nav = () => {
         <li>
           <Link to="/users">Users</Link>
         </li>
+        <li>
+          <Link to="/invite-member">Invite a member</Link>
+        </li>
       </ul>
       <SignOutButton />
     </nav>
@@ -71,6 +75,14 @@ export function App() {
             element={
               <RequireAuth>
                 <UsersPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/invite-member"
+            element={
+              <RequireAuth>
+                <InviteMemberPage />
               </RequireAuth>
             }
           />

@@ -1,7 +1,5 @@
 import express from "express";
-import { CreateInviteSchema } from "shared";
 import { requireAdmin, requireAuth } from "../middleware/auth";
-import { validate } from "../middleware/validate";
 import {
   inviteCreate,
   inviteList,
@@ -12,14 +10,16 @@ import {
 const router = express.Router();
 
 // Public: the invite page looks up its link before the invitee has an
-// account. Registered before the admin check below so it isn't blocked.
+// account. Registered before the checks below so it isn't blocked.
 router.get("/:token", inviteLookup);
+
+// Any signed-in member can make an invite link. No body.
+router.post("/", requireAuth, inviteCreate);
 
 // Everything else is admin-only for now.
 router.use(requireAuth, requireAdmin);
 
 router.get("/", inviteList);
-router.post("/", validate(CreateInviteSchema), inviteCreate);
 router.delete("/:id", inviteRevoke);
 
 export default router;

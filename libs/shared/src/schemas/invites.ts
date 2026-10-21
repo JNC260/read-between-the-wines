@@ -1,11 +1,12 @@
 import * as z from "zod";
 import { isoDate } from "./dates";
 
-// What an admin sees about an invite. The token itself is only ever in the
-// email; the server keeps just its hash.
+// What an admin sees about an invite. Invites aren't tied to an email: the
+// link shows a member vouched for whoever has it, and the invitee proves
+// their email separately by verifying it. The server keeps just the token's
+// hash; the raw token is only returned once, to the member who created it.
 export const InviteSchema = z.object({
   id: z.uuidv4(),
-  email: z.email(),
   expiresAt: isoDate,
   usedAt: isoDate.nullable(),
   createdAt: isoDate,
@@ -13,16 +14,17 @@ export const InviteSchema = z.object({
 
 export type InviteDTO = z.output<typeof InviteSchema>;
 
-export const CreateInviteSchema = z.object({
-  email: z.email(),
+// Returned only when an invite is created, so the member can share the
+// sign-up link. It can't be fetched again later.
+export const CreatedInviteSchema = InviteSchema.extend({
+  url: z.url(),
 });
 
-export type CreateInviteDTO = z.infer<typeof CreateInviteSchema>;
+export type CreatedInviteDTO = z.output<typeof CreatedInviteSchema>;
 
-// Public lookup for the invite page, so it can pre-fill the email. Anyone
-// with the link can see this, which is fine: only the invitee has the link.
+// Public lookup for the invite page, so it can tell an expired link from a
+// good one before asking for details.
 export const InviteLookupSchema = z.object({
-  email: z.email(),
   expiresAt: isoDate,
 });
 

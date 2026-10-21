@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { type MeetingListQuery } from "shared";
 import {
+  createInvite,
   createMeeting,
   createVenue,
   getMeeting,
@@ -31,6 +32,10 @@ export const useInvite = (token: string) => {
     queryKey: ["invite", token],
     queryFn: () => getInvite(token),
   });
+};
+
+export const useCreateInvite = () => {
+  return useMutation({ mutationFn: createInvite });
 };
 
 export const useSignIn = () => {

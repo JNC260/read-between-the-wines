@@ -1,25 +1,34 @@
 import { type FormEvent, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useInvite, useSignUpWithInvite } from "../hooks";
-import { authClient } from "../lib/auth-client";
 
 // Better Auth's limits for email and password accounts.
 const MIN_LENGTH = 8;
 const MAX_LENGTH = 128;
 
-// The invite email links here: /invite/<token>.
+// Invite links shared by members point here: /invite/<token>.
 const InvitePage = () => {
   const { token = "" } = useParams();
-  const navigate = useNavigate();
   const invite = useInvite(token);
-  const { refetch: refetchSession } = authClient.useSession();
+  const [email, setEmail] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [mismatch, setMismatch] = useState(false);
-  const { mutate, isPending, error } = useSignUpWithInvite();
+  const { mutate, isPending, isSuccess, error } = useSignUpWithInvite();
 
+  if (isSuccess) {
+    return (
+      <div>
+        <h1>Check your email</h1>
+        <p>
+          We've sent a link to {email}. Tap it to verify your email and you'll
+          be signed in.
+        </p>
+      </div>
+    );
+  }
   if (invite.isPending) {
     return <p>Checking your invite...</p>;
   }
@@ -31,14 +40,12 @@ const InvitePage = () => {
       <div>
         <h1>This invite has expired</h1>
         <p>
-          The link may be old or already used. Ask the club organizer to send
-          you a new one.
+          The link may be old or already used. Ask whoever sent it to make you
+          a new one.
         </p>
       </div>
     );
   }
-
-  const { email } = invite.data;
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -47,16 +54,7 @@ const InvitePage = () => {
       return;
     }
     setMismatch(false);
-    mutate(
-      { token, email, password, firstName, lastName },
-      {
-        // Signed in by now; refresh the session so "/" shows them as such.
-        onSuccess: async () => {
-          await refetchSession();
-          navigate("/", { replace: true });
-        },
-      },
-    );
+    mutate({ token, email, password, firstName, lastName });
   };
 
   return (
@@ -65,8 +63,14 @@ const InvitePage = () => {
       <form onSubmit={handleSubmit}>
         <div>
           <label htmlFor="email">Email</label>
-          {/* The invite is for exactly this email, so it can't be changed. */}
-          <input id="email" type="email" value={email} readOnly />
+          <input
+            id="email"
+            type="email"
+            autoComplete="email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
         </div>
         <div>
           <label htmlFor="firstName">First name</label>
