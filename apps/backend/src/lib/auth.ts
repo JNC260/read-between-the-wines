@@ -1,5 +1,6 @@
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
+import { APIError } from "better-auth/api";
 import { UserStatus } from "../../generated/prisma/client";
 import { type Email, sendEmail } from "./email";
 import { prisma } from "./prisma";
@@ -28,6 +29,27 @@ export const auth = betterAuth({
         subject: "Reset your Read Between the Wines password",
         html: `<p>Someone asked to reset your password. If it was you, <a href="${url}">choose a new one</a>.</p><p>If not, you can ignore this email.</p>`,
       });
+    },
+  },
+  databaseHooks: {
+    session: {
+      create: {
+        // Banned users can't sign in at all. requireAuth also rejects them,
+        // but without this they'd still get a session that works on Better
+        // Auth's own endpoints, like change-password.
+        before: async (session) => {
+          const user = await prisma.user.findUnique({
+            where: { id: session.userId },
+            select: { status: true },
+          });
+          if (user?.status === UserStatus.BANNED) {
+            throw new APIError("FORBIDDEN", {
+              message: "This account has been banned",
+              code: "ACCOUNT_BANNED",
+            });
+          }
+        },
+      },
     },
   },
   emailVerification: {

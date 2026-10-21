@@ -20,15 +20,16 @@ export class BadRequestError extends AppError {
 
 // 401: we don't know who you are.
 export class UnauthorizedError extends AppError {
-  constructor(message = "Unauthorized") {
-    super(401, "UNAUTHORIZED", message);
+  constructor(message = "Unauthorized", code = "UNAUTHORIZED") {
+    super(401, code, message);
   }
 }
 
-// 403: we know who you are, and you can't do this.
+// 403: we know who you are, and you can't do this. Pass a specific code when
+// the frontend needs to react to the reason (e.g. ACCOUNT_INACTIVE).
 export class ForbiddenError extends AppError {
-  constructor(message = "Forbidden") {
-    super(403, "FORBIDDEN", message);
+  constructor(message = "Forbidden", code = "FORBIDDEN") {
+    super(403, code, message);
   }
 }
 
