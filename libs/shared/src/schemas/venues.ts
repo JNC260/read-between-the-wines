@@ -1,6 +1,7 @@
 import * as z from "zod";
 
-const requiredText = z.string().trim().min(1);
+// The message shows next to each field on the venue form.
+const requiredText = z.string().trim().min(1, "Required");
 
 export const VenueSchema = z.object({
   id: z.uuidv4(),

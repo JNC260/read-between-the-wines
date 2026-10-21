@@ -4,7 +4,7 @@ import RequireAuth from "./RequireAuth";
 
 vi.mock("../lib/auth-client", () => ({ authClient: { useSession: vi.fn() } }));
 
-const renderProtected = () =>
+const renderProtected = (admin = false) =>
   renderRoutes(
     "/private",
     <>
@@ -13,7 +13,7 @@ const renderProtected = () =>
       <Route
         path="/private"
         element={
-          <RequireAuth>
+          <RequireAuth admin={admin}>
             <p>secret page</p>
           </RequireAuth>
         }
@@ -52,5 +52,18 @@ describe("RequireAuth", () => {
     renderProtected();
     expect(screen.getByText("This account has been banned.")).toBeTruthy();
     expect(screen.queryByText("secret page")).toBeNull();
+  });
+
+  it("blocks members who aren't admins from admin pages", () => {
+    mockSession(testUser());
+    renderProtected(true);
+    expect(screen.getByText("Only admins can see this page.")).toBeTruthy();
+    expect(screen.queryByText("secret page")).toBeNull();
+  });
+
+  it("shows admin pages to admins", () => {
+    mockSession(testUser({ isAdmin: true }));
+    renderProtected(true);
+    expect(screen.getByText("secret page")).toBeTruthy();
   });
 });

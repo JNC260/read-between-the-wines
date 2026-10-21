@@ -1,0 +1,147 @@
+import { type FormEvent, useState } from "react";
+import * as z from "zod";
+import { type CreateMeetingDTO, CreateMeetingSchema, type MeetingDTO } from "shared";
+import NewVenueFields from "./NewVenueFields";
+import { useVenues } from "../hooks";
+
+// The dropdown value that opens the new venue fields. Never a real id,
+// since those are UUIDs.
+const NEW_VENUE = "new";
+
+// What the form sends: every field, so an edit can also clear the venue or
+// description (null) rather than leave them as they were.
+export type EventValues = Required<
+  Pick<CreateMeetingDTO, "title" | "start" | "end" | "venueId" | "description">
+>;
+
+// datetime-local wants "YYYY-MM-DDTHH:mm" in local time, with no zone.
+const pad = (n: number) => String(n).padStart(2, "0");
+const toLocalInput = (d: Date) =>
+  `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}` +
+  `T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+
+// Shared by the new and edit event pages. Pass `event` to pre-fill it; it's
+// only read on the first render, so render the form once the event loads.
+const EventForm = ({
+  event,
+  onSubmit,
+  isPending,
+  error,
+  submitLabel,
+  pendingLabel,
+}: {
+  event?: MeetingDTO;
+  onSubmit: (values: EventValues) => void;
+  isPending: boolean;
+  error: Error | null;
+  submitLabel: string;
+  pendingLabel: string;
+}) => {
+  const venues = useVenues();
+  const [title, setTitle] = useState(event?.title ?? "");
+  const [start, setStart] = useState(event ? toLocalInput(event.start) : "");
+  const [end, setEnd] = useState(event ? toLocalInput(event.end) : "");
+  const [venueId, setVenueId] = useState(event?.venueId ?? "");
+  const [description, setDescription] = useState(event?.description ?? "");
+  const [invalid, setInvalid] = useState<string | null>(null);
+
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (venueId === NEW_VENUE) {
+      setInvalid("Save or cancel the new venue first.");
+      return;
+    }
+    // datetime-local values have no time zone, so new Date() reads them as
+    // the admin's local time, which is what they meant.
+    const values = {
+      title,
+      start: new Date(start),
+      end: new Date(end),
+      venueId: venueId || null,
+      description: description || null,
+    };
+    // Check here too: the API only says "Invalid request", and this gives
+    // the real reason, like the end being before the start. safeEncode, not
+    // safeParse, because the dates are already Date objects.
+    const result = z.safeEncode(CreateMeetingSchema, values);
+    if (!result.success) {
+      setInvalid(result.error.issues[0].message);
+      return;
+    }
+    setInvalid(null);
+    onSubmit(values);
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <div>
+        <label htmlFor="title">Title</label>
+        <input
+          id="title"
+          required
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+        />
+      </div>
+      <div>
+        <label htmlFor="start">Starts</label>
+        <input
+          id="start"
+          type="datetime-local"
+          required
+          value={start}
+          onChange={(e) => setStart(e.target.value)}
+        />
+      </div>
+      <div>
+        <label htmlFor="end">Ends</label>
+        <input
+          id="end"
+          type="datetime-local"
+          required
+          min={start}
+          value={end}
+          onChange={(e) => setEnd(e.target.value)}
+        />
+      </div>
+      <div>
+        <label htmlFor="venue">Venue</label>
+        <select
+          id="venue"
+          value={venueId}
+          onChange={(e) => setVenueId(e.target.value)}
+        >
+          <option value="">Not decided yet</option>
+          {venues.data?.map((venue) => (
+            <option key={venue.id} value={venue.id}>
+              {venue.name}
+            </option>
+          ))}
+          <option value={NEW_VENUE}>Add a new venue…</option>
+        </select>
+        {venues.error && <p role="alert">{venues.error.message}</p>}
+      </div>
+      {venueId === NEW_VENUE && (
+        <NewVenueFields
+          onSaved={(venue) => setVenueId(venue.id)}
+          onCancel={() => setVenueId("")}
+        />
+      )}
+      <div>
+        <label htmlFor="description">Description</label>
+        <textarea
+          id="description"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+        />
+      </div>
+      {invalid && <p role="alert">{invalid}</p>}
+      {error && <p role="alert">{error.message}</p>}
+      <button type="submit" disabled={isPending}>
+        {isPending ? pendingLabel : submitLabel}
+      </button>
+    </form>
+  );
+};
+
+export default EventForm;

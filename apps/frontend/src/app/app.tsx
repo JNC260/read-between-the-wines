@@ -7,11 +7,14 @@ import { ApiError } from "../api";
 import RequireAuth from "../components/RequireAuth";
 import SignOutButton from "../components/SignOutButton";
 import { authClient } from "../lib/auth-client";
+import EditEventPage from "../pages/EditEventPage";
+import EventsPage from "../pages/EventsPage";
 import ForgotPasswordPage from "../pages/ForgotPasswordPage";
 import InviteMemberPage from "../pages/InviteMemberPage";
 import InvitePage from "../pages/InvitePage";
 import LandingPage from "../pages/LandingPage";
 import LoginPage from "../pages/LoginPage";
+import NewEventPage from "../pages/NewEventPage";
 import ReactivatePage from "../pages/ReactivatePage";
 import ResetPasswordPage from "../pages/ResetPasswordPage";
 import UsersPage from "../pages/UsersPage";
@@ -41,17 +44,19 @@ const Nav = () => {
           <Link to="/">Home</Link>
         </li>
         <li>
-          <Link to="/page-1">Page 1</Link>
-        </li>
-        <li>
-          <Link to="/page-2">Page 2</Link>
-        </li>
-        <li>
           <Link to="/users">Users</Link>
         </li>
         <li>
           <Link to="/invite-member">Invite a member</Link>
         </li>
+        <li>
+          <Link to="/events">Events</Link>
+        </li>
+        {session.user.isAdmin && (
+          <li>
+            <Link to="/events/new">New event</Link>
+          </li>
+        )}
       </ul>
       <SignOutButton />
     </nav>
@@ -86,22 +91,28 @@ export function App() {
               </RequireAuth>
             }
           />
-          {/* Placeholder pages from the Nx template, moved off "/" */}
           <Route
-            path="/page-1"
+            path="/events"
             element={
-              <div>
-                This is the generated root route.{" "}
-                <Link to="/page-2">Click here for page 2.</Link>
-              </div>
+              <RequireAuth>
+                <EventsPage />
+              </RequireAuth>
             }
           />
           <Route
-            path="/page-2"
+            path="/events/new"
             element={
-              <div>
-                <Link to="/page-1">Click here to go back to page 1.</Link>
-              </div>
+              <RequireAuth admin>
+                <NewEventPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/events/:id/edit"
+            element={
+              <RequireAuth admin>
+                <EditEventPage />
+              </RequireAuth>
             }
           />
         </Routes>

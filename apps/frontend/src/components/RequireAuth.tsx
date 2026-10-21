@@ -4,7 +4,15 @@ import { authClient } from "../lib/auth-client";
 
 // Wrap any page that needs a signed-in member:
 //   <Route path="/users" element={<RequireAuth><UsersPage /></RequireAuth>} />
-const RequireAuth = ({ children }: { children: ReactNode }) => {
+// Add `admin` for admin-only pages. The API checks too; this just saves
+// members from a form that would only fail.
+const RequireAuth = ({
+  children,
+  admin = false,
+}: {
+  children: ReactNode;
+  admin?: boolean;
+}) => {
   const { data: session, isPending } = authClient.useSession();
   const location = useLocation();
 
@@ -24,6 +32,9 @@ const RequireAuth = ({ children }: { children: ReactNode }) => {
   // before the ban.
   if (session.user.status === "BANNED") {
     return <p>This account has been banned.</p>;
+  }
+  if (admin && !session.user.isAdmin) {
+    return <p>Only admins can see this page.</p>;
   }
   return children;
 };
