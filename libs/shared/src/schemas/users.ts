@@ -8,16 +8,22 @@ const isoDate = z.codec(z.iso.datetime(), z.date(), {
   encode: (d) => d.toISOString(),
 });
 
+// Mirrors the UserStatus enum in schema.prisma. Kept separate so the frontend
+// doesn't depend on Prisma; getAllUsers() stops compiling if they drift.
+export const UserStatusSchema = z.enum(["ACTIVE", "INACTIVE", "BANNED"]);
+
+// What any member may see about another member. z.encode() drops fields not
+// listed here, so isAdmin, emailVerified and active never leave the server.
 export const UserSchema = z.object({
   id: z.uuidv4(),
   email: z.email(),
+  name: z.string(),
+  firstName: z.string(),
+  lastName: z.string(),
+  image: z.string().nullable(),
+  status: UserStatusSchema,
   createdAt: isoDate,
   updatedAt: isoDate,
 });
 
 export type UserDTO = z.output<typeof UserSchema>;
-
-// What a client may send. The server sets id and timestamps.
-export const CreateUserSchema = UserSchema.pick({ email: true });
-
-export type CreateUserDTO = z.infer<typeof CreateUserSchema>;

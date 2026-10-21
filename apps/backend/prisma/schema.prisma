@@ -1,22 +1,202 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
-  provider     = "prisma-client"
-  output       = "../generated/prisma"
-  moduleFormat = "esm"
+  provider = "prisma-client"
+  output   = "../generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
 }
 
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  BANNED
+}
 
-model User { 
-  id    String    @id @default(uuid()) 
-  email String @unique
+// Better Auth's user table. name, emailVerified and image are its core
+// fields; firstName, lastName, status and isAdmin are registered as
+// additionalFields in src/lib/auth.ts. Passwords live on Account.
+model User {
+  id            String     @id @default(uuid())
+  name          String
+  email         String     @unique
+  emailVerified Boolean    @default(false)
+  image         String?
+  firstName     String
+  lastName      String
+  active        Boolean    @default(true)
+  isAdmin       Boolean    @default(false)
+  status        UserStatus @default(ACTIVE)
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  sessions    Session[]
+  accounts    Account[]
+  suggestions Suggestion[]
+  ratings     Rating[]
+  votes       Vote[]
+  rsvps       Rsvp[]
+}
+
+// Better Auth: one row per signed-in browser
+model Session {
+  id        String   @id @default(uuid())
+  expiresAt DateTime
+  token     String   @unique
+  ipAddress String?
+  userAgent String?
+  userId    String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-} 
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+// Better Auth: one row per way a user can sign in. For email and password,
+// providerId is "credential" and password holds the hash.
+model Account {
+  id                    String    @id @default(uuid())
+  accountId             String
+  providerId            String
+  userId                String
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+// Better Auth: short-lived tokens, like email verification links
+model Verification {
+  id         String   @id @default(uuid())
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+}
+
+model Book {
+  id            String   @id @default(uuid())
+  title         String
+  author        String
+  yearPublished Int?
+  genres        String[]
+  coverUrl      String?
+  createdAt     DateTime @default(now())
+
+  suggestions Suggestion[]
+  ratings     Rating[]
+  meeting     Meeting?
+  polls       Poll[]
+  votes       Vote[]
+}
+
+// join table: User <-> Book
+model Suggestion {
+  userId    String
+  bookId    String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+  book Book @relation(fields: [bookId], references: [id])
+
+  @@id([userId, bookId])
+}
+
+// join table: User <-> Book, carrying a score (1-5, validated with Zod)
+model Rating {
+  userId    String
+  bookId    String
+  score     Int
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+  book Book @relation(fields: [bookId], references: [id])
+
+  @@id([userId, bookId])
+}
+
+model Venue {
+  id            String @id @default(uuid())
+  name          String
+  streetAddress String
+  city          String
+  state         String
+  zip           String
+
+  meetings Meeting[]
+}
+
+model Meeting {
+  id          String   @id @default(uuid())
+  start       DateTime
+  end         DateTime
+  description String?
+  venueId     String
+  bookId      String?  @unique // one book per meeting; null until a book is assigned
+
+  venue Venue @relation(fields: [venueId], references: [id])
+  book  Book? @relation(fields: [bookId], references: [id])
+  rsvps Rsvp[]
+}
+
+model Poll {
+  id             String   @id @default(uuid())
+  theme          String?
+  opensAt        DateTime
+  closesAt       DateTime
+  votesPerMember Int      @default(2)
+  createdAt      DateTime @default(now())
+
+  books Book[] // the ballot (implicit many-to-many)
+  votes Vote[]
+}
+
+// one row per book a member picks on a ballot; resubmitting replaces them
+model Vote {
+  userId    String
+  pollId    String
+  bookId    String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+  poll Poll @relation(fields: [pollId], references: [id])
+  book Book @relation(fields: [bookId], references: [id])
+
+  @@id([userId, pollId, bookId])
+}
+
+enum RsvpStatus {
+  YES
+  NO
+  MAYBE
+}
+
+// join table: User <-> Meeting
+model Rsvp {
+  userId     String
+  meetingId  String
+  status     RsvpStatus
+  guestCount Int        @default(0)
+  dish       String?
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+
+  user    User    @relation(fields: [userId], references: [id])
+  meeting Meeting @relation(fields: [meetingId], references: [id])
+
+  @@id([userId, meetingId])
+}
