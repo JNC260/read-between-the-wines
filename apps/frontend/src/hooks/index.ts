@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { type MeetingListQuery } from "shared";
+import { type MeetingListQuery, type VenueDTO } from "shared";
 import {
   createMeeting,
   createVenue,
@@ -108,11 +108,20 @@ export const useVenue = (id: string) => {
   });
 };
 
+// Adds the new venue to the cached list straight away, so a dropdown can
+// select it before the refetch lands. Sorted by name like the API's list.
 export const useCreateVenue = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: createVenue,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["venues"] }),
+    onSuccess: (venue) => {
+      queryClient.setQueryData<VenueDTO[]>(["venues"], (venues) =>
+        venues
+          ? [...venues, venue].sort((a, b) => a.name.localeCompare(b.name))
+          : venues,
+      );
+      return queryClient.invalidateQueries({ queryKey: ["venues"] });
+    },
   });
 };
 

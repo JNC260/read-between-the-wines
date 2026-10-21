@@ -13,9 +13,23 @@ const when = new Intl.DateTimeFormat(undefined, {
   minute: "2-digit",
 });
 
-const EventItem = ({ event }: { event: MeetingDTO }) => (
+const EventItem = ({
+  event,
+  canEdit,
+}: {
+  event: MeetingDTO;
+  canEdit: boolean;
+}) => (
   <li>
     <h2>{event.title}</h2>
+    {canEdit && (
+      <Link
+        to={`/events/${event.id}/edit`}
+        aria-label={`Edit ${event.title}`}
+      >
+        Edit
+      </Link>
+    )}
     <p>
       <time dateTime={event.start.toISOString()}>
         {when.formatRange(event.start, event.end)}
@@ -46,7 +60,11 @@ const EventsPage = () => {
       {events && events.length > 0 && (
         <ul>
           {events.map((event) => (
-            <EventItem key={event.id} event={event} />
+            <EventItem
+              key={event.id}
+              event={event}
+              canEdit={!!session?.user.isAdmin}
+            />
           ))}
         </ul>
       )}

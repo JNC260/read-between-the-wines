@@ -64,10 +64,23 @@ describe("EventsPage", () => {
     expect(await screen.findByRole("link", { name: "New event" })).toBeTruthy();
   });
 
-  it("hides that link from other members", async () => {
-    vi.mocked(getMeetings).mockResolvedValue([]);
+  it("lets admins edit each event", async () => {
+    mockSession(testUser({ isAdmin: true }));
+    vi.mocked(getMeetings).mockResolvedValue([event()]);
     renderPage();
-    await screen.findByText(/Nothing scheduled yet/);
+    const link = await screen.findByRole("link", {
+      name: "Edit November: Piranesi",
+    });
+    expect(link.getAttribute("href")).toBe(
+      "/events/00000000-0000-4000-8000-000000000002/edit",
+    );
+  });
+
+  it("hides the new and edit links from other members", async () => {
+    vi.mocked(getMeetings).mockResolvedValue([event()]);
+    renderPage();
+    await screen.findByRole("heading", { name: "November: Piranesi" });
     expect(screen.queryByRole("link", { name: "New event" })).toBeNull();
+    expect(screen.queryByRole("link", { name: /^Edit/ })).toBeNull();
   });
 });

@@ -7,6 +7,7 @@ import { ApiError } from "../api";
 import RequireAuth from "../components/RequireAuth";
 import SignOutButton from "../components/SignOutButton";
 import { authClient } from "../lib/auth-client";
+import EditEventPage from "../pages/EditEventPage";
 import EventsPage from "../pages/EventsPage";
 import ForgotPasswordPage from "../pages/ForgotPasswordPage";
 import InvitePage from "../pages/InvitePage";
@@ -97,6 +98,14 @@ export function App() {
             element={
               <RequireAuth admin>
                 <NewEventPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/events/:id/edit"
+            element={
+              <RequireAuth admin>
+                <EditEventPage />
               </RequireAuth>
             }
           />
