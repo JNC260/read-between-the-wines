@@ -1,9 +1,9 @@
 import { type Request, type Response } from "express";
 import * as z from "zod";
-import { type CreateInviteDTO, InviteLookupSchema, InviteSchema } from "shared";
+import { CreatedInviteSchema, InviteLookupSchema, InviteSchema } from "shared";
 import { getUser } from "../middleware/auth";
 import {
-  inviteMember,
+  createInviteLink,
   listInvites,
   lookupInvite,
   revokeInvite,
@@ -14,12 +14,9 @@ export const inviteList = async (_req: Request, res: Response) => {
   res.json(z.encode(InviteSchema.array(), invites));
 };
 
-export const inviteCreate = async (
-  req: Request<Record<string, string>, unknown, CreateInviteDTO>,
-  res: Response,
-) => {
-  const invite = await inviteMember(req.body.email, getUser(req).id);
-  res.status(201).json(z.encode(InviteSchema, invite));
+export const inviteCreate = async (req: Request, res: Response) => {
+  const invite = await createInviteLink(getUser(req).id);
+  res.status(201).json(z.encode(CreatedInviteSchema, invite));
 };
 
 export const inviteRevoke = async (

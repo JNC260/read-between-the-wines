@@ -10,6 +10,7 @@ import { authClient } from "../lib/auth-client";
 import EditEventPage from "../pages/EditEventPage";
 import EventsPage from "../pages/EventsPage";
 import ForgotPasswordPage from "../pages/ForgotPasswordPage";
+import InviteMemberPage from "../pages/InviteMemberPage";
 import InvitePage from "../pages/InvitePage";
 import LandingPage from "../pages/LandingPage";
 import LoginPage from "../pages/LoginPage";
@@ -46,6 +47,9 @@ const Nav = () => {
           <Link to="/users">Users</Link>
         </li>
         <li>
+          <Link to="/invite-member">Invite a member</Link>
+        </li>
+        <li>
           <Link to="/events">Events</Link>
         </li>
         {session.user.isAdmin && (
@@ -76,6 +80,14 @@ export function App() {
             element={
               <RequireAuth>
                 <UsersPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/invite-member"
+            element={
+              <RequireAuth>
+                <InviteMemberPage />
               </RequireAuth>
             }
           />

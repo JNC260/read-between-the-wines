@@ -1,5 +1,6 @@
 import * as z from "zod";
 import {
+  CreatedInviteSchema,
   type CreateMeetingDTO,
   CreateMeetingSchema,
   type CreateVenueDTO,
@@ -91,6 +92,11 @@ export const getInvite = async (token: string) => {
   }
 };
 
+export const createInvite = () =>
+  apiFetch(`/api/invites`, CreatedInviteSchema, "Failed to create invite", {
+    method: "POST",
+  });
+
 export const signIn = async (body: { email: string; password: string }) => {
   return unwrap(await authClient.signIn.email(body), "Failed to sign in").user;
 };
@@ -99,8 +105,8 @@ export const signOut = async () => {
   unwrap(await authClient.signOut(), "Failed to sign out");
 };
 
-// Invited members are verified at sign-up but not signed in, so sign them in
-// straight after.
+// Doesn't sign them in: they have to verify their email first. The link in
+// that email signs them in and lands them on "/".
 export const signUpWithInvite = async (input: {
   token: string;
   email: string;
@@ -118,9 +124,9 @@ export const signUpWithInvite = async (input: {
     firstName: input.firstName,
     lastName: input.lastName,
     inviteToken: input.token,
+    callbackURL: "/",
   };
   unwrap(await authClient.signUp.email(body), "Failed to create account");
-  return signIn({ email: input.email, password: input.password });
 };
 
 export const requestPasswordReset = async (email: string) => {

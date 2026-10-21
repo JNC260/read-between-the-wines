@@ -1,6 +1,9 @@
 import { createHash, randomBytes } from "node:crypto";
-import { type InviteDTO, type InviteLookupDTO } from "shared";
-import { sendEmail } from "../lib/email";
+import {
+  type CreatedInviteDTO,
+  type InviteDTO,
+  type InviteLookupDTO,
+} from "shared";
 import { ConflictError, NotFoundError } from "../lib/errors";
 import { prisma } from "../lib/prisma";
 
@@ -11,24 +14,14 @@ const INVITE_LIFETIME_MS = 7 * 24 * 60 * 60 * 1000;
 const hashToken = (token: string) =>
   createHash("sha256").update(token).digest("hex");
 
-// Creates an invite without emailing it. Returns the raw token, which isn't
-// stored anywhere; the caller has to deliver it.
+// Creates an invite. Returns the raw token, which isn't stored anywhere; the
+// caller has to deliver it.
 export const createInvite = async (
-  rawEmail: string,
   invitedById: string | null,
 ): Promise<{ invite: InviteDTO; token: string }> => {
-  const email = rawEmail.trim().toLowerCase();
-  if (await prisma.user.findUnique({ where: { email } })) {
-    throw new ConflictError("That email already belongs to a member");
-  }
-
-  // Re-inviting someone replaces their old link, so only the newest works.
-  await prisma.invite.deleteMany({ where: { email, usedAt: null } });
-
   const token = randomBytes(32).toString("base64url");
   const invite = await prisma.invite.create({
     data: {
-      email,
       tokenHash: hashToken(token),
       expiresAt: new Date(Date.now() + INVITE_LIFETIME_MS),
       invitedById,
@@ -37,25 +30,17 @@ export const createInvite = async (
   return { invite, token };
 };
 
-// Creates the invite and emails the sign-up link. Awaited, unlike auth
-// emails: the admin should see an error if it didn't send, and can just
-// invite again.
-export const inviteMember = async (
-  email: string,
+// For a member to text or share. Anyone with the link can sign up once, so
+// it's only shown to the member who made it.
+export const createInviteLink = async (
   invitedById: string,
-): Promise<InviteDTO> => {
+): Promise<CreatedInviteDTO> => {
   const appUrl = process.env.BETTER_AUTH_URL;
   if (!appUrl) {
     throw new Error("BETTER_AUTH_URL is not set");
   }
-  const { invite, token } = await createInvite(email, invitedById);
-  const url = `${appUrl}/invite/${token}`;
-  await sendEmail({
-    to: invite.email,
-    subject: "You're invited to Read Between the Wines",
-    html: `<p>You've been invited to join our book club! <a href="${url}">Create your account</a>.</p><p>This link expires in 7 days.</p>`,
-  });
-  return invite;
+  const { invite, token } = await createInvite(invitedById);
+  return { ...invite, url: `${appUrl}/invite/${token}` };
 };
 
 export const listInvites = (): Promise<InviteDTO[]> => {
@@ -85,22 +70,13 @@ export const lookupInvite = async (token: string): Promise<InviteLookupDTO> => {
   return invite;
 };
 
-// Used by the sign-up hook in lib/auth.ts. The token proves the person can
-// read that inbox, and the email must match exactly, so an invite can't be
-// used to sign up as someone else.
-export const isInviteValid = async (
-  token: string,
-  email: string,
-): Promise<boolean> => {
+// Used by the sign-up hook in lib/auth.ts. A valid token only shows a member
+// vouched for this person; their email is checked by verification instead.
+export const isInviteValid = async (token: string): Promise<boolean> => {
   const invite = await prisma.invite.findUnique({
     where: { tokenHash: hashToken(token) },
   });
-  return (
-    !!invite &&
-    !invite.usedAt &&
-    invite.expiresAt > new Date() &&
-    invite.email === email.toLowerCase()
-  );
+  return !!invite && !invite.usedAt && invite.expiresAt > new Date();
 };
 
 export const markInviteUsed = async (token: string): Promise<void> => {
