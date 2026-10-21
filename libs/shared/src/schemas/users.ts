@@ -13,7 +13,7 @@ const isoDate = z.codec(z.iso.datetime(), z.date(), {
 export const UserStatusSchema = z.enum(["ACTIVE", "INACTIVE", "BANNED"]);
 
 // What any member may see about another member. z.encode() drops fields not
-// listed here, so isAdmin, emailVerified and active never leave the server.
+// listed here, so isAdmin and emailVerified never leave the server.
 export const UserSchema = z.object({
   id: z.uuidv4(),
   email: z.email(),

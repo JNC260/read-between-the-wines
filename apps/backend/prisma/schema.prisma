@@ -24,7 +24,6 @@ model User {
   image         String?
   firstName     String
   lastName      String
-  active        Boolean    @default(true)
   isAdmin       Boolean    @default(false)
   status        UserStatus @default(ACTIVE)
   createdAt     DateTime   @default(now())
