@@ -20,7 +20,8 @@ const ResetPasswordPage = () => {
     return (
       <div>
         <h1>Reset password</h1>
-        <p>This reset link is invalid or has expired. Request a new one.</p>
+        <p>This reset link is invalid or has expired.</p>
+        <Link to="/forgot-password">Request a new one</Link>
       </div>
     );
   }
@@ -30,7 +31,7 @@ const ResetPasswordPage = () => {
       <div>
         <h1>Reset password</h1>
         <p>Your password has been updated.</p>
-        <Link to="/">Back to home</Link>
+        <Link to="/login">Log in</Link>
       </div>
     );
   }
