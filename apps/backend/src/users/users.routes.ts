@@ -1,11 +1,9 @@
 import express from "express";
-import { CreateUserSchema } from "shared";
-import { validate } from "../middleware/validate";
-import { userCreate, userList } from "./users.controller";
+import { userList } from "./users.controller";
 
 const router = express.Router();
 
+// Sign-up lives at /api/auth/sign-up/email (Better Auth).
 router.get("/", userList);
-router.post("/", validate(CreateUserSchema), userCreate);
 
 export default router;
