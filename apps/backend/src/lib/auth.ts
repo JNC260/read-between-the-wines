@@ -2,6 +2,7 @@ import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { APIError } from "better-auth/api";
 import { UserStatus } from "../../generated/prisma/client";
+import { isInviteValid, markInviteUsed } from "../invites/invites.service";
 import { type Email, sendEmail } from "./email";
 import { prisma } from "./prisma";
 
@@ -32,6 +33,30 @@ export const auth = betterAuth({
     },
   },
   databaseHooks: {
+    // Sign-up is invite-only: the body must include the inviteToken from the
+    // invite email, for exactly this email. Runs for every way a user is
+    // created, so the create-admin script goes through it too.
+    user: {
+      create: {
+        before: async (user, ctx) => {
+          const token = ctx?.body?.inviteToken;
+          if (typeof token !== "string" || !(await isInviteValid(token, user.email))) {
+            // 400, not 403: Better Auth turns a 403 here into its fake
+            // "success" response for duplicate emails, hiding the error.
+            throw new APIError("BAD_REQUEST", {
+              message: "This invite link is invalid or has expired",
+              code: "INVITE_INVALID",
+            });
+          }
+          // The token arrived by email, so they've already proved they can
+          // read this inbox. No separate verification step needed.
+          return { data: { ...user, emailVerified: true } };
+        },
+        after: async (_user, ctx) => {
+          await markInviteUsed(ctx?.body?.inviteToken);
+        },
+      },
+    },
     session: {
       create: {
         // Banned users can't sign in at all. requireAuth also rejects them,
@@ -55,6 +80,11 @@ export const auth = betterAuth({
   emailVerification: {
     sendOnSignUp: true,
     sendVerificationEmail: async ({ user, url }) => {
+      // Better Auth sends this after every sign-up, but invited members are
+      // verified by the sign-up hook above.
+      if (user.emailVerified) {
+        return;
+      }
       sendInBackground({
         to: user.email,
         subject: "Verify your email for Read Between the Wines",
