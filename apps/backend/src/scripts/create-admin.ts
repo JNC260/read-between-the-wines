@@ -6,6 +6,7 @@
 // Safe to run again: an existing account is only made a verified admin.
 import { randomBytes } from "node:crypto";
 import { parseArgs } from "node:util";
+import { createInvite } from "../invites/invites.service";
 import { auth } from "../lib/auth";
 import { prisma } from "../lib/prisma";
 
@@ -41,18 +42,26 @@ const main = async () => {
     return;
   }
 
+  // Sign-up is invite-only, so invite ourselves first (no inviter: null).
+  const { token } = await createInvite(email, null);
+
   // Goes through Better Auth so the password is hashed its way and stored on
   // a "credential" Account row. A random password nobody knows is replaced
   // via the reset email below, so a real one never sits in a shell or file.
-  const { user } = await auth.api.signUpEmail({
-    body: {
-      email,
-      password: randomBytes(32).toString("base64url"),
-      name: `${firstName} ${lastName}`,
-      firstName,
-      lastName,
-    },
-  });
+  // The invite also marks the email verified.
+  //
+  // Built separately because Better Auth's types don't know about
+  // inviteToken, though the endpoint accepts extra fields and passes them to
+  // the sign-up hook. TypeScript only rejects unknown keys in inline objects.
+  const body = {
+    email,
+    password: randomBytes(32).toString("base64url"),
+    name: `${firstName} ${lastName}`,
+    firstName,
+    lastName,
+    inviteToken: token,
+  };
+  const { user } = await auth.api.signUpEmail({ body });
 
   // isAdmin can't be set through sign-up (input: false), so set it directly.
   await makeVerifiedAdmin(user.id);

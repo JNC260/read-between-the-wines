@@ -35,6 +35,7 @@ model User {
   ratings     Rating[]
   votes       Vote[]
   rsvps       Rsvp[]
+  invitesSent Invite[]
 }
 
 // Better Auth: one row per signed-in browser
@@ -73,6 +74,22 @@ model Account {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+}
+
+// Sign-up is invite-only. The emailed link carries a random token; only its
+// SHA-256 hash is stored, so a database leak doesn't expose usable links.
+model Invite {
+  id          String    @id @default(uuid())
+  email       String // lowercased; sign-up must use exactly this email
+  tokenHash   String    @unique
+  expiresAt   DateTime
+  usedAt      DateTime?
+  invitedById String? // null when created by the create-admin script
+  createdAt   DateTime  @default(now())
+
+  invitedBy User? @relation(fields: [invitedById], references: [id], onDelete: SetNull)
+
+  @@index([email])
 }
 
 // Better Auth: short-lived tokens, like email verification links
