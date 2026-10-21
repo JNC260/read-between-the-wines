@@ -7,10 +7,12 @@ import { ApiError } from "../api";
 import RequireAuth from "../components/RequireAuth";
 import SignOutButton from "../components/SignOutButton";
 import { authClient } from "../lib/auth-client";
+import EventsPage from "../pages/EventsPage";
 import ForgotPasswordPage from "../pages/ForgotPasswordPage";
 import InvitePage from "../pages/InvitePage";
 import LandingPage from "../pages/LandingPage";
 import LoginPage from "../pages/LoginPage";
+import NewEventPage from "../pages/NewEventPage";
 import ReactivatePage from "../pages/ReactivatePage";
 import ResetPasswordPage from "../pages/ResetPasswordPage";
 import UsersPage from "../pages/UsersPage";
@@ -48,6 +50,14 @@ const Nav = () => {
         <li>
           <Link to="/users">Users</Link>
         </li>
+        <li>
+          <Link to="/events">Events</Link>
+        </li>
+        {session.user.isAdmin && (
+          <li>
+            <Link to="/events/new">New event</Link>
+          </li>
+        )}
       </ul>
       <SignOutButton />
     </nav>
@@ -71,6 +81,22 @@ export function App() {
             element={
               <RequireAuth>
                 <UsersPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/events"
+            element={
+              <RequireAuth>
+                <EventsPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/events/new"
+            element={
+              <RequireAuth admin>
+                <NewEventPage />
               </RequireAuth>
             }
           />
