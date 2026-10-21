@@ -3,6 +3,7 @@
 
 import { Route, Routes, Link } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ApiError } from "../api";
 import RequireAuth from "../components/RequireAuth";
 import SignOutButton from "../components/SignOutButton";
 import { authClient } from "../lib/auth-client";
@@ -14,7 +15,17 @@ import ReactivatePage from "../pages/ReactivatePage";
 import ResetPasswordPage from "../pages/ResetPasswordPage";
 import UsersPage from "../pages/UsersPage";
 
-const queryClient = new QueryClient();
+// A 4xx (not found, signed out, forbidden) won't change on a retry, so show
+// it right away. Server and network errors still get React Query's default
+// three retries.
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: (failureCount, error) =>
+        !(error instanceof ApiError && error.status < 500) && failureCount < 3,
+    },
+  },
+});
 
 // Only shown to signed-in members.
 const Nav = () => {

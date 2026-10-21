@@ -1,5 +1,19 @@
 import * as z from "zod";
-import { InviteLookupSchema, UserSchema } from "shared";
+import {
+  type CreateMeetingDTO,
+  CreateMeetingSchema,
+  type CreateVenueDTO,
+  CreateVenueSchema,
+  InviteLookupSchema,
+  type MeetingListQuery,
+  MeetingSchema,
+  type UpdateMeetingDTO,
+  UpdateMeetingSchema,
+  type UpdateVenueDTO,
+  UpdateVenueSchema,
+  UserSchema,
+  VenueSchema,
+} from "shared";
 import { authClient } from "../lib/auth-client";
 
 // Better Auth's client returns { data, error } instead of throwing; React
@@ -14,37 +28,71 @@ const unwrap = <T>(
   return result.data as T;
 };
 
-// Our own API's errors look like { error: { code, message } }.
+// Our own API's errors look like { error: { code, message } }. The status
+// rides along so callers (and React Query's retry rule) can tell a 404 from
+// a server error.
+export class ApiError extends Error {
+  constructor(
+    readonly status: number,
+    message: string,
+  ) {
+    super(message);
+    this.name = "ApiError";
+  }
+}
+
 const throwApiError = async (response: Response, fallback: string) => {
   const body = await response.json().catch(() => null);
-  throw new Error(body?.error?.message ?? fallback);
+  throw new ApiError(response.status, body?.error?.message ?? fallback);
 };
 
-export const getUsersList = async () => {
-  const url = `/api/users`;
-  const response = await fetch(url);
+// Fetches from our API and decodes the response with `schema`, so dates come
+// back as Date objects. Pass `send.schema` and `send.body` to encode a
+// request body the other way.
+const apiFetch = async <T extends z.ZodType>(
+  url: string,
+  schema: T,
+  fallback: string,
+  send?: { method: string; schema?: z.ZodType; body?: unknown },
+): Promise<z.output<T>> => {
+  const response = await fetch(
+    url,
+    send && {
+      method: send.method,
+      ...(send.schema && {
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(z.encode(send.schema, send.body)),
+      }),
+    },
+  );
   if (!response.ok) {
-    throw new Error("Failed to fetch user list");
+    await throwApiError(response, fallback);
   }
-  return z.decode(UserSchema.array(), await response.json());
+  return z.decode(schema, await response.json());
 };
+
+export const getUsersList = () =>
+  apiFetch(`/api/users`, UserSchema.array(), "Failed to fetch user list");
 
 // Returns null for an invalid or expired invite, so the page can show a
-// friendly message instead of an error (and React Query doesn't retry).
+// friendly message instead of an error.
 export const getInvite = async (token: string) => {
-  const response = await fetch(`/api/invites/${encodeURIComponent(token)}`);
-  if (response.status === 404) {
-    return null;
+  try {
+    return await apiFetch(
+      `/api/invites/${encodeURIComponent(token)}`,
+      InviteLookupSchema,
+      "Failed to check invite",
+    );
+  } catch (err) {
+    if (err instanceof ApiError && err.status === 404) {
+      return null;
+    }
+    throw err;
   }
-  if (!response.ok) {
-    await throwApiError(response, "Failed to check invite");
-  }
-  return z.decode(InviteLookupSchema, await response.json());
 };
 
 export const signIn = async (body: { email: string; password: string }) => {
-  return unwrap(await authClient.signIn.email(body), "Failed to sign in")
-    .user;
+  return unwrap(await authClient.signIn.email(body), "Failed to sign in").user;
 };
 
 export const signOut = async () => {
@@ -93,8 +141,69 @@ export const resetPassword = async (body: {
 };
 
 export const reactivateAccount = async () => {
-  const response = await fetch(`/api/users/me/reactivate`, { method: "POST" });
-  if (!response.ok) {
-    await throwApiError(response, "Failed to reactivate account");
-  }
+  await apiFetch(
+    `/api/users/me/reactivate`,
+    UserSchema,
+    "Failed to reactivate account",
+    { method: "POST" },
+  );
 };
+
+export const getMeetings = (when?: MeetingListQuery["when"]) => {
+  const query = when ? `?when=${when}` : "";
+  return apiFetch(
+    `/api/meetings${query}`,
+    MeetingSchema.array(),
+    "Failed to fetch meetings",
+  );
+};
+
+export const getMeeting = (id: string) =>
+  apiFetch(
+    `/api/meetings/${encodeURIComponent(id)}`,
+    MeetingSchema,
+    "Failed to fetch meeting",
+  );
+
+export const createMeeting = (body: CreateMeetingDTO) =>
+  apiFetch(`/api/meetings`, MeetingSchema, "Failed to create meeting", {
+    method: "POST",
+    schema: CreateMeetingSchema,
+    body,
+  });
+
+export const updateMeeting = ({
+  id,
+  ...body
+}: UpdateMeetingDTO & { id: string }) =>
+  apiFetch(
+    `/api/meetings/${encodeURIComponent(id)}`,
+    MeetingSchema,
+    "Failed to update meeting",
+    { method: "PATCH", schema: UpdateMeetingSchema, body },
+  );
+
+export const getVenues = () =>
+  apiFetch(`/api/venues`, VenueSchema.array(), "Failed to fetch venues");
+
+export const getVenue = (id: string) =>
+  apiFetch(
+    `/api/venues/${encodeURIComponent(id)}`,
+    VenueSchema,
+    "Failed to fetch venue",
+  );
+
+export const createVenue = (body: CreateVenueDTO) =>
+  apiFetch(`/api/venues`, VenueSchema, "Failed to create venue", {
+    method: "POST",
+    schema: CreateVenueSchema,
+    body,
+  });
+
+export const updateVenue = ({ id, ...body }: UpdateVenueDTO & { id: string }) =>
+  apiFetch(
+    `/api/venues/${encodeURIComponent(id)}`,
+    VenueSchema,
+    "Failed to update venue",
+    { method: "PATCH", schema: UpdateVenueSchema, body },
+  );
