@@ -102,20 +102,31 @@ model Verification {
   @@index([identifier])
 }
 
+// Book data comes from Open Library (looked up from a pasted Goodreads link)
+// or from the manual form. Open Library groups every edition of a book under
+// one work, so openLibraryWorkId is what stops duplicates; manual entries
+// have no work id and are checked against normalizedTitle in app code.
 model Book {
-  id            String   @id @default(uuid())
-  title         String
-  author        String
-  yearPublished Int?
-  genres        String[]
-  coverUrl      String?
-  createdAt     DateTime @default(now())
+  id                String   @id @default(uuid())
+  title             String
+  normalizedTitle   String // set by books.service via normalizeTitle(); never written directly
+  author            String
+  yearPublished     Int?
+  genres            String[]
+  coverUrl          String?
+  synopsis          String?
+  pageCount         Int?
+  openLibraryWorkId String?  @unique // e.g. "OL18012166W"
+  goodreadsUrl      String? // Goodreads ids are per edition, so not unique
+  createdAt         DateTime @default(now())
 
   suggestions Suggestion[]
   ratings     Rating[]
   meeting     Meeting?
   polls       Poll[]
   votes       Vote[]
+
+  @@index([normalizedTitle])
 }
 
 // join table: User <-> Book
