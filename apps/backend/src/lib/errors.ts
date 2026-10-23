@@ -44,3 +44,11 @@ export class ConflictError extends AppError {
     super(409, "CONFLICT", message);
   }
 }
+
+// 502: a service we depend on (like Open Library) failed or sent something
+// we couldn't read. Not the client's fault, but not our bug either.
+export class BadGatewayError extends AppError {
+  constructor(message = "An outside service is unavailable") {
+    super(502, "BAD_GATEWAY", message);
+  }
+}
