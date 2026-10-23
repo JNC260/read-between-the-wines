@@ -1,6 +1,13 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+import {
+  keepPreviousData,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { type MeetingListQuery, type VenueDTO } from "shared";
 import {
+  createBookSuggestion,
   createInvite,
   createMeeting,
   createVenue,
@@ -13,6 +20,7 @@ import {
   reactivateAccount,
   requestPasswordReset,
   resetPassword,
+  searchBooks,
   signIn,
   signOut,
   signUpWithInvite,
@@ -140,5 +148,36 @@ export const useUpdateVenue = () => {
         queryClient.invalidateQueries({ queryKey: ["venues"] }),
         queryClient.invalidateQueries({ queryKey: ["meetings"] }),
       ]),
+  });
+};
+
+// The value, once it has stopped changing for `ms`. For search-as-you-type,
+// so each keystroke doesn't send a request.
+export const useDebouncedValue = <T>(value: T, ms: number): T => {
+  const [debounced, setDebounced] = useState(value);
+  useEffect(() => {
+    const timer = setTimeout(() => setDebounced(value), ms);
+    return () => clearTimeout(timer);
+  }, [value, ms]);
+  return debounced;
+};
+
+// Pass "" to search for nothing. Keeps showing the previous results while
+// the next search loads, so the list doesn't flash empty between keystrokes.
+export const useBookSearch = (q: string) => {
+  return useQuery({
+    queryKey: ["books", "search", q],
+    queryFn: () => searchBooks(q),
+    enabled: q !== "",
+    placeholderData: keepPreviousData,
+  });
+};
+
+// Searches carry "already suggested" flags, so they go stale too.
+export const useCreateBookSuggestion = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: createBookSuggestion,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["books"] }),
   });
 };

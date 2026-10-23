@@ -1,8 +1,10 @@
 import {
   ApiError,
+  createBookSuggestion,
   createMeeting,
   getInvite,
   getMeetings,
+  searchBooks,
   updateVenue,
 } from ".";
 
@@ -105,5 +107,39 @@ describe("getInvite", () => {
   it("still throws other errors", async () => {
     respond(500, { error: { code: "INTERNAL", message: "Boom" } });
     await expect(getInvite("token")).rejects.toThrow("Boom");
+  });
+});
+
+describe("books API", () => {
+  beforeEach(() => fetchMock.mockReset());
+
+  it("encodes the search text, which may be a whole URL", async () => {
+    respond(200, []);
+    await searchBooks("https://www.goodreads.com/book/show/5907?a=1&b=2");
+    expect(fetchMock.mock.calls[0][0]).toBe(
+      "/api/books/search?q=https%3A%2F%2Fwww.goodreads.com%2Fbook%2Fshow%2F5907%3Fa%3D1%26b%3D2",
+    );
+  });
+
+  it("posts a suggestion and decodes the saved book", async () => {
+    respond(201, {
+      id: "00000000-0000-4000-8000-000000000004",
+      title: "The Hobbit",
+      author: "J.R.R. Tolkien",
+      yearPublished: 1937,
+      genres: [],
+      coverUrl: null,
+      synopsis: null,
+      pageCount: 310,
+      openLibraryWorkId: "OL27482W",
+      goodreadsUrl: null,
+      createdAt: "2026-10-22T12:00:00.000Z",
+    });
+    const book = await createBookSuggestion({ openLibraryWorkId: "OL27482W" });
+    const [url, init] = fetchMock.mock.calls[0];
+    expect(url).toBe("/api/books/suggestions");
+    expect(init.method).toBe("POST");
+    expect(JSON.parse(init.body)).toEqual({ openLibraryWorkId: "OL27482W" });
+    expect(book.createdAt).toEqual(new Date("2026-10-22T12:00:00.000Z"));
   });
 });

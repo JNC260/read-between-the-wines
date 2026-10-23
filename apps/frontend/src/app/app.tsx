@@ -17,6 +17,7 @@ import LoginPage from "../pages/LoginPage";
 import NewEventPage from "../pages/NewEventPage";
 import ReactivatePage from "../pages/ReactivatePage";
 import ResetPasswordPage from "../pages/ResetPasswordPage";
+import SuggestBookPage from "../pages/SuggestBookPage";
 import UsersPage from "../pages/UsersPage";
 
 // A 4xx (not found, signed out, forbidden) won't change on a retry, so show
@@ -51,6 +52,9 @@ const Nav = () => {
         </li>
         <li>
           <Link to="/events">Events</Link>
+        </li>
+        <li>
+          <Link to="/books/suggest">Suggest a book</Link>
         </li>
         {session.user.isAdmin && (
           <li>
@@ -112,6 +116,14 @@ export function App() {
             element={
               <RequireAuth admin>
                 <EditEventPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/books/suggest"
+            element={
+              <RequireAuth>
+                <SuggestBookPage />
               </RequireAuth>
             }
           />
