@@ -114,7 +114,9 @@ const toCandidate = (
   doc: SearchDoc,
   flags: { alreadySuggested: boolean; suggestedByMe: boolean },
 ): BookCandidateDTO => {
-  // TODO: author_name is an array (possibly missing). Missing numbers
-  // become null, since the DTO uses null, not undefined.
+  // TODO: author_name is an array (possibly missing): join it, or use
+  // "Unknown author" when it's missing or empty (the page shows "by
+  // <author>"). Missing numbers become null, since the DTO uses null, not
+  // undefined.
   throw new Error("Not implemented");
 };

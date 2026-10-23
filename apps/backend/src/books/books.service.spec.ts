@@ -48,6 +48,7 @@ describe("searchBooks", () => {
   it.todo("returns [] for a link with no slug and no id match");
   it.todo("searches by title for typed text");
   it.todo("maps docs to candidates: work id, joined authors, cover URL, nulls");
+  it.todo("uses \"Unknown author\" when a doc has no authors");
   it.todo("flags works already in the Book table as alreadySuggested");
   it.todo("flags works this user suggested as suggestedByMe");
   it.todo("sends the User-Agent header");
