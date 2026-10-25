@@ -22,7 +22,9 @@ vi.stubGlobal("fetch", fetchMock);
 
 // Queue the next fetch response, in call order.
 const respond = (body: unknown, status = 200) =>
-  fetchMock.mockResolvedValueOnce(new Response(JSON.stringify(body), { status }));
+  fetchMock.mockResolvedValueOnce(
+    new Response(JSON.stringify(body), { status }),
+  );
 
 // The URL of the nth fetch call, for checking what was searched.
 const fetchedUrl = (n = 0) => new URL(String(fetchMock.mock.calls[n][0]));
@@ -48,7 +50,7 @@ describe("searchBooks", () => {
   it.todo("returns [] for a link with no slug and no id match");
   it.todo("searches by title for typed text");
   it.todo("maps docs to candidates: work id, joined authors, cover URL, nulls");
-  it.todo("uses \"Unknown author\" when a doc has no authors");
+  it.todo('uses "Unknown author" when a doc has no authors');
   it.todo("flags works already in the Book table as alreadySuggested");
   it.todo("flags works this user suggested as suggestedByMe");
   it.todo("sends the User-Agent header");
