@@ -1,5 +1,9 @@
 import * as z from "zod";
 import {
+  BookCandidateSchema,
+  BookSchema,
+  type CreateBookSuggestionDTO,
+  CreateBookSuggestionSchema,
   CreatedInviteSchema,
   type CreateMeetingDTO,
   CreateMeetingSchema,
@@ -213,3 +217,18 @@ export const updateVenue = ({ id, ...body }: UpdateVenueDTO & { id: string }) =>
     "Failed to update venue",
     { method: "PATCH", schema: UpdateVenueSchema, body },
   );
+
+// q is a Goodreads link or a title; the server works out which.
+export const searchBooks = (q: string) =>
+  apiFetch(
+    `/api/books/search?q=${encodeURIComponent(q)}`,
+    BookCandidateSchema.array(),
+    "Failed to search for books",
+  );
+
+export const createBookSuggestion = (body: CreateBookSuggestionDTO) =>
+  apiFetch(`/api/books/suggestions`, BookSchema, "Failed to suggest book", {
+    method: "POST",
+    schema: CreateBookSuggestionSchema,
+    body,
+  });

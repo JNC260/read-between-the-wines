@@ -65,12 +65,21 @@
       ],
       "executor": "nx:noop"
     },
+    "db": {
+      "executor": "nx:run-commands",
+      "cache": false,
+      "options": {
+        "cwd": "{workspaceRoot}",
+        "command": "docker compose up -d --wait"
+      }
+    },
     "serve": {
       "continuous": true,
       "executor": "@nx/js:node",
       "defaultConfiguration": "development",
       "dependsOn": [
-        "build"
+        "build",
+        "db"
       ],
       "options": {
         "buildTarget": "backend:build",

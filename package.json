@@ -1,4 +1,7 @@
 {
+  "scripts": {
+    "dev": "nx run-many -t serve -p backend frontend"
+  },
   "dependencies": {
     "@prisma/adapter-pg": "^7.10.1",
     "@prisma/client": "^7.10.1",
