@@ -1,18 +1,11 @@
-/* eslint-disable @typescript-eslint/no-unused-vars -- scaffold; delete once the TODOs are done */
 import {
   type BookCandidateDTO,
   type BookDTO,
   type CreateBookSuggestionDTO,
   normalizeTitle,
-  openLibraryWorkId,
   parseGoodreadsUrl,
 } from "shared";
-import {
-  BadGatewayError,
-  BadRequestError,
-  ConflictError,
-  NotFoundError,
-} from "../lib/errors";
+import { BadGatewayError, ConflictError, NotFoundError } from "../lib/errors";
 import { prisma } from "../lib/prisma";
 import {
   OPEN_LIBRARY_URL,
@@ -23,19 +16,21 @@ import {
   type WorkDescription,
   WorkDescriptionSchema,
 } from "./open-library";
-import { Prisma, Suggestion } from "../../generated/prisma/client";
+import { Prisma, type Suggestion } from "../../generated/prisma/client";
 
 // How the three "search-ish" functions fit together:
 //
-//   searchBooks        Exported, called by the controller (GET /books/search?q=).
-//                      The smart one: works out whether q is a Goodreads link or
-//                      typed text, picks the query, checks our Book table, and
-//                      maps results with toCandidate().
-//   searchOpenLibrary  Plain HTTP call to /search.json. Returns docs with title,
-//                      author, year, cover, pages and key, but NO synopsis.
-//                      Used by searchBooks and createSuggestion.
-//   fetchWork          Plain HTTP call to /works/<id>.json. Only used for the
-//                      synopsis (description). Used by createSuggestion.
+//   searchBooks           Exported, called by the controller (GET
+//                         /books/search?q=). The smart one: works out whether
+//                         q is a Goodreads link or typed text, picks the
+//                         query, checks our Book table, and maps results with
+//                         toCandidate().
+//   searchOpenLibrary     Plain HTTP call to /search.json. Returns docs with
+//                         title, author, year, cover, pages and key, but NO
+//                         synopsis. Used by searchBooks and createSuggestion.
+//   fetchWorkDescription  Plain HTTP call to /works/<id>.json. Only used for
+//                         the synopsis (description). Used by
+//                         createSuggestion.
 //
 // All Goodreads-link parsing happens in searchBooks. createSuggestion never
 // parses the link: by then the member has already picked a candidate.
@@ -85,11 +80,8 @@ export const searchBooks = async (
   const candidates = searchResult.map((sr) => {
     const workId = workIdFromKey(sr.key);
     const alreadySuggested = existingMap.has(workId);
-    const suggestedByMe = existingMap.get(workId)?.length ?? 0 > 0;
-    return toCandidate(sr, {
-      alreadySuggested,
-      suggestedByMe: Boolean(suggestedByMe),
-    });
+    const suggestedByMe = (existingMap.get(workId)?.length ?? 0) > 0;
+    return toCandidate(sr, { alreadySuggested, suggestedByMe });
   });
   return candidates;
 };
@@ -138,8 +130,9 @@ export const createSuggestion = async (
       data: { userId, bookId: book.id },
     });
   } catch (e) {
-    if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002")
+    if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002") {
       throw new ConflictError();
+    }
 
     throw e;
   }
@@ -275,7 +268,7 @@ const toCandidate = (
 
   const bookCandidate: BookCandidateDTO = {
     openLibraryWorkId,
-    title: normalizeTitle(doc.title),
+    title: doc.title,
     author,
     yearPublished: doc.first_publish_year ?? null,
     coverUrl,
