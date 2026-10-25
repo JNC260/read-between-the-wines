@@ -6,7 +6,7 @@ import {
   workWithoutDescription,
   workWithStringDescription,
 } from "./open-library.fixtures";
-import { SearchResponseSchema, WorkSchema } from "./open-library";
+import { SearchResponseSchema, WorkDescriptionSchema } from "./open-library";
 
 describe("SearchResponseSchema", () => {
   it("parses full docs and drops fields we don't use", () => {
@@ -29,20 +29,20 @@ describe("SearchResponseSchema", () => {
   });
 });
 
-describe("WorkSchema", () => {
+describe("WorkDescriptionSchema", () => {
   it("parses a description that is a string", () => {
-    expect(WorkSchema.parse(workWithStringDescription)).toEqual({
+    expect(WorkDescriptionSchema.parse(workWithStringDescription)).toEqual({
       description: workWithStringDescription.description,
     });
   });
 
   it("parses a description that is an object, keeping only value", () => {
-    expect(WorkSchema.parse(workWithObjectDescription)).toEqual({
+    expect(WorkDescriptionSchema.parse(workWithObjectDescription)).toEqual({
       description: { value: workWithObjectDescription.description.value },
     });
   });
 
   it("parses a work without a description", () => {
-    expect(WorkSchema.parse(workWithoutDescription)).toEqual({});
+    expect(WorkDescriptionSchema.parse(workWithoutDescription)).toEqual({});
   });
 });

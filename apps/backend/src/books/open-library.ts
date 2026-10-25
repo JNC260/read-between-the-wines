@@ -39,10 +39,10 @@ export const SearchResponseSchema = z.object({
 
 // GET /works/<id>.json. Only the synopsis is read from here. description is
 // a plain string on some works and { type, value } on others.
-export const WorkSchema = z.object({
+export const WorkDescriptionSchema = z.object({
   description: z
     .union([z.string(), z.object({ value: z.string() })])
     .optional(),
 });
 
-export type Work = z.infer<typeof WorkSchema>;
+export type WorkDescription = z.infer<typeof WorkDescriptionSchema>;
