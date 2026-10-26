@@ -56,11 +56,16 @@ export const CreateBookSuggestionSchema = z.object({
   goodreadsUrl: z
     .string()
     .trim()
-    .refine((url) => parseGoodreadsUrl(url) !== null, "Not a Goodreads book link")
+    .refine(
+      (url) => parseGoodreadsUrl(url) !== null,
+      "Not a Goodreads book link",
+    )
     .optional(),
 });
 
-export type CreateBookSuggestionDTO = z.infer<typeof CreateBookSuggestionSchema>;
+export type CreateBookSuggestionDTO = z.infer<
+  typeof CreateBookSuggestionSchema
+>;
 
 // Just enough to name a member next to a book; no email.
 export const SuggesterSchema = z.object({

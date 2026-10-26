@@ -3,6 +3,7 @@ import * as z from "zod";
 import { type CreateMeetingDTO, CreateMeetingSchema, type MeetingDTO } from "shared";
 import NewVenueFields from "./NewVenueFields";
 import { useBookSuggestions, useVenues } from "../hooks";
+import { toLocalInput } from "../lib/datetime-local";
 
 // The dropdown value that opens the new venue fields. Never a real id,
 // since those are UUIDs.
@@ -16,12 +17,6 @@ export type EventValues = Required<
     "title" | "start" | "end" | "venueId" | "bookId" | "description"
   >
 >;
-
-// datetime-local wants "YYYY-MM-DDTHH:mm" in local time, with no zone.
-const pad = (n: number) => String(n).padStart(2, "0");
-const toLocalInput = (d: Date) =>
-  `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}` +
-  `T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 
 // Shared by the new and edit event pages. Pass `event` to pre-fill it; it's
 // only read on the first render, so render the form once the event loads.

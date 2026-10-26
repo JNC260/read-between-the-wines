@@ -5,15 +5,19 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { type MeetingListQuery, type VenueDTO } from "shared";
+import { type MeetingListQuery, type PollDTO, type VenueDTO } from "shared";
 import {
+  castVotes,
   createBookSuggestion,
+  createPoll,
   createInvite,
   createMeeting,
   createVenue,
   getBookSuggestions,
+  getCurrentPoll,
   getMeeting,
   getMeetings,
+  getPoll,
   getReadBooks,
   rateBook,
   getVenue,
@@ -217,5 +221,46 @@ export const useCreateBookSuggestion = () => {
   return useMutation({
     mutationFn: createBookSuggestion,
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["books"] }),
+  });
+};
+
+// Keys start with "polls": ["polls", "current"] and ["polls", id].
+// Pass enabled: false while signed out, since the API would only say 401.
+export const useCurrentPoll = ({ enabled = true } = {}) => {
+  return useQuery({
+    queryKey: ["polls", "current"],
+    queryFn: getCurrentPoll,
+    enabled,
+  });
+};
+
+export const usePoll = (id: string) => {
+  return useQuery({
+    queryKey: ["polls", id],
+    queryFn: () => getPoll(id),
+  });
+};
+
+export const useCreatePoll = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: createPoll,
+    onSuccess: (poll) => {
+      queryClient.setQueryData<PollDTO>(["polls", poll.id], poll);
+      return queryClient.invalidateQueries({ queryKey: ["polls", "current"] });
+    },
+  });
+};
+
+// The response is the updated poll, so the poll page updates without a
+// refetch. The landing page's "you've voted" message reads the current poll.
+export const useCastVotes = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: castVotes,
+    onSuccess: (poll) => {
+      queryClient.setQueryData<PollDTO>(["polls", poll.id], poll);
+      return queryClient.invalidateQueries({ queryKey: ["polls", "current"] });
+    },
   });
 };

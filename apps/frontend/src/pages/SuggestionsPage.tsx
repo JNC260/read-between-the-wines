@@ -1,6 +1,13 @@
-import { Link, useSearchParams } from "react-router-dom";
-import { type SuggestedBookDTO, type SuggesterDTO } from "shared";
-import { useBookSuggestions } from "../hooks";
+import { useState } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import {
+  MAX_POLL_BOOKS,
+  MIN_POLL_BOOKS,
+  type SuggestedBookDTO,
+  type SuggesterDTO,
+} from "shared";
+import { useBookSuggestions, useCurrentPoll } from "../hooks";
+import { authClient } from "../lib/auth-client";
 
 type SortOrder = "asc" | "desc";
 
@@ -92,8 +99,37 @@ const details = (book: SuggestedBookDTO) =>
     .filter(Boolean)
     .join(" · ");
 
-const SuggestionItem = ({ book }: { book: SuggestedBookDTO }) => (
+const closesOn = new Intl.DateTimeFormat(undefined, {
+  dateStyle: "medium",
+  timeStyle: "short",
+});
+
+// Admins get a checkbox per book when they're able to start a poll.
+type Selection = {
+  checked: boolean;
+  disabled: boolean;
+  onChange: () => void;
+};
+
+const SuggestionItem = ({
+  book,
+  onBallot,
+  selection,
+}: {
+  book: SuggestedBookDTO;
+  onBallot: boolean;
+  selection?: Selection;
+}) => (
   <li>
+    {selection && (
+      <input
+        type="checkbox"
+        aria-label={`Select ${book.title} for a poll`}
+        checked={selection.checked}
+        disabled={selection.disabled}
+        onChange={selection.onChange}
+      />
+    )}
     {book.coverUrl && (
       <img src={book.coverUrl} alt="" width={60} loading="lazy" />
     )}
@@ -107,13 +143,38 @@ const SuggestionItem = ({ book }: { book: SuggestedBookDTO }) => (
         </time>
       </p>
       {book.suggestedByMe && <p>You suggested this.</p>}
+      {onBallot && <p>On the ballot</p>}
     </div>
   </li>
 );
 
 const SuggestionsPage = () => {
   const { data: books, isPending, error } = useBookSuggestions();
+  const { data: session } = authClient.useSession();
+  const { data: currentPoll } = useCurrentPoll();
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
+  // Ids in the order they were picked. Not kept in the URL like the sort,
+  // since a poll is created straight after picking.
+  const [selected, setSelected] = useState<string[]>([]);
+
+  const ballot = new Set(currentPoll?.books.map((b) => b.id));
+  // Only one poll can be open, so there's nothing to select until it closes.
+  const canStartPoll = !!session?.user.isAdmin && currentPoll === null;
+  const full = selected.length >= MAX_POLL_BOOKS;
+
+  const toggle = (id: string) =>
+    setSelected((ids) =>
+      ids.includes(id) ? ids.filter((i) => i !== id) : [...ids, id],
+    );
+
+  const selectionFor = (id: string): Selection | undefined => {
+    if (!canStartPoll) {
+      return undefined;
+    }
+    const checked = selected.includes(id);
+    return { checked, disabled: full && !checked, onChange: () => toggle(id) };
+  };
 
   const sortParam = searchParams.get("sort");
   const field: SortField = isSortField(sortParam) ? sortParam : "suggestedAt";
@@ -161,6 +222,30 @@ const SuggestionsPage = () => {
         </div>
       )}
 
+      {session?.user.isAdmin && currentPoll && (
+        <p>
+          <Link to={`/polls/${currentPoll.id}`}>A poll is open</Link> until{" "}
+          {closesOn.format(currentPoll.closesAt)}. You can start the next one
+          once it closes.
+        </p>
+      )}
+      {canStartPoll && books && books.length >= MIN_POLL_BOOKS && (
+        <div>
+          <p aria-live="polite">
+            {selected.length} of {MAX_POLL_BOOKS} selected
+            {selected.length < MIN_POLL_BOOKS &&
+              ` (pick at least ${MIN_POLL_BOOKS})`}
+          </p>
+          <button
+            type="button"
+            disabled={selected.length < MIN_POLL_BOOKS}
+            onClick={() => navigate(`/polls/new?books=${selected.join(",")}`)}
+          >
+            Create a poll from selection
+          </button>
+        </div>
+      )}
+
       {isPending && <p>Loading...</p>}
       {error && <p role="alert">{error.message}</p>}
       {books?.length === 0 && (
@@ -169,7 +254,12 @@ const SuggestionsPage = () => {
       {books && books.length > 0 && (
         <ul aria-label="Suggested books">
           {sortBooks(books, field, order).map((book) => (
-            <SuggestionItem key={book.id} book={book} />
+            <SuggestionItem
+              key={book.id}
+              book={book}
+              onBallot={ballot.has(book.id)}
+              selection={selectionFor(book.id)}
+            />
           ))}
         </ul>
       )}
