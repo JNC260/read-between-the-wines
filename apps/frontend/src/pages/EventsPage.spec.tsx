@@ -23,6 +23,7 @@ const event = (overrides: Partial<MeetingDTO> = {}): MeetingDTO => ({
     state: "IL",
     zip: "62701",
   },
+  book: null,
   ...overrides,
 });
 
@@ -47,6 +48,30 @@ describe("EventsPage", () => {
     ).toBeTruthy();
     expect(screen.getByText("Ada's house, 1 Main St, Springfield")).toBeTruthy();
     expect(screen.getByText("Bring a snack")).toBeTruthy();
+  });
+
+  it("shows the book once one is assigned", async () => {
+    vi.mocked(getMeetings).mockResolvedValue([
+      event({
+        bookId: "00000000-0000-4000-8000-000000000010",
+        book: {
+          id: "00000000-0000-4000-8000-000000000010",
+          title: "Slewfoot",
+          author: "Brom",
+          yearPublished: 2021,
+          genres: [],
+          coverUrl: null,
+          synopsis: null,
+          pageCount: 336,
+          openLibraryWorkId: null,
+          goodreadsUrl: null,
+          createdAt: new Date("2026-10-01T00:00:00Z"),
+        },
+      }),
+    ]);
+    renderPage();
+    const line = await screen.findByText(/Reading/);
+    expect(line.textContent).toBe("Reading Slewfoot by Brom");
   });
 
   it("says when the venue hasn't been picked", async () => {

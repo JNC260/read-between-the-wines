@@ -2,16 +2,19 @@ import { type FormEvent, useState } from "react";
 import * as z from "zod";
 import { type CreateMeetingDTO, CreateMeetingSchema, type MeetingDTO } from "shared";
 import NewVenueFields from "./NewVenueFields";
-import { useVenues } from "../hooks";
+import { useBookSuggestions, useVenues } from "../hooks";
 
 // The dropdown value that opens the new venue fields. Never a real id,
 // since those are UUIDs.
 const NEW_VENUE = "new";
 
-// What the form sends: every field, so an edit can also clear the venue or
-// description (null) rather than leave them as they were.
+// What the form sends: every field, so an edit can also clear the venue,
+// book or description (null) rather than leave them as they were.
 export type EventValues = Required<
-  Pick<CreateMeetingDTO, "title" | "start" | "end" | "venueId" | "description">
+  Pick<
+    CreateMeetingDTO,
+    "title" | "start" | "end" | "venueId" | "bookId" | "description"
+  >
 >;
 
 // datetime-local wants "YYYY-MM-DDTHH:mm" in local time, with no zone.
@@ -38,10 +41,12 @@ const EventForm = ({
   pendingLabel: string;
 }) => {
   const venues = useVenues();
+  const suggestions = useBookSuggestions();
   const [title, setTitle] = useState(event?.title ?? "");
   const [start, setStart] = useState(event ? toLocalInput(event.start) : "");
   const [end, setEnd] = useState(event ? toLocalInput(event.end) : "");
   const [venueId, setVenueId] = useState(event?.venueId ?? "");
+  const [bookId, setBookId] = useState(event?.bookId ?? "");
   const [description, setDescription] = useState(event?.description ?? "");
   const [invalid, setInvalid] = useState<string | null>(null);
 
@@ -58,6 +63,7 @@ const EventForm = ({
       start: new Date(start),
       end: new Date(end),
       venueId: venueId || null,
+      bookId: bookId || null,
       description: description || null,
     };
     // Check here too: the API only says "Invalid request", and this gives
@@ -127,6 +133,31 @@ const EventForm = ({
           onCancel={() => setVenueId("")}
         />
       )}
+      <div>
+        <label htmlFor="book">Book</label>
+        {/* Suggestions leave out books already on a meeting, so this
+            meeting's own book is added back as its own option. */}
+        <select
+          id="book"
+          value={bookId}
+          onChange={(e) => setBookId(e.target.value)}
+        >
+          <option value="">Not decided yet</option>
+          {event?.book && (
+            <option value={event.book.id}>
+              {event.book.title} by {event.book.author}
+            </option>
+          )}
+          {[...(suggestions.data ?? [])]
+            .sort((a, b) => a.title.localeCompare(b.title))
+            .map((book) => (
+              <option key={book.id} value={book.id}>
+                {book.title} by {book.author}
+              </option>
+            ))}
+        </select>
+        {suggestions.error && <p role="alert">{suggestions.error.message}</p>}
+      </div>
       <div>
         <label htmlFor="description">Description</label>
         <textarea

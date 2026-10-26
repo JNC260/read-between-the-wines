@@ -1,10 +1,11 @@
 import * as z from "zod";
+import { BookSchema } from "./books";
 import { isoDate } from "./dates";
 import { VenueSchema } from "./venues";
 
 const requiredText = z.string().trim().min(1);
 
-// The venue comes along so lists and detail pages don't need a second request.
+// The venue and book come along so lists and detail pages don't need a second request.
 export const MeetingSchema = z.object({
   id: z.uuidv4(),
   title: z.string(),
@@ -14,6 +15,7 @@ export const MeetingSchema = z.object({
   venueId: z.uuidv4().nullable(),
   bookId: z.uuidv4().nullable(),
   venue: VenueSchema.nullable(),
+  book: BookSchema.nullable(),
 });
 
 export type MeetingDTO = z.output<typeof MeetingSchema>;
