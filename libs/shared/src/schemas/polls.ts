@@ -7,7 +7,10 @@ export const MAX_POLL_BOOKS = 6;
 
 const distinctBookIds = z
   .array(z.uuidv4())
-  .refine((ids) => new Set(ids).size === ids.length, "Pick each book only once");
+  .refine(
+    (ids) => new Set(ids).size === ids.length,
+    "Pick each book only once",
+  );
 
 // POST /polls (admins). The poll opens as soon as it's created. Members vote
 // for fewer books than are on the ballot, or the vote couldn't narrow it down.
@@ -38,6 +41,15 @@ export const CastVotesSchema = z.object({
 });
 
 export type CastVotesDTO = z.output<typeof CastVotesSchema>;
+
+export const VoteSchema = z.object({
+  createdAt: isoDate,
+  bookId: z.uuidv4(),
+  userId: z.uuidv4(),
+  pollId: z.uuidv4(),
+});
+
+export type VoteDTO = z.output<typeof VoteSchema>;
 
 export const PollResultSchema = z.object({
   bookId: z.uuidv4(),
