@@ -1,8 +1,10 @@
 import { Link } from "react-router-dom";
 import { type ReadBookDTO } from "shared";
-import { useReadBooks } from "../hooks";
+import { useRateBook, useReadBooks } from "../hooks";
 
 const meetingDate = new Intl.DateTimeFormat(undefined, { dateStyle: "medium" });
+
+const SCORES = [1, 2, 3, 4, 5];
 
 const details = (book: ReadBookDTO) =>
   [
@@ -12,6 +14,42 @@ const details = (book: ReadBookDTO) =>
   ]
     .filter(Boolean)
     .join(" · ");
+
+// "4.3 / 5 from 3 ratings"
+const average = (book: ReadBookDTO) =>
+  book.averageRating === null
+    ? "Not rated yet"
+    : `${book.averageRating.toFixed(1)} / 5 from ${book.ratingCount} ${
+        book.ratingCount === 1 ? "rating" : "ratings"
+      }`;
+
+// Five buttons, filled up to the member's score. While a new score saves,
+// it shows that one so the click feels instant.
+const RateBook = ({ book }: { book: ReadBookDTO }) => {
+  const { mutate, isPending, variables, error } = useRateBook();
+  const shown = isPending ? variables.score : book.myRating;
+
+  return (
+    <div>
+      <div role="group" aria-label={`Your rating for ${book.title}`}>
+        Your rating:{" "}
+        {SCORES.map((score) => (
+          <button
+            key={score}
+            type="button"
+            aria-label={`${score} ${score === 1 ? "star" : "stars"}`}
+            aria-pressed={book.myRating === score}
+            disabled={isPending}
+            onClick={() => mutate({ bookId: book.id, score })}
+          >
+            {shown !== null && score <= shown ? "★" : "☆"}
+          </button>
+        ))}
+      </div>
+      {error && <p role="alert">{error.message}</p>}
+    </div>
+  );
+};
 
 // A book whose meeting hasn't started yet is the one being read now.
 const ReadBookItem = ({ book, now }: { book: ReadBookDTO; now: Date }) => (
@@ -28,6 +66,8 @@ const ReadBookItem = ({ book, now }: { book: ReadBookDTO; now: Date }) => (
           {meetingDate.format(book.meetingStart)}
         </time>
       </p>
+      <p>Club rating: {average(book)}</p>
+      <RateBook book={book} />
     </div>
   </li>
 );

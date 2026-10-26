@@ -86,6 +86,24 @@ export type SuggestedBookDTO = z.output<typeof SuggestedBookSchema>;
 export const ReadBookSchema = BookSchema.omit({ synopsis: true }).extend({
   meetingId: z.uuidv4(),
   meetingStart: isoDate,
+  averageRating: z.number().nullable(), // null until someone rates it
+  ratingCount: z.int(),
+  myRating: z.int().nullable(),
 });
 
 export type ReadBookDTO = z.output<typeof ReadBookSchema>;
+
+// PUT /books/:id/rating. Only books on a meeting can be rated; rating again
+// replaces the member's earlier score.
+export const RateBookSchema = z.object({
+  score: z.int().min(1).max(5),
+});
+
+export type RateBookDTO = z.infer<typeof RateBookSchema>;
+
+export const RatingSchema = z.object({
+  bookId: z.uuidv4(),
+  score: z.int(),
+});
+
+export type RatingDTO = z.output<typeof RatingSchema>;

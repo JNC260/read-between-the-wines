@@ -12,6 +12,9 @@ import {
   InviteLookupSchema,
   type MeetingListQuery,
   MeetingSchema,
+  type RateBookDTO,
+  RateBookSchema,
+  RatingSchema,
   ReadBookSchema,
   SuggestedBookSchema,
   type UpdateMeetingDTO,
@@ -244,3 +247,11 @@ export const getBookSuggestions = () =>
 
 export const getReadBooks = () =>
   apiFetch(`/api/books/read`, ReadBookSchema.array(), "Failed to fetch books");
+
+export const rateBook = ({ bookId, ...body }: RateBookDTO & { bookId: string }) =>
+  apiFetch(
+    `/api/books/${encodeURIComponent(bookId)}/rating`,
+    RatingSchema,
+    "Failed to save rating",
+    { method: "PUT", schema: RateBookSchema, body },
+  );

@@ -15,6 +15,7 @@ import {
   getMeeting,
   getMeetings,
   getReadBooks,
+  rateBook,
   getVenue,
   getVenues,
   getInvite,
@@ -196,6 +197,16 @@ export const useReadBooks = () => {
   return useQuery({
     queryKey: ["books", "read"],
     queryFn: getReadBooks,
+  });
+};
+
+// The read list carries the averages, so it refetches after each rating.
+export const useRateBook = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: rateBook,
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: ["books", "read"] }),
   });
 };
 

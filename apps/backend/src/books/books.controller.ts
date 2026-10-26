@@ -5,6 +5,8 @@ import {
   BookSchema,
   BookSearchQuerySchema,
   type CreateBookSuggestionDTO,
+  type RateBookDTO,
+  RatingSchema,
   ReadBookSchema,
   SuggestedBookSchema,
 } from "shared";
@@ -35,7 +37,19 @@ export const listSuggestions = async (req: Request, res: Response) => {
   res.json(z.encode(SuggestedBookSchema.array(), books));
 };
 
-export const listReadBooks = async (_req: Request, res: Response) => {
-  const books = await service.listReadBooks();
+export const listReadBooks = async (req: Request, res: Response) => {
+  const books = await service.listReadBooks(getUser(req).id);
   res.json(z.encode(ReadBookSchema.array(), books));
+};
+
+export const rateBook = async (
+  req: Request<{ id: string }, unknown, RateBookDTO>,
+  res: Response,
+) => {
+  const rating = await service.rateBook(
+    getUser(req).id,
+    req.params.id,
+    req.body.score,
+  );
+  res.json(z.encode(RatingSchema, rating));
 };

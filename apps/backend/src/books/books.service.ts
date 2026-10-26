@@ -3,11 +3,17 @@ import {
   type BookDTO,
   type CreateBookSuggestionDTO,
   normalizeTitle,
+  type RatingDTO,
   type ReadBookDTO,
   type SuggestedBookDTO,
   parseGoodreadsUrl,
 } from "shared";
-import { BadGatewayError, ConflictError, NotFoundError } from "../lib/errors";
+import {
+  BadGatewayError,
+  ConflictError,
+  ForbiddenError,
+  NotFoundError,
+} from "../lib/errors";
 import { prisma } from "../lib/prisma";
 import {
   OPEN_LIBRARY_URL,
@@ -170,18 +176,60 @@ export const listSuggestions = async (
     .sort((a, b) => b.suggestedAt.getTime() - a.suggestedAt.getTime());
 };
 
-// Books the club has read (or is about to), latest meeting first. Queried
-// from the meeting side so the sort happens in the database.
-export const listReadBooks = async (): Promise<ReadBookDTO[]> => {
+// Books the club has read (or is about to), latest meeting first, with their
+// ratings summed up. Queried from the meeting side so the sort happens in the
+// database.
+export const listReadBooks = async (userId: string): Promise<ReadBookDTO[]> => {
   const meetings = await prisma.meeting.findMany({
     where: { bookId: { not: null } },
     orderBy: { start: "desc" },
-    include: { book: true },
+    include: {
+      book: { include: { ratings: { select: { userId: true, score: true } } } },
+    },
   });
 
-  return meetings.flatMap(({ id, start, book }) =>
-    book ? [{ ...book, meetingId: id, meetingStart: start }] : [],
-  );
+  return meetings.flatMap(({ id, start, book }) => {
+    if (!book) {
+      return [];
+    }
+    const { ratings, ...rest } = book;
+    const total = ratings.reduce((sum, r) => sum + r.score, 0);
+    return [
+      {
+        ...rest,
+        meetingId: id,
+        meetingStart: start,
+        averageRating: ratings.length > 0 ? total / ratings.length : null,
+        ratingCount: ratings.length,
+        myRating: ratings.find((r) => r.userId === userId)?.score ?? null,
+      },
+    ];
+  });
+};
+
+// Same rule as the read-books page: a book counts as read once it's on a
+// meeting. Rating again overwrites the member's earlier score.
+export const rateBook = async (
+  userId: string,
+  bookId: string,
+  score: number,
+): Promise<RatingDTO> => {
+  const book = await prisma.book.findUnique({
+    where: { id: bookId },
+    include: { meeting: true },
+  });
+  if (!book) {
+    throw new NotFoundError("Book not found");
+  }
+  if (!book.meeting) {
+    throw new ForbiddenError("Only books the club has read can be rated");
+  }
+
+  return prisma.rating.upsert({
+    where: { userId_bookId: { userId, bookId } },
+    update: { score },
+    create: { userId, bookId, score },
+  });
 };
 
 // ---------------------------------------------------------------------------
