@@ -3,6 +3,8 @@ import {
   type BookDTO,
   type CreateBookSuggestionDTO,
   normalizeTitle,
+  type ReadBookDTO,
+  type SuggestedBookDTO,
   parseGoodreadsUrl,
 } from "shared";
 import { BadGatewayError, ConflictError, NotFoundError } from "../lib/errors";
@@ -138,6 +140,48 @@ export const createSuggestion = async (
   }
 
   return book;
+};
+
+// Books with at least one suggestion that aren't on a meeting yet, newest
+// suggestion first. The frontend can re-sort; this is just the default.
+export const listSuggestions = async (
+  userId: string,
+): Promise<SuggestedBookDTO[]> => {
+  const books = await prisma.book.findMany({
+    where: { suggestions: { some: {} }, meeting: { is: null } },
+    include: {
+      suggestions: {
+        orderBy: { createdAt: "asc" },
+        include: {
+          user: { select: { id: true, firstName: true, lastName: true } },
+        },
+      },
+    },
+  });
+
+  return books
+    .map(({ suggestions, ...book }) => ({
+      ...book,
+      suggestedBy: suggestions.map((s) => s.user),
+      suggestedByMe: suggestions.some((s) => s.userId === userId),
+      // The where clause guarantees at least one, oldest first.
+      suggestedAt: suggestions[0].createdAt,
+    }))
+    .sort((a, b) => b.suggestedAt.getTime() - a.suggestedAt.getTime());
+};
+
+// Books the club has read (or is about to), latest meeting first. Queried
+// from the meeting side so the sort happens in the database.
+export const listReadBooks = async (): Promise<ReadBookDTO[]> => {
+  const meetings = await prisma.meeting.findMany({
+    where: { bookId: { not: null } },
+    orderBy: { start: "desc" },
+    include: { book: true },
+  });
+
+  return meetings.flatMap(({ id, start, book }) =>
+    book ? [{ ...book, meetingId: id, meetingStart: start }] : [],
+  );
 };
 
 // ---------------------------------------------------------------------------

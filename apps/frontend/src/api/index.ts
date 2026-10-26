@@ -12,6 +12,8 @@ import {
   InviteLookupSchema,
   type MeetingListQuery,
   MeetingSchema,
+  ReadBookSchema,
+  SuggestedBookSchema,
   type UpdateMeetingDTO,
   UpdateMeetingSchema,
   type UpdateVenueDTO,
@@ -232,3 +234,13 @@ export const createBookSuggestion = (body: CreateBookSuggestionDTO) =>
     schema: CreateBookSuggestionSchema,
     body,
   });
+
+export const getBookSuggestions = () =>
+  apiFetch(
+    `/api/books/suggestions`,
+    SuggestedBookSchema.array(),
+    "Failed to fetch suggestions",
+  );
+
+export const getReadBooks = () =>
+  apiFetch(`/api/books/read`, ReadBookSchema.array(), "Failed to fetch books");

@@ -4,7 +4,12 @@
 import { Prisma } from "../../generated/prisma/client";
 import { BadGatewayError, ConflictError, NotFoundError } from "../lib/errors";
 import { prisma } from "../lib/prisma";
-import { createSuggestion, searchBooks } from "./books.service";
+import {
+  createSuggestion,
+  listReadBooks,
+  listSuggestions,
+  searchBooks,
+} from "./books.service";
 import { USER_AGENT } from "./open-library";
 import {
   bareSearch,
@@ -20,6 +25,7 @@ vi.mock("../lib/prisma", () => ({
   prisma: {
     book: { findMany: vi.fn(), upsert: vi.fn() },
     suggestion: { create: vi.fn() },
+    meeting: { findMany: vi.fn() },
   },
 }));
 
@@ -321,5 +327,100 @@ describe("createSuggestion", () => {
     await expect(
       createSuggestion(USER_ID, { openLibraryWorkId: CIRCE_WORK_ID }),
     ).rejects.toBe(fkError);
+  });
+});
+
+describe("listSuggestions", () => {
+  const ada = { id: "user-1", firstName: "Ada", lastName: "Lovelace" };
+  const ben = { id: "user-2", firstName: "Ben", lastName: "Okri" };
+  const suggestion = (user: typeof ada, createdAt: string) => ({
+    userId: user.id,
+    bookId: "book-1",
+    createdAt: new Date(createdAt),
+    user,
+  });
+
+  it("only asks for suggested books that aren't on a meeting", async () => {
+    await listSuggestions(USER_ID);
+    expect(vi.mocked(prisma.book.findMany).mock.calls[0][0]?.where).toEqual({
+      suggestions: { some: {} },
+      meeting: { is: null },
+    });
+  });
+
+  it("lists every suggester and dates the book by its first suggestion", async () => {
+    mockExistingBooks([
+      {
+        ...circeBook,
+        suggestions: [
+          suggestion(ben, "2026-10-02T00:00:00Z"),
+          suggestion(ada, "2026-10-05T00:00:00Z"),
+        ],
+      },
+    ]);
+    const [book] = await listSuggestions(USER_ID);
+    expect(book.suggestedBy).toEqual([ben, ada]);
+    expect(book.suggestedAt).toEqual(new Date("2026-10-02T00:00:00Z"));
+  });
+
+  it("flags books this user suggested as suggestedByMe", async () => {
+    mockExistingBooks([
+      { ...circeBook, suggestions: [suggestion(ada, "2026-10-02T00:00:00Z")] },
+      {
+        ...circeBook,
+        id: "book-2",
+        suggestions: [suggestion(ben, "2026-10-03T00:00:00Z")],
+      },
+    ]);
+    const books = await listSuggestions(ada.id);
+    const mine = Object.fromEntries(books.map((b) => [b.id, b.suggestedByMe]));
+    expect(mine).toEqual({ "book-1": true, "book-2": false });
+  });
+
+  it("sorts the newest suggestion first", async () => {
+    mockExistingBooks([
+      { ...circeBook, suggestions: [suggestion(ada, "2026-10-01T00:00:00Z")] },
+      {
+        ...circeBook,
+        id: "book-2",
+        suggestions: [suggestion(ben, "2026-10-09T00:00:00Z")],
+      },
+    ]);
+    const books = await listSuggestions(USER_ID);
+    expect(books.map((b) => b.id)).toEqual(["book-2", "book-1"]);
+  });
+});
+
+describe("listReadBooks", () => {
+  const meeting = (id: string, start: string, book: typeof circeBook | null) => ({
+    id,
+    title: "Book club",
+    start: new Date(start),
+    end: new Date(start),
+    description: null,
+    venueId: null,
+    bookId: book?.id ?? null,
+    book,
+  });
+
+  it("asks for meetings with a book, latest first", async () => {
+    vi.mocked(prisma.meeting.findMany).mockResolvedValue([]);
+    await listReadBooks();
+    const args = vi.mocked(prisma.meeting.findMany).mock.calls[0][0];
+    expect(args?.where).toEqual({ bookId: { not: null } });
+    expect(args?.orderBy).toEqual({ start: "desc" });
+  });
+
+  it("returns each book with its meeting's id and start", async () => {
+    vi.mocked(prisma.meeting.findMany).mockResolvedValue([
+      meeting("meeting-1", "2026-09-10T19:00:00Z", circeBook),
+    ] as never);
+    const [book] = await listReadBooks();
+    expect(book).toMatchObject({
+      id: circeBook.id,
+      title: "Circe",
+      meetingId: "meeting-1",
+      meetingStart: new Date("2026-09-10T19:00:00Z"),
+    });
   });
 });

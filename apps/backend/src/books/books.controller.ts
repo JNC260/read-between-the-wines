@@ -5,6 +5,8 @@ import {
   BookSchema,
   BookSearchQuerySchema,
   type CreateBookSuggestionDTO,
+  ReadBookSchema,
+  SuggestedBookSchema,
 } from "shared";
 import { BadRequestError } from "../lib/errors";
 import { getUser } from "../middleware/auth";
@@ -26,4 +28,14 @@ export const createSuggestion = async (
 ) => {
   const book = await service.createSuggestion(getUser(req).id, req.body);
   res.status(201).json(z.encode(BookSchema, book));
+};
+
+export const listSuggestions = async (req: Request, res: Response) => {
+  const books = await service.listSuggestions(getUser(req).id);
+  res.json(z.encode(SuggestedBookSchema.array(), books));
+};
+
+export const listReadBooks = async (_req: Request, res: Response) => {
+  const books = await service.listReadBooks();
+  res.json(z.encode(ReadBookSchema.array(), books));
 };

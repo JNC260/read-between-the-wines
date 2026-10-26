@@ -11,8 +11,10 @@ import {
   createInvite,
   createMeeting,
   createVenue,
+  getBookSuggestions,
   getMeeting,
   getMeetings,
+  getReadBooks,
   getVenue,
   getVenues,
   getInvite,
@@ -91,11 +93,17 @@ export const useMeeting = (id: string) => {
   });
 };
 
+// A meeting's book moves it from the suggestions list to the read list, so
+// book lists go stale too.
 export const useCreateMeeting = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: createMeeting,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["meetings"] }),
+    onSuccess: () =>
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["meetings"] }),
+        queryClient.invalidateQueries({ queryKey: ["books"] }),
+      ]),
   });
 };
 
@@ -103,7 +111,11 @@ export const useUpdateMeeting = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: updateMeeting,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["meetings"] }),
+    onSuccess: () =>
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["meetings"] }),
+        queryClient.invalidateQueries({ queryKey: ["books"] }),
+      ]),
   });
 };
 
@@ -173,7 +185,22 @@ export const useBookSearch = (q: string) => {
   });
 };
 
-// Searches carry "already suggested" flags, so they go stale too.
+export const useBookSuggestions = () => {
+  return useQuery({
+    queryKey: ["books", "suggestions"],
+    queryFn: getBookSuggestions,
+  });
+};
+
+export const useReadBooks = () => {
+  return useQuery({
+    queryKey: ["books", "read"],
+    queryFn: getReadBooks,
+  });
+};
+
+// Refreshes the suggestions list, and searches, which carry "already
+// suggested" flags.
 export const useCreateBookSuggestion = () => {
   const queryClient = useQueryClient();
   return useMutation({

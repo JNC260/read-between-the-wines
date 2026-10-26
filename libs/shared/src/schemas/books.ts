@@ -61,3 +61,31 @@ export const CreateBookSuggestionSchema = z.object({
 });
 
 export type CreateBookSuggestionDTO = z.infer<typeof CreateBookSuggestionSchema>;
+
+// Just enough to name a member next to a book; no email.
+export const SuggesterSchema = z.object({
+  id: z.uuidv4(),
+  firstName: z.string(),
+  lastName: z.string(),
+});
+
+export type SuggesterDTO = z.output<typeof SuggesterSchema>;
+
+// GET /books/suggestions. One entry per book, however many members suggested
+// it. Books already assigned to a meeting are left out.
+export const SuggestedBookSchema = BookSchema.omit({ synopsis: true }).extend({
+  suggestedBy: z.array(SuggesterSchema), // earliest first
+  suggestedByMe: z.boolean(),
+  suggestedAt: isoDate, // when the first member suggested it
+});
+
+export type SuggestedBookDTO = z.output<typeof SuggestedBookSchema>;
+
+// GET /books/read. Books assigned to a meeting, with that meeting's date. The
+// latest meeting may still be upcoming.
+export const ReadBookSchema = BookSchema.omit({ synopsis: true }).extend({
+  meetingId: z.uuidv4(),
+  meetingStart: isoDate,
+});
+
+export type ReadBookDTO = z.output<typeof ReadBookSchema>;
