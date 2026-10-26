@@ -2,16 +2,22 @@ import * as z from "zod";
 import {
   BookCandidateSchema,
   BookSchema,
+  type CastVotesDTO,
+  CastVotesSchema,
   type CreateBookSuggestionDTO,
   CreateBookSuggestionSchema,
   CreatedInviteSchema,
   type CreateMeetingDTO,
   CreateMeetingSchema,
+  type CreatePollDTO,
+  CreatePollSchema,
   type CreateVenueDTO,
   CreateVenueSchema,
+  CurrentPollSchema,
   InviteLookupSchema,
   type MeetingListQuery,
   MeetingSchema,
+  PollSchema,
   type RateBookDTO,
   RateBookSchema,
   RatingSchema,
@@ -254,4 +260,32 @@ export const rateBook = ({ bookId, ...body }: RateBookDTO & { bookId: string }) 
     RatingSchema,
     "Failed to save rating",
     { method: "PUT", schema: RateBookSchema, body },
+  );
+
+export const getCurrentPoll = () =>
+  apiFetch(`/api/polls/current`, CurrentPollSchema, "Failed to fetch the poll");
+
+export const getPoll = (id: string) =>
+  apiFetch(
+    `/api/polls/${encodeURIComponent(id)}`,
+    PollSchema,
+    "Failed to fetch the poll",
+  );
+
+export const createPoll = (body: CreatePollDTO) =>
+  apiFetch(`/api/polls`, PollSchema, "Failed to create the poll", {
+    method: "POST",
+    schema: CreatePollSchema,
+    body,
+  });
+
+export const castVotes = ({
+  pollId,
+  ...body
+}: CastVotesDTO & { pollId: string }) =>
+  apiFetch(
+    `/api/polls/${encodeURIComponent(pollId)}/votes`,
+    PollSchema,
+    "Failed to save your votes",
+    { method: "PUT", schema: CastVotesSchema, body },
   );

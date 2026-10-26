@@ -15,6 +15,8 @@ import InvitePage from "../pages/InvitePage";
 import LandingPage from "../pages/LandingPage";
 import LoginPage from "../pages/LoginPage";
 import NewEventPage from "../pages/NewEventPage";
+import NewPollPage from "../pages/NewPollPage";
+import PollPage from "../pages/PollPage";
 import ReactivatePage from "../pages/ReactivatePage";
 import ReadBooksPage from "../pages/ReadBooksPage";
 import ResetPasswordPage from "../pages/ResetPasswordPage";
@@ -140,6 +142,22 @@ export function App() {
             element={
               <RequireAuth>
                 <SuggestionsPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/polls/new"
+            element={
+              <RequireAuth admin>
+                <NewPollPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/polls/:id"
+            element={
+              <RequireAuth>
+                <PollPage />
               </RequireAuth>
             }
           />

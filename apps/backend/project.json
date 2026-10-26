@@ -106,6 +106,18 @@
       "options": {
         "passWithNoTests": true
       }
+    },
+    "test-db": {
+      "executor": "nx:run-commands",
+      "cache": false,
+      "dependsOn": [
+        "db",
+        "prisma-generate"
+      ],
+      "options": {
+        "cwd": "{projectRoot}",
+        "command": "vitest run --config vitest.db.config.mts"
+      }
     }
   }
 }

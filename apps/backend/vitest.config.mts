@@ -11,6 +11,8 @@ export default defineConfig(() => ({
     globals: true,
     environment: 'node',
     include: ['src/**/*.{test,spec}.ts'],
+    // Need a database: see vitest.db.config.mts.
+    exclude: ['src/**/*.db.spec.ts'],
     reporters: ['default'],
     coverage: {
       reportsDirectory: '../../coverage/apps/backend',

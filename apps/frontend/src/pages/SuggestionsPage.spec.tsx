@@ -1,10 +1,15 @@
 import { fireEvent, screen, within } from "@testing-library/react";
-import { type SuggestedBookDTO } from "shared";
-import { getBookSuggestions } from "../api";
-import { renderRoutes, Route } from "../test-utils";
+import { useLocation } from "react-router-dom";
+import { type PollDTO, type SuggestedBookDTO } from "shared";
+import { getBookSuggestions, getCurrentPoll } from "../api";
+import { mockSession, renderRoutes, Route, testUser } from "../test-utils";
 import SuggestionsPage from "./SuggestionsPage";
 
-vi.mock("../api", () => ({ getBookSuggestions: vi.fn() }));
+vi.mock("../lib/auth-client", () => ({ authClient: { useSession: vi.fn() } }));
+vi.mock("../api", () => ({
+  getBookSuggestions: vi.fn(),
+  getCurrentPoll: vi.fn(),
+}));
 
 const ada = {
   id: "00000000-0000-4000-8000-000000000001",
@@ -55,10 +60,16 @@ const books = [
   }),
 ];
 
+// Stands in for NewPollPage and prints the query it was sent.
+const NewPollStub = () => <p>new poll {useLocation().search}</p>;
+
 const renderPage = (at = "/books/suggestions") =>
   renderRoutes(
     at,
-    <Route path="/books/suggestions" element={<SuggestionsPage />} />,
+    <>
+      <Route path="/books/suggestions" element={<SuggestionsPage />} />
+      <Route path="/polls/new" element={<NewPollStub />} />
+    </>,
   );
 
 const titles = async () => {
@@ -69,6 +80,11 @@ const titles = async () => {
 };
 
 describe("SuggestionsPage", () => {
+  beforeEach(() => {
+    mockSession(testUser());
+    vi.mocked(getCurrentPoll).mockResolvedValue(null);
+  });
+
   it("shows an empty state", async () => {
     vi.mocked(getBookSuggestions).mockResolvedValue([]);
     renderPage();
@@ -121,5 +137,112 @@ describe("SuggestionsPage", () => {
     vi.mocked(getBookSuggestions).mockResolvedValue(books);
     renderPage("/books/suggestions?sort=nonsense");
     expect(await titles()).toEqual(["Piranesi", "Circe", "Beloved"]);
+  });
+
+  describe("starting a poll", () => {
+    const idOf = (n: number) => `00000000-0000-4000-8000-0000000001${String(n).padStart(2, "0")}`;
+    const many = (count: number) =>
+      Array.from({ length: count }, (_, i) =>
+        book({ id: idOf(i), title: `Book ${i}` }),
+      );
+    const checkbox = (title: string) =>
+      screen.getByRole("checkbox", { name: `Select ${title} for a poll` });
+    const createButton = () =>
+      screen.getByRole("button", { name: "Create a poll from selection" });
+
+    const openPoll = (bookIds: string[]): PollDTO => ({
+      id: "00000000-0000-4000-8000-000000000099",
+      theme: null,
+      opensAt: new Date("2026-10-20T00:00:00Z"),
+      closesAt: new Date("2099-11-01T00:00:00Z"),
+      votesPerMember: 1,
+      createdAt: new Date("2026-10-20T00:00:00Z"),
+      isOpen: true,
+      books: bookIds.map((id) => ({
+        ...book({ id }),
+        synopsis: null,
+      })),
+      myVotes: [],
+      voterCount: 0,
+      results: null,
+    });
+
+    it("gives members no checkboxes", async () => {
+      vi.mocked(getBookSuggestions).mockResolvedValue(books);
+      renderPage();
+      await titles();
+      expect(screen.queryAllByRole("checkbox")).toHaveLength(0);
+      expect(
+        screen.queryByRole("button", { name: "Create a poll from selection" }),
+      ).toBeNull();
+    });
+
+    it("lets admins pick at least two books, then sends them to the new poll page", async () => {
+      mockSession(testUser({ isAdmin: true }));
+      vi.mocked(getBookSuggestions).mockResolvedValue(books);
+      renderPage();
+      await titles();
+      await screen.findByText(/0 of 6 selected/);
+      expect((createButton() as HTMLButtonElement).disabled).toBe(true);
+
+      fireEvent.click(checkbox("Piranesi"));
+      expect(screen.getByText(/1 of 6 selected/)).toBeTruthy();
+      expect((createButton() as HTMLButtonElement).disabled).toBe(true);
+
+      fireEvent.click(checkbox("Beloved"));
+      expect(screen.getByText("2 of 6 selected")).toBeTruthy();
+      fireEvent.click(createButton());
+      expect(
+        await screen.findByText(
+          `new poll ?books=${books[0].id},${books[2].id}`,
+        ),
+      ).toBeTruthy();
+    });
+
+    it("unticking a book removes it from the selection", async () => {
+      mockSession(testUser({ isAdmin: true }));
+      vi.mocked(getBookSuggestions).mockResolvedValue(books);
+      renderPage();
+      await titles();
+      fireEvent.click(await screen.findByRole("checkbox", { name: "Select Circe for a poll" }));
+      fireEvent.click(checkbox("Circe"));
+      expect(screen.getByText(/0 of 6 selected/)).toBeTruthy();
+    });
+
+    it("stops at six books", async () => {
+      mockSession(testUser({ isAdmin: true }));
+      vi.mocked(getBookSuggestions).mockResolvedValue(many(7));
+      renderPage();
+      await titles();
+      for (let i = 0; i < 6; i++) {
+        fireEvent.click(await screen.findByRole("checkbox", { name: `Select Book ${i} for a poll` }));
+      }
+      expect(screen.getByText("6 of 6 selected")).toBeTruthy();
+      expect((checkbox("Book 6") as HTMLInputElement).disabled).toBe(true);
+      // Unticking one frees a spot again.
+      fireEvent.click(checkbox("Book 0"));
+      expect((checkbox("Book 6") as HTMLInputElement).disabled).toBe(false);
+    });
+
+    it("tells admins to wait while a poll is open, and offers no checkboxes", async () => {
+      mockSession(testUser({ isAdmin: true }));
+      vi.mocked(getBookSuggestions).mockResolvedValue(books);
+      vi.mocked(getCurrentPoll).mockResolvedValue(openPoll([books[1].id]));
+      renderPage();
+      expect(await screen.findByRole("link", { name: "A poll is open" })).toBeTruthy();
+      expect(screen.queryAllByRole("checkbox")).toHaveLength(0);
+    });
+
+    it("marks books on the open poll's ballot for everyone", async () => {
+      vi.mocked(getBookSuggestions).mockResolvedValue(books);
+      vi.mocked(getCurrentPoll).mockResolvedValue(openPoll([books[1].id]));
+      renderPage();
+      const list = await screen.findByRole("list", { name: "Suggested books" });
+      const circe = within(list)
+        .getByRole("heading", { name: "Circe" })
+        .closest("li") as HTMLElement;
+      expect(await within(circe).findByText("On the ballot")).toBeTruthy();
+      expect(screen.getAllByText("On the ballot")).toHaveLength(1);
+    });
   });
 });
