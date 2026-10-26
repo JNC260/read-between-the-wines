@@ -7,7 +7,7 @@ import {
 } from "shared";
 import * as service from "./polls.service";
 import * as z from "zod";
-import { NotFoundError, UnauthorizedError } from "../lib/errors";
+import { UnauthorizedError } from "../lib/errors";
 
 type Params = { id: string };
 
@@ -19,7 +19,7 @@ export const createPoll = async (
   if (!req.user) {
     throw new UnauthorizedError();
   }
-  const poll = await service.createPoll(req.body, req.user.id);
+  const poll = await service.createPoll(req.body);
   res.status(201).json(z.encode(PollSchema, poll));
 };
 

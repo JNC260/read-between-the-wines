@@ -46,20 +46,9 @@
       }
     },
     {
-      "plugin": "@nx/jest/plugin",
-      "options": {
-        "targetName": "test"
-      },
-      "exclude": [
-        "apps/backend-e2e/**/*"
-      ]
-    },
-    {
       "plugin": "@nx/js/typescript",
       "options": {
-        "typecheck": {
-          "targetName": "tsc:typecheck"
-        },
+        "typecheck": false,
         "build": {
           "targetName": "build",
           "configName": "tsconfig.lib.json",

@@ -1,6 +1,5 @@
 import { type CastVotesDTO, type CreatePollDTO, type PollDTO } from "shared";
 import { prisma } from "../lib/prisma";
-import { ForbiddenError, NotFoundError } from "../lib/errors";
 
 import {
   validateBooks,
@@ -21,6 +20,7 @@ export const createPoll = async (data: CreatePollDTO): Promise<PollDTO> => {
       books: { connect: data.bookIds.map((id) => ({ id })) },
       opensAt: new Date(),
       closesAt: data.closesAt,
+      votesPerMember: data.votesPerMember,
       theme: data.theme ?? null,
     },
     include: { books: true, votes: true },

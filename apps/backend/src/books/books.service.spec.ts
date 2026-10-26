@@ -1,39 +1,22 @@
-// books.service tests. fetch and Prisma are mocked, so no network or database
-// is needed: each test queues the Open Library responses it expects, in call
-// order, with respond().
-import { Prisma } from "../../generated/prisma/client";
-import {
-  BadGatewayError,
-  ConflictError,
-  ForbiddenError,
-  NotFoundError,
-} from "../lib/errors";
+// books.service tests for searching Open Library. fetch and Prisma are
+// mocked, so no network or database is needed: each test queues the Open
+// Library responses it expects, in call order, with respond(). Everything that
+// reads or writes the database is in books.db.spec.ts.
+import { BadGatewayError } from "../lib/errors";
 import { prisma } from "../lib/prisma";
-import {
-  createSuggestion,
-  listReadBooks,
-  listSuggestions,
-  rateBook,
-  searchBooks,
-} from "./books.service";
+import { searchBooks } from "./books.service";
 import { USER_AGENT } from "./open-library";
 import {
   bareSearch,
   circeSearch,
   circeTitleSearch,
   noResults,
-  workWithObjectDescription,
-  workWithoutDescription,
-  workWithStringDescription,
 } from "./open-library.fixtures";
 
+// searchBooks checks the Book table for works already suggested. These tests
+// leave it empty; books.db.spec.ts covers the flags.
 vi.mock("../lib/prisma", () => ({
-  prisma: {
-    book: { findMany: vi.fn(), findUnique: vi.fn(), upsert: vi.fn() },
-    suggestion: { create: vi.fn() },
-    meeting: { findMany: vi.fn() },
-    rating: { upsert: vi.fn() },
-  },
+  prisma: { book: { findMany: vi.fn() } },
 }));
 
 const fetchMock = vi.fn();
@@ -52,32 +35,9 @@ const USER_ID = "user-1";
 const CIRCE_LINK = "https://www.goodreads.com/book/show/35959740-circe";
 const CIRCE_WORK_ID = "OL18012166W";
 
-// A Book row as Prisma returns it.
-const circeBook = {
-  id: "book-1",
-  title: "Circe",
-  normalizedTitle: "circe",
-  author: "Madeline Miller",
-  yearPublished: 2018,
-  genres: [],
-  coverUrl: "https://covers.openlibrary.org/b/id/8739376-L.jpg",
-  synopsis: workWithStringDescription.description,
-  pageCount: 404,
-  openLibraryWorkId: CIRCE_WORK_ID,
-  goodreadsUrl: null,
-  createdAt: new Date("2026-10-01T00:00:00Z"),
-};
-
-// findMany's mock is typed without the include, so rows that carry
-// suggestions are cast.
-const mockExistingBooks = (
-  rows: (typeof circeBook & { suggestions: unknown[] })[],
-) => vi.mocked(prisma.book.findMany).mockResolvedValue(rows as never);
-
 beforeEach(() => {
   vi.resetAllMocks();
   vi.mocked(prisma.book.findMany).mockResolvedValue([]);
-  vi.mocked(prisma.book.upsert).mockResolvedValue(circeBook);
 });
 
 describe("searchBooks", () => {
@@ -165,33 +125,6 @@ describe("searchBooks", () => {
     ]);
   });
 
-  it("flags works already in the Book table as alreadySuggested", async () => {
-    respond(circeTitleSearch);
-    mockExistingBooks([{ ...circeBook, suggestions: [] }]);
-    const candidates = await searchBooks("circe", USER_ID);
-
-    expect(prisma.book.findMany).toHaveBeenCalledWith({
-      where: { openLibraryWorkId: { in: [CIRCE_WORK_ID, "OL21869269W"] } },
-      include: { suggestions: { where: { userId: USER_ID } } },
-    });
-    expect(candidates.map((c) => c.alreadySuggested)).toEqual([true, false]);
-    expect(candidates.map((c) => c.suggestedByMe)).toEqual([false, false]);
-  });
-
-  it("flags works this user suggested as suggestedByMe", async () => {
-    respond(circeTitleSearch);
-    mockExistingBooks([
-      {
-        ...circeBook,
-        suggestions: [
-          { userId: USER_ID, bookId: circeBook.id, createdAt: new Date() },
-        ],
-      },
-    ]);
-    const candidates = await searchBooks("circe", USER_ID);
-    expect(candidates.map((c) => c.suggestedByMe)).toEqual([true, false]);
-  });
-
   it("sends the User-Agent header", async () => {
     respond(circeSearch);
     await searchBooks("circe", USER_ID);
@@ -222,297 +155,5 @@ describe("searchBooks", () => {
     await expect(searchBooks("circe", USER_ID)).rejects.toThrow(
       BadGatewayError,
     );
-  });
-});
-
-describe("createSuggestion", () => {
-  it("throws NotFoundError for a work id Open Library doesn't know", async () => {
-    respond(noResults);
-    await expect(
-      createSuggestion(USER_ID, { openLibraryWorkId: "OL999W" }),
-    ).rejects.toThrow(NotFoundError);
-    expect(prisma.book.upsert).not.toHaveBeenCalled();
-  });
-
-  it("upserts the book by work id with normalizedTitle and synopsis", async () => {
-    respond(circeSearch);
-    respond(workWithStringDescription);
-    const book = await createSuggestion(USER_ID, {
-      openLibraryWorkId: CIRCE_WORK_ID,
-    });
-
-    expect(fetchedUrl(0).searchParams.get("q")).toBe(
-      `key:"/works/${CIRCE_WORK_ID}"`,
-    );
-    expect(fetchedUrl(1).pathname).toBe(`/works/${CIRCE_WORK_ID}.json`);
-    expect(prisma.book.upsert).toHaveBeenCalledWith({
-      where: { openLibraryWorkId: CIRCE_WORK_ID },
-      update: { goodreadsUrl: undefined },
-      create: {
-        title: "Circe",
-        normalizedTitle: "circe",
-        author: "Madeline Miller",
-        yearPublished: 2018,
-        pageCount: 404,
-        coverUrl: "https://covers.openlibrary.org/b/id/8739376-L.jpg",
-        synopsis: workWithStringDescription.description,
-        openLibraryWorkId: CIRCE_WORK_ID,
-        goodreadsUrl: undefined,
-      },
-    });
-    expect(book).toBe(circeBook);
-  });
-
-  it.each([
-    ["a string", workWithStringDescription, workWithStringDescription.description],
-    ["an object", workWithObjectDescription, workWithObjectDescription.description.value],
-    ["missing", workWithoutDescription, null],
-  ])("reads the synopsis when the description is %s", async (_, work, synopsis) => {
-    respond(circeSearch);
-    respond(work);
-    await createSuggestion(USER_ID, { openLibraryWorkId: CIRCE_WORK_ID });
-    expect(prisma.book.upsert).toHaveBeenCalledWith(
-      expect.objectContaining({
-        create: expect.objectContaining({ synopsis }),
-      }),
-    );
-  });
-
-  it("saves the goodreadsUrl when given", async () => {
-    respond(circeSearch);
-    respond(workWithStringDescription);
-    await createSuggestion(USER_ID, {
-      openLibraryWorkId: CIRCE_WORK_ID,
-      goodreadsUrl: CIRCE_LINK,
-    });
-    expect(prisma.book.upsert).toHaveBeenCalledWith(
-      expect.objectContaining({
-        update: { goodreadsUrl: CIRCE_LINK },
-        create: expect.objectContaining({ goodreadsUrl: CIRCE_LINK }),
-      }),
-    );
-  });
-
-  it("adds a suggestion to an existing book instead of duplicating it", async () => {
-    const existing = { ...circeBook, id: "existing-book" };
-    vi.mocked(prisma.book.upsert).mockResolvedValue(existing);
-    respond(circeSearch);
-    respond(workWithStringDescription);
-
-    const book = await createSuggestion(USER_ID, {
-      openLibraryWorkId: CIRCE_WORK_ID,
-    });
-
-    expect(prisma.suggestion.create).toHaveBeenCalledWith({
-      data: { userId: USER_ID, bookId: "existing-book" },
-    });
-    expect(book).toBe(existing);
-  });
-
-  it("throws ConflictError when this user already suggested the book", async () => {
-    respond(circeSearch);
-    respond(workWithStringDescription);
-    vi.mocked(prisma.suggestion.create).mockRejectedValue(
-      new Prisma.PrismaClientKnownRequestError("Unique constraint failed", {
-        code: "P2002",
-        clientVersion: "7",
-      }),
-    );
-    await expect(
-      createSuggestion(USER_ID, { openLibraryWorkId: CIRCE_WORK_ID }),
-    ).rejects.toThrow(ConflictError);
-  });
-
-  it("rethrows other database errors unchanged", async () => {
-    respond(circeSearch);
-    respond(workWithStringDescription);
-    const fkError = new Prisma.PrismaClientKnownRequestError(
-      "Foreign key constraint failed",
-      { code: "P2003", clientVersion: "7" },
-    );
-    vi.mocked(prisma.suggestion.create).mockRejectedValue(fkError);
-    await expect(
-      createSuggestion(USER_ID, { openLibraryWorkId: CIRCE_WORK_ID }),
-    ).rejects.toBe(fkError);
-  });
-});
-
-describe("listSuggestions", () => {
-  const ada = { id: "user-1", firstName: "Ada", lastName: "Lovelace" };
-  const ben = { id: "user-2", firstName: "Ben", lastName: "Okri" };
-  const suggestion = (user: typeof ada, createdAt: string) => ({
-    userId: user.id,
-    bookId: "book-1",
-    createdAt: new Date(createdAt),
-    user,
-  });
-
-  it("only asks for suggested books that aren't on a meeting", async () => {
-    await listSuggestions(USER_ID);
-    expect(vi.mocked(prisma.book.findMany).mock.calls[0][0]?.where).toEqual({
-      suggestions: { some: {} },
-      meeting: { is: null },
-    });
-  });
-
-  it("lists every suggester and dates the book by its first suggestion", async () => {
-    mockExistingBooks([
-      {
-        ...circeBook,
-        suggestions: [
-          suggestion(ben, "2026-10-02T00:00:00Z"),
-          suggestion(ada, "2026-10-05T00:00:00Z"),
-        ],
-      },
-    ]);
-    const [book] = await listSuggestions(USER_ID);
-    expect(book.suggestedBy).toEqual([ben, ada]);
-    expect(book.suggestedAt).toEqual(new Date("2026-10-02T00:00:00Z"));
-  });
-
-  it("flags books this user suggested as suggestedByMe", async () => {
-    mockExistingBooks([
-      { ...circeBook, suggestions: [suggestion(ada, "2026-10-02T00:00:00Z")] },
-      {
-        ...circeBook,
-        id: "book-2",
-        suggestions: [suggestion(ben, "2026-10-03T00:00:00Z")],
-      },
-    ]);
-    const books = await listSuggestions(ada.id);
-    const mine = Object.fromEntries(books.map((b) => [b.id, b.suggestedByMe]));
-    expect(mine).toEqual({ "book-1": true, "book-2": false });
-  });
-
-  it("sorts the newest suggestion first", async () => {
-    mockExistingBooks([
-      { ...circeBook, suggestions: [suggestion(ada, "2026-10-01T00:00:00Z")] },
-      {
-        ...circeBook,
-        id: "book-2",
-        suggestions: [suggestion(ben, "2026-10-09T00:00:00Z")],
-      },
-    ]);
-    const books = await listSuggestions(USER_ID);
-    expect(books.map((b) => b.id)).toEqual(["book-2", "book-1"]);
-  });
-});
-
-describe("listReadBooks", () => {
-  type Rating = { userId: string; score: number };
-  const meeting = (
-    id: string,
-    start: string,
-    book: (typeof circeBook & { ratings: Rating[] }) | null,
-  ) => ({
-    id,
-    title: "Book club",
-    start: new Date(start),
-    end: new Date(start),
-    description: null,
-    venueId: null,
-    bookId: book?.id ?? null,
-    book,
-  });
-
-  it("asks for meetings with a book, latest first", async () => {
-    vi.mocked(prisma.meeting.findMany).mockResolvedValue([]);
-    await listReadBooks(USER_ID);
-    const args = vi.mocked(prisma.meeting.findMany).mock.calls[0][0];
-    expect(args?.where).toEqual({ bookId: { not: null } });
-    expect(args?.orderBy).toEqual({ start: "desc" });
-  });
-
-  it("returns each book with its meeting's id and start", async () => {
-    vi.mocked(prisma.meeting.findMany).mockResolvedValue([
-      meeting("meeting-1", "2026-09-10T19:00:00Z", {
-        ...circeBook,
-        ratings: [],
-      }),
-    ] as never);
-    const [book] = await listReadBooks(USER_ID);
-    expect(book).toMatchObject({
-      id: circeBook.id,
-      title: "Circe",
-      meetingId: "meeting-1",
-      meetingStart: new Date("2026-09-10T19:00:00Z"),
-    });
-  });
-
-  it("averages the ratings and picks out this member's", async () => {
-    vi.mocked(prisma.meeting.findMany).mockResolvedValue([
-      meeting("meeting-1", "2026-09-10T19:00:00Z", {
-        ...circeBook,
-        ratings: [
-          { userId: USER_ID, score: 4 },
-          { userId: "user-2", score: 5 },
-          { userId: "user-3", score: 2 },
-        ],
-      }),
-    ] as never);
-    const [book] = await listReadBooks(USER_ID);
-    expect(book).toMatchObject({
-      averageRating: 11 / 3,
-      ratingCount: 3,
-      myRating: 4,
-    });
-  });
-
-  it("has no average and no rating of mine until rated", async () => {
-    vi.mocked(prisma.meeting.findMany).mockResolvedValue([
-      meeting("meeting-1", "2026-09-10T19:00:00Z", {
-        ...circeBook,
-        ratings: [{ userId: "user-2", score: 3 }],
-      }),
-      meeting("meeting-2", "2026-08-10T19:00:00Z", {
-        ...circeBook,
-        id: "book-2",
-        ratings: [],
-      }),
-    ] as never);
-    const [rated, unrated] = await listReadBooks(USER_ID);
-    expect(rated.myRating).toBeNull();
-    expect(unrated).toMatchObject({
-      averageRating: null,
-      ratingCount: 0,
-      myRating: null,
-    });
-  });
-});
-
-describe("rateBook", () => {
-  const mockBook = (meeting: { id: string } | null) =>
-    vi
-      .mocked(prisma.book.findUnique)
-      .mockResolvedValue({ ...circeBook, meeting } as never);
-
-  it("throws NotFoundError for an unknown book", async () => {
-    vi.mocked(prisma.book.findUnique).mockResolvedValue(null);
-    await expect(rateBook(USER_ID, "nope", 4)).rejects.toThrow(NotFoundError);
-  });
-
-  it("throws ForbiddenError for a book that isn't on a meeting", async () => {
-    mockBook(null);
-    await expect(rateBook(USER_ID, circeBook.id, 4)).rejects.toThrow(
-      ForbiddenError,
-    );
-    expect(prisma.rating.upsert).not.toHaveBeenCalled();
-  });
-
-  it("creates or replaces this member's rating", async () => {
-    mockBook({ id: "meeting-1" });
-    const row = {
-      userId: USER_ID,
-      bookId: circeBook.id,
-      score: 4,
-      createdAt: new Date(),
-    };
-    vi.mocked(prisma.rating.upsert).mockResolvedValue(row);
-    expect(await rateBook(USER_ID, circeBook.id, 4)).toBe(row);
-    expect(vi.mocked(prisma.rating.upsert).mock.calls[0][0]).toEqual({
-      where: { userId_bookId: { userId: USER_ID, bookId: circeBook.id } },
-      update: { score: 4 },
-      create: { userId: USER_ID, bookId: circeBook.id, score: 4 },
-    });
   });
 });

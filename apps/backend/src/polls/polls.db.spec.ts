@@ -174,6 +174,11 @@ describe("POST /polls", () => {
     );
     expect(res.status).toBe(201);
     expect(res.body.books).toHaveLength(6);
+    expect(res.body.votesPerMember).toBe(5);
+    const saved = await prisma.poll.findUniqueOrThrow({
+      where: { id: res.body.id },
+    });
+    expect(saved.votesPerMember).toBe(5);
   });
 
   describe("rejects books that can't go on a ballot with 400", () => {
@@ -195,7 +200,7 @@ describe("POST /polls", () => {
     });
 
     it("a book that's already on a meeting", async () => {
-      await createMeeting(beloved.id);
+      await createMeeting({ bookId: beloved.id });
       const res = await createPoll(validPoll());
       expect(res.status).toBe(400);
       expect(await pollCount()).toBe(0);
