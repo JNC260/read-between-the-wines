@@ -70,264 +70,264 @@ const vote = (pollId: string, bookIds: string[], as: User = ada) =>
 
 const pollCount = () => prisma.poll.count();
 
-// describe("POST /polls", () => {
-//   it("creates an open poll and returns it with 201", async () => {
-//     const before = Date.now();
-//     const closesAt = inDays(7).toISOString();
-//     const res = await createPoll(validPoll({ closesAt }));
-//     const after = Date.now();
+describe("POST /polls", () => {
+  it("creates an open poll and returns it with 201", async () => {
+    const before = Date.now();
+    const closesAt = inDays(7).toISOString();
+    const res = await createPoll(validPoll({ closesAt }));
+    const after = Date.now();
 
-//     expect(res.status).toBe(201);
-//     expect(res.body).toMatchObject({
-//       theme: "Witchy reads",
-//       closesAt,
-//       votesPerMember: 2,
-//       isOpen: true,
-//       myVotes: [],
-//       voterCount: 0,
-//       results: null,
-//     });
-//     const opensAt = new Date(res.body.opensAt).getTime();
-//     expect(opensAt).toBeGreaterThanOrEqual(before - 1000);
-//     expect(opensAt).toBeLessThanOrEqual(after + 1000);
-//     expect(await pollCount()).toBe(1);
-//   });
+    expect(res.status).toBe(201);
+    expect(res.body).toMatchObject({
+      theme: "Witchy reads",
+      closesAt,
+      votesPerMember: 2,
+      isOpen: true,
+      myVotes: [],
+      voterCount: 0,
+      results: null,
+    });
+    const opensAt = new Date(res.body.opensAt).getTime();
+    expect(opensAt).toBeGreaterThanOrEqual(before - 1000);
+    expect(opensAt).toBeLessThanOrEqual(after + 1000);
+    expect(await pollCount()).toBe(1);
+  });
 
-//   it("puts every chosen book on the ballot, synopsis and Goodreads link included", async () => {
-//     const res = await createPoll(validPoll());
-//     expect(sorted(res.body.books.map((b: { id: string }) => b.id))).toEqual(
-//       sorted([circe.id, piranesi.id, beloved.id]),
-//     );
-//     const circeOnBallot = res.body.books.find(
-//       (b: { id: string }) => b.id === circe.id,
-//     );
-//     expect(circeOnBallot).toMatchObject({
-//       title: "Circe",
-//       synopsis: "What Circe is about.",
-//       goodreadsUrl: "https://www.goodreads.com/book/show/1",
-//     });
-//   });
+  it("puts every chosen book on the ballot, synopsis and Goodreads link included", async () => {
+    const res = await createPoll(validPoll());
+    expect(sorted(res.body.books.map((b: { id: string }) => b.id))).toEqual(
+      sorted([circe.id, piranesi.id, beloved.id]),
+    );
+    const circeOnBallot = res.body.books.find(
+      (b: { id: string }) => b.id === circe.id,
+    );
+    expect(circeOnBallot).toMatchObject({
+      title: "Circe",
+      synopsis: "What Circe is about.",
+      goodreadsUrl: "https://www.goodreads.com/book/show/1",
+    });
+  });
 
-//   it("allows leaving out the theme", async () => {
-//     // JSON.stringify leaves undefined keys out.
-//     const res = await createPoll(validPoll({ theme: undefined }));
-//     expect(res.status).toBe(201);
-//     expect(res.body.theme).toBeNull();
-//   });
+  it("allows leaving out the theme", async () => {
+    // JSON.stringify leaves undefined keys out.
+    const res = await createPoll(validPoll({ theme: undefined }));
+    expect(res.status).toBe(201);
+    expect(res.body.theme).toBeNull();
+  });
 
-//   it("is admins only", async () => {
-//     const res = await createPoll(validPoll(), ada);
-//     expect(res.status).toBe(403);
-//     expect(errorCode(res)).toBe("FORBIDDEN");
-//     expect(await pollCount()).toBe(0);
-//   });
+  it("is admins only", async () => {
+    const res = await createPoll(validPoll(), ada);
+    expect(res.status).toBe(403);
+    expect(errorCode(res)).toBe("FORBIDDEN");
+    expect(await pollCount()).toBe(0);
+  });
 
-//   it("needs a signed-in user", async () => {
-//     const res = await api.request("POST", "/polls", { body: validPoll() });
-//     expect(res.status).toBe(401);
-//   });
+  it("needs a signed-in user", async () => {
+    const res = await api.request("POST", "/polls", { body: validPoll() });
+    expect(res.status).toBe(401);
+  });
 
-//   describe("rejects an invalid body with 400", () => {
-//     it.each([
-//       [
-//         "only one book",
-//         () => validPoll({ bookIds: [circe.id], votesPerMember: 1 }),
-//       ],
-//       [
-//         "more than six books",
-//         () =>
-//           validPoll({
-//             bookIds: Array.from({ length: 7 }, () => randomUUID()),
-//           }),
-//       ],
-//       [
-//         "the same book twice",
-//         () => validPoll({ bookIds: [circe.id, circe.id, piranesi.id] }),
-//       ],
-//       [
-//         "a closing time in the past",
-//         () => validPoll({ closesAt: inDays(-1).toISOString() }),
-//       ],
-//       ["zero votes per member", () => validPoll({ votesPerMember: 0 })],
-//       ["as many votes as books", () => validPoll({ votesPerMember: 3 })],
-//       ["a fractional vote count", () => validPoll({ votesPerMember: 1.5 })],
-//       ["no closing time", () => validPoll({ closesAt: undefined })],
-//     ])("%s", async (_, body) => {
-//       const res = await createPoll(body());
-//       expect(res.status).toBe(400);
-//       expect(errorCode(res)).toBe("BAD_REQUEST");
-//       expect(await pollCount()).toBe(0);
-//     });
-//   });
+  describe("rejects an invalid body with 400", () => {
+    it.each([
+      [
+        "only one book",
+        () => validPoll({ bookIds: [circe.id], votesPerMember: 1 }),
+      ],
+      [
+        "more than six books",
+        () =>
+          validPoll({
+            bookIds: Array.from({ length: 7 }, () => randomUUID()),
+          }),
+      ],
+      [
+        "the same book twice",
+        () => validPoll({ bookIds: [circe.id, circe.id, piranesi.id] }),
+      ],
+      [
+        "a closing time in the past",
+        () => validPoll({ closesAt: inDays(-1).toISOString() }),
+      ],
+      ["zero votes per member", () => validPoll({ votesPerMember: 0 })],
+      ["as many votes as books", () => validPoll({ votesPerMember: 3 })],
+      ["a fractional vote count", () => validPoll({ votesPerMember: 1.5 })],
+      ["no closing time", () => validPoll({ closesAt: undefined })],
+    ])("%s", async (_, body) => {
+      const res = await createPoll(body());
+      expect(res.status).toBe(400);
+      expect(errorCode(res)).toBe("BAD_REQUEST");
+      expect(await pollCount()).toBe(0);
+    });
+  });
 
-//   it("allows up to six books", async () => {
-//     const more = await Promise.all(
-//       ["A", "B", "C"].map((title) =>
-//         createBook({ title, suggestedBy: ben.id }),
-//       ),
-//     );
-//     const res = await createPoll(
-//       validPoll({
-//         bookIds: [circe.id, piranesi.id, beloved.id, ...more.map((b) => b.id)],
-//         votesPerMember: 5,
-//       }),
-//     );
-//     expect(res.status).toBe(201);
-//     expect(res.body.books).toHaveLength(6);
-//   });
+  it("allows up to six books", async () => {
+    const more = await Promise.all(
+      ["A", "B", "C"].map((title) =>
+        createBook({ title, suggestedBy: ben.id }),
+      ),
+    );
+    const res = await createPoll(
+      validPoll({
+        bookIds: [circe.id, piranesi.id, beloved.id, ...more.map((b) => b.id)],
+        votesPerMember: 5,
+      }),
+    );
+    expect(res.status).toBe(201);
+    expect(res.body.books).toHaveLength(6);
+  });
 
-//   describe("rejects books that can't go on a ballot with 400", () => {
-//     it("a book that doesn't exist", async () => {
-//       const res = await createPoll(
-//         validPoll({ bookIds: [circe.id, randomUUID()], votesPerMember: 1 }),
-//       );
-//       expect(res.status).toBe(400);
-//       expect(await pollCount()).toBe(0);
-//     });
+  describe("rejects books that can't go on a ballot with 400", () => {
+    it("a book that doesn't exist", async () => {
+      const res = await createPoll(
+        validPoll({ bookIds: [circe.id, randomUUID()], votesPerMember: 1 }),
+      );
+      expect(res.status).toBe(400);
+      expect(await pollCount()).toBe(0);
+    });
 
-//     it("a book nobody has suggested", async () => {
-//       const unsuggested = await createBook({ title: "Unsuggested" });
-//       const res = await createPoll(
-//         validPoll({ bookIds: [circe.id, unsuggested.id], votesPerMember: 1 }),
-//       );
-//       expect(res.status).toBe(400);
-//       expect(await pollCount()).toBe(0);
-//     });
+    it("a book nobody has suggested", async () => {
+      const unsuggested = await createBook({ title: "Unsuggested" });
+      const res = await createPoll(
+        validPoll({ bookIds: [circe.id, unsuggested.id], votesPerMember: 1 }),
+      );
+      expect(res.status).toBe(400);
+      expect(await pollCount()).toBe(0);
+    });
 
-//     it("a book that's already on a meeting", async () => {
-//       await createMeeting(beloved.id);
-//       const res = await createPoll(validPoll());
-//       expect(res.status).toBe(400);
-//       expect(await pollCount()).toBe(0);
-//     });
-//   });
+    it("a book that's already on a meeting", async () => {
+      await createMeeting(beloved.id);
+      const res = await createPoll(validPoll());
+      expect(res.status).toBe(400);
+      expect(await pollCount()).toBe(0);
+    });
+  });
 
-//   it("refuses with 409 while another poll is open", async () => {
-//     await createPollRow({ bookIds: [circe.id, piranesi.id] });
-//     const res = await createPoll(validPoll());
-//     expect(res.status).toBe(409);
-//     expect(errorCode(res)).toBe("CONFLICT");
-//     expect(await pollCount()).toBe(1);
-//   });
+  it("refuses with 409 while another poll is open", async () => {
+    await createPollRow({ bookIds: [circe.id, piranesi.id] });
+    const res = await createPoll(validPoll());
+    expect(res.status).toBe(409);
+    expect(errorCode(res)).toBe("CONFLICT");
+    expect(await pollCount()).toBe(1);
+  });
 
-//   it("allows a new poll once the last one has closed, even with the same books", async () => {
-//     await createClosedPollRow({ bookIds: [circe.id, piranesi.id] });
-//     const res = await createPoll(validPoll());
-//     expect(res.status).toBe(201);
-//   });
-// });
+  it("allows a new poll once the last one has closed, even with the same books", async () => {
+    await createClosedPollRow({ bookIds: [circe.id, piranesi.id] });
+    const res = await createPoll(validPoll());
+    expect(res.status).toBe(201);
+  });
+});
 
-// describe("GET /polls/current", () => {
-//   it("returns null when there's no poll", async () => {
-//     const res = await api.request("GET", "/polls/current", { as: ada });
-//     expect(res.status).toBe(200);
-//     expect(res.body).toBeNull();
-//   });
+describe("GET /polls/current", () => {
+  it("returns null when there's no poll", async () => {
+    const res = await api.request("GET", "/polls/current", { as: ada });
+    expect(res.status).toBe(200);
+    expect(res.body).toBeNull();
+  });
 
-//   it("returns null when every poll has closed", async () => {
-//     await createClosedPollRow({ bookIds: [circe.id, piranesi.id] });
-//     const res = await api.request("GET", "/polls/current", { as: ada });
-//     expect(res.status).toBe(200);
-//     expect(res.body).toBeNull();
-//   });
+  it("returns null when every poll has closed", async () => {
+    await createClosedPollRow({ bookIds: [circe.id, piranesi.id] });
+    const res = await api.request("GET", "/polls/current", { as: ada });
+    expect(res.status).toBe(200);
+    expect(res.body).toBeNull();
+  });
 
-//   it("ignores a poll that hasn't opened yet", async () => {
-//     await createPollRow({
-//       bookIds: [circe.id, piranesi.id],
-//       opensAt: inDays(1),
-//       closesAt: inDays(8),
-//     });
-//     const res = await api.request("GET", "/polls/current", { as: ada });
-//     expect(res.body).toBeNull();
-//   });
+  it("ignores a poll that hasn't opened yet", async () => {
+    await createPollRow({
+      bookIds: [circe.id, piranesi.id],
+      opensAt: inDays(1),
+      closesAt: inDays(8),
+    });
+    const res = await api.request("GET", "/polls/current", { as: ada });
+    expect(res.body).toBeNull();
+  });
 
-//   it("returns the open poll with this member's votes", async () => {
-//     await createClosedPollRow({ bookIds: [circe.id, piranesi.id] });
-//     const open = await createPollRow({
-//       bookIds: [circe.id, piranesi.id, beloved.id],
-//     });
-//     await createVotes(open.id, ada.id, [circe.id, beloved.id]);
-//     await createVotes(open.id, ben.id, [piranesi.id]);
+  it("returns the open poll with this member's votes", async () => {
+    await createClosedPollRow({ bookIds: [circe.id, piranesi.id] });
+    const open = await createPollRow({
+      bookIds: [circe.id, piranesi.id, beloved.id],
+    });
+    await createVotes(open.id, ada.id, [circe.id, beloved.id]);
+    await createVotes(open.id, ben.id, [piranesi.id]);
 
-//     const res = await api.request("GET", "/polls/current", { as: ada });
-//     expect(res.status).toBe(200);
-//     expect(res.body).toMatchObject({
-//       id: open.id,
-//       isOpen: true,
-//       voterCount: 2,
-//       results: null,
-//     });
-//     expect(sorted(res.body.myVotes)).toEqual(sorted([circe.id, beloved.id]));
-//   });
+    const res = await api.request("GET", "/polls/current", { as: ada });
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({
+      id: open.id,
+      isOpen: true,
+      voterCount: 2,
+      results: null,
+    });
+    expect(sorted(res.body.myVotes)).toEqual(sorted([circe.id, beloved.id]));
+  });
 
-//   it("shows an empty myVotes to a member who hasn't voted", async () => {
-//     const open = await createPollRow({ bookIds: [circe.id, piranesi.id] });
-//     await createVotes(open.id, ben.id, [piranesi.id]);
-//     const res = await api.request("GET", "/polls/current", { as: ada });
-//     expect(res.body.myVotes).toEqual([]);
-//     expect(res.body.voterCount).toBe(1);
-//   });
+  it("shows an empty myVotes to a member who hasn't voted", async () => {
+    const open = await createPollRow({ bookIds: [circe.id, piranesi.id] });
+    await createVotes(open.id, ben.id, [piranesi.id]);
+    const res = await api.request("GET", "/polls/current", { as: ada });
+    expect(res.body.myVotes).toEqual([]);
+    expect(res.body.voterCount).toBe(1);
+  });
 
-//   it("needs a signed-in user", async () => {
-//     const res = await api.request("GET", "/polls/current");
-//     expect(res.status).toBe(401);
-//   });
-// });
+  it("needs a signed-in user", async () => {
+    const res = await api.request("GET", "/polls/current");
+    expect(res.status).toBe(401);
+  });
+});
 
-// describe("GET /polls/:id", () => {
-//   it("returns 404 for a poll that doesn't exist", async () => {
-//     const res = await api.request("GET", `/polls/${randomUUID()}`, { as: ada });
-//     expect(res.status).toBe(404);
-//     expect(errorCode(res)).toBe("NOT_FOUND");
-//   });
+describe("GET /polls/:id", () => {
+  it("returns 404 for a poll that doesn't exist", async () => {
+    const res = await api.request("GET", `/polls/${randomUUID()}`, { as: ada });
+    expect(res.status).toBe(404);
+    expect(errorCode(res)).toBe("NOT_FOUND");
+  });
 
-//   it("returns an open poll with the ballot and no results, even to admins", async () => {
-//     const poll = await createPollRow({
-//       bookIds: [circe.id, piranesi.id, beloved.id],
-//       votesPerMember: 2,
-//     });
-//     await createVotes(poll.id, ada.id, [circe.id]);
+  it("returns an open poll with the ballot and no results, even to admins", async () => {
+    const poll = await createPollRow({
+      bookIds: [circe.id, piranesi.id, beloved.id],
+      votesPerMember: 2,
+    });
+    await createVotes(poll.id, ada.id, [circe.id]);
 
-//     const res = await api.request("GET", `/polls/${poll.id}`, { as: admin });
-//     expect(res.status).toBe(200);
-//     expect(res.body).toMatchObject({
-//       id: poll.id,
-//       votesPerMember: 2,
-//       isOpen: true,
-//       myVotes: [],
-//       voterCount: 1,
-//       results: null,
-//     });
-//     expect(res.body.books).toHaveLength(3);
-//     expect(res.body.books[0].synopsis).toEqual(expect.any(String));
-//   });
+    const res = await api.request("GET", `/polls/${poll.id}`, { as: admin });
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({
+      id: poll.id,
+      votesPerMember: 2,
+      isOpen: true,
+      myVotes: [],
+      voterCount: 1,
+      results: null,
+    });
+    expect(res.body.books).toHaveLength(3);
+    expect(res.body.books[0].synopsis).toEqual(expect.any(String));
+  });
 
-//   it("returns a closed poll with every book's votes, most first", async () => {
-//     const poll = await createClosedPollRow({
-//       bookIds: [circe.id, piranesi.id, beloved.id],
-//       votesPerMember: 2,
-//     });
-//     await createVotes(poll.id, ada.id, [circe.id, piranesi.id]);
-//     await createVotes(poll.id, ben.id, [piranesi.id]);
+  it("returns a closed poll with every book's votes, most first", async () => {
+    const poll = await createClosedPollRow({
+      bookIds: [circe.id, piranesi.id, beloved.id],
+      votesPerMember: 2,
+    });
+    await createVotes(poll.id, ada.id, [circe.id, piranesi.id]);
+    await createVotes(poll.id, ben.id, [piranesi.id]);
 
-//     const res = await api.request("GET", `/polls/${poll.id}`, { as: ada });
-//     expect(res.status).toBe(200);
-//     expect(res.body.isOpen).toBe(false);
-//     expect(res.body.voterCount).toBe(2);
-//     expect(sorted(res.body.myVotes)).toEqual(sorted([circe.id, piranesi.id]));
-//     expect(res.body.results).toEqual([
-//       { bookId: piranesi.id, votes: 2 },
-//       { bookId: circe.id, votes: 1 },
-//       { bookId: beloved.id, votes: 0 },
-//     ]);
-//   });
+    const res = await api.request("GET", `/polls/${poll.id}`, { as: ada });
+    expect(res.status).toBe(200);
+    expect(res.body.isOpen).toBe(false);
+    expect(res.body.voterCount).toBe(2);
+    expect(sorted(res.body.myVotes)).toEqual(sorted([circe.id, piranesi.id]));
+    expect(res.body.results).toEqual([
+      { bookId: piranesi.id, votes: 2 },
+      { bookId: circe.id, votes: 1 },
+      { bookId: beloved.id, votes: 0 },
+    ]);
+  });
 
-//   it("needs a signed-in user", async () => {
-//     const poll = await createPollRow({ bookIds: [circe.id, piranesi.id] });
-//     const res = await api.request("GET", `/polls/${poll.id}`);
-//     expect(res.status).toBe(401);
-//   });
-// });
+  it("needs a signed-in user", async () => {
+    const poll = await createPollRow({ bookIds: [circe.id, piranesi.id] });
+    const res = await api.request("GET", `/polls/${poll.id}`);
+    expect(res.status).toBe(401);
+  });
+});
 
 describe("PUT /polls/:id/votes", () => {
   let poll: Awaited<ReturnType<typeof createPollRow>>;
