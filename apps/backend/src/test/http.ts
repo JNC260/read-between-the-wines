@@ -7,6 +7,10 @@ import { TEST_USER_HEADER } from "./mock-auth";
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type ApiResponse = { status: number; body: any };
 
+// Taken when this module loads, before a spec stubs the global fetch to fake
+// Open Library, so requests to the app still go through.
+const send = globalThis.fetch;
+
 // Serves the real app on a free port and sends requests to /api with the
 // built-in fetch. Pass `as` to sign in as that user (needs mock-auth).
 export const startApi = async () => {
@@ -26,7 +30,7 @@ export const startApi = async () => {
     if (options.body !== undefined) {
       headers["Content-Type"] = "application/json";
     }
-    const response = await fetch(`http://127.0.0.1:${port}/api${path}`, {
+    const response = await send(`http://127.0.0.1:${port}/api${path}`, {
       method,
       headers,
       body: options.body === undefined ? undefined : JSON.stringify(options.body),
