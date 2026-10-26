@@ -27,6 +27,7 @@ const meeting = {
   venueId: null,
   bookId: null,
   venue: null,
+  book: null,
 };
 
 describe("meetings API", () => {

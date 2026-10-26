@@ -7,7 +7,7 @@ import {
 import { BadRequestError, ConflictError, NotFoundError } from "../lib/errors";
 import { prisma } from "../lib/prisma";
 
-const include = { venue: true } as const;
+const include = { venue: true, book: true } as const;
 
 // A meeting still in progress counts as upcoming. Upcoming lists soonest
 // first; past lists most recent first, which is how people scan each.

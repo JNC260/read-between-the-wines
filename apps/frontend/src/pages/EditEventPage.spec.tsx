@@ -1,12 +1,19 @@
 import { fireEvent, screen } from "@testing-library/react";
 import { type MeetingDTO } from "shared";
-import { ApiError, getMeeting, getVenues, updateMeeting } from "../api";
+import {
+  ApiError,
+  getBookSuggestions,
+  getMeeting,
+  getVenues,
+  updateMeeting,
+} from "../api";
 import { renderRoutes, Route } from "../test-utils";
 import EditEventPage from "./EditEventPage";
 
 vi.mock("../api", async (importOriginal) => ({
   // The real ApiError, so the not-found test can throw one.
   ApiError: (await importOriginal<typeof import("../api")>()).ApiError,
+  getBookSuggestions: vi.fn(),
   getMeeting: vi.fn(),
   getVenues: vi.fn(),
   updateMeeting: vi.fn(),
@@ -24,6 +31,29 @@ const venue = {
   zip: "62701",
 };
 
+const slewfoot = {
+  id: "00000000-0000-4000-8000-000000000010",
+  title: "Slewfoot",
+  author: "Brom",
+  yearPublished: 2021,
+  genres: [],
+  coverUrl: null,
+  synopsis: null,
+  pageCount: 336,
+  openLibraryWorkId: null,
+  goodreadsUrl: null,
+  createdAt: new Date("2026-10-01T00:00:00Z"),
+};
+
+// As the suggestions list returns it: no synopsis, plus who suggested it.
+const { synopsis: _, ...slewfootRow } = slewfoot;
+const suggestedSlewfoot = {
+  ...slewfootRow,
+  suggestedBy: [],
+  suggestedByMe: false,
+  suggestedAt: slewfoot.createdAt,
+};
+
 const meeting: MeetingDTO = {
   id: ID,
   title: "November: Piranesi",
@@ -34,6 +64,7 @@ const meeting: MeetingDTO = {
   venueId: VENUE_ID,
   bookId: null,
   venue,
+  book: null,
 };
 
 const renderPage = () =>
@@ -61,6 +92,7 @@ describe("EditEventPage", () => {
   beforeEach(() => {
     vi.mocked(getMeeting).mockResolvedValue(meeting);
     vi.mocked(getVenues).mockResolvedValue([venue]);
+    vi.mocked(getBookSuggestions).mockResolvedValue([suggestedSlewfoot]);
   });
 
   it("loads the event from the URL and fills in the form", async () => {
@@ -87,7 +119,39 @@ describe("EditEventPage", () => {
       start: new Date("2030-11-05T19:00"),
       end: new Date("2030-11-05T21:00"),
       venueId: VENUE_ID,
+      bookId: null,
       description: "Bring a snack",
+    });
+  });
+
+  it("assigns a suggested book", async () => {
+    vi.mocked(updateMeeting).mockResolvedValue(meeting);
+    await loaded();
+    await screen.findByRole("option", { name: "Slewfoot by Brom" });
+    fill("Book", slewfoot.id);
+    fireEvent.click(screen.getByRole("button", { name: "Save changes" }));
+    await screen.findByText("events page");
+    expect(vi.mocked(updateMeeting).mock.calls[0][0]).toMatchObject({
+      bookId: slewfoot.id,
+    });
+  });
+
+  // Suggestions leave out assigned books, so the form adds this one back.
+  it("keeps the current book selected and can clear it", async () => {
+    vi.mocked(getMeeting).mockResolvedValue({
+      ...meeting,
+      bookId: slewfoot.id,
+      book: slewfoot,
+    });
+    vi.mocked(getBookSuggestions).mockResolvedValue([]);
+    vi.mocked(updateMeeting).mockResolvedValue(meeting);
+    await loaded();
+    expect(valueOf("Book")).toBe(slewfoot.id);
+    fill("Book", "");
+    fireEvent.click(screen.getByRole("button", { name: "Save changes" }));
+    await screen.findByText("events page");
+    expect(vi.mocked(updateMeeting).mock.calls[0][0]).toMatchObject({
+      bookId: null,
     });
   });
 

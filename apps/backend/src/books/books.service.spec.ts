@@ -2,12 +2,18 @@
 // is needed: each test queues the Open Library responses it expects, in call
 // order, with respond().
 import { Prisma } from "../../generated/prisma/client";
-import { BadGatewayError, ConflictError, NotFoundError } from "../lib/errors";
+import {
+  BadGatewayError,
+  ConflictError,
+  ForbiddenError,
+  NotFoundError,
+} from "../lib/errors";
 import { prisma } from "../lib/prisma";
 import {
   createSuggestion,
   listReadBooks,
   listSuggestions,
+  rateBook,
   searchBooks,
 } from "./books.service";
 import { USER_AGENT } from "./open-library";
@@ -23,9 +29,10 @@ import {
 
 vi.mock("../lib/prisma", () => ({
   prisma: {
-    book: { findMany: vi.fn(), upsert: vi.fn() },
+    book: { findMany: vi.fn(), findUnique: vi.fn(), upsert: vi.fn() },
     suggestion: { create: vi.fn() },
     meeting: { findMany: vi.fn() },
+    rating: { upsert: vi.fn() },
   },
 }));
 
@@ -392,7 +399,12 @@ describe("listSuggestions", () => {
 });
 
 describe("listReadBooks", () => {
-  const meeting = (id: string, start: string, book: typeof circeBook | null) => ({
+  type Rating = { userId: string; score: number };
+  const meeting = (
+    id: string,
+    start: string,
+    book: (typeof circeBook & { ratings: Rating[] }) | null,
+  ) => ({
     id,
     title: "Book club",
     start: new Date(start),
@@ -405,7 +417,7 @@ describe("listReadBooks", () => {
 
   it("asks for meetings with a book, latest first", async () => {
     vi.mocked(prisma.meeting.findMany).mockResolvedValue([]);
-    await listReadBooks();
+    await listReadBooks(USER_ID);
     const args = vi.mocked(prisma.meeting.findMany).mock.calls[0][0];
     expect(args?.where).toEqual({ bookId: { not: null } });
     expect(args?.orderBy).toEqual({ start: "desc" });
@@ -413,14 +425,94 @@ describe("listReadBooks", () => {
 
   it("returns each book with its meeting's id and start", async () => {
     vi.mocked(prisma.meeting.findMany).mockResolvedValue([
-      meeting("meeting-1", "2026-09-10T19:00:00Z", circeBook),
+      meeting("meeting-1", "2026-09-10T19:00:00Z", {
+        ...circeBook,
+        ratings: [],
+      }),
     ] as never);
-    const [book] = await listReadBooks();
+    const [book] = await listReadBooks(USER_ID);
     expect(book).toMatchObject({
       id: circeBook.id,
       title: "Circe",
       meetingId: "meeting-1",
       meetingStart: new Date("2026-09-10T19:00:00Z"),
+    });
+  });
+
+  it("averages the ratings and picks out this member's", async () => {
+    vi.mocked(prisma.meeting.findMany).mockResolvedValue([
+      meeting("meeting-1", "2026-09-10T19:00:00Z", {
+        ...circeBook,
+        ratings: [
+          { userId: USER_ID, score: 4 },
+          { userId: "user-2", score: 5 },
+          { userId: "user-3", score: 2 },
+        ],
+      }),
+    ] as never);
+    const [book] = await listReadBooks(USER_ID);
+    expect(book).toMatchObject({
+      averageRating: 11 / 3,
+      ratingCount: 3,
+      myRating: 4,
+    });
+  });
+
+  it("has no average and no rating of mine until rated", async () => {
+    vi.mocked(prisma.meeting.findMany).mockResolvedValue([
+      meeting("meeting-1", "2026-09-10T19:00:00Z", {
+        ...circeBook,
+        ratings: [{ userId: "user-2", score: 3 }],
+      }),
+      meeting("meeting-2", "2026-08-10T19:00:00Z", {
+        ...circeBook,
+        id: "book-2",
+        ratings: [],
+      }),
+    ] as never);
+    const [rated, unrated] = await listReadBooks(USER_ID);
+    expect(rated.myRating).toBeNull();
+    expect(unrated).toMatchObject({
+      averageRating: null,
+      ratingCount: 0,
+      myRating: null,
+    });
+  });
+});
+
+describe("rateBook", () => {
+  const mockBook = (meeting: { id: string } | null) =>
+    vi
+      .mocked(prisma.book.findUnique)
+      .mockResolvedValue({ ...circeBook, meeting } as never);
+
+  it("throws NotFoundError for an unknown book", async () => {
+    vi.mocked(prisma.book.findUnique).mockResolvedValue(null);
+    await expect(rateBook(USER_ID, "nope", 4)).rejects.toThrow(NotFoundError);
+  });
+
+  it("throws ForbiddenError for a book that isn't on a meeting", async () => {
+    mockBook(null);
+    await expect(rateBook(USER_ID, circeBook.id, 4)).rejects.toThrow(
+      ForbiddenError,
+    );
+    expect(prisma.rating.upsert).not.toHaveBeenCalled();
+  });
+
+  it("creates or replaces this member's rating", async () => {
+    mockBook({ id: "meeting-1" });
+    const row = {
+      userId: USER_ID,
+      bookId: circeBook.id,
+      score: 4,
+      createdAt: new Date(),
+    };
+    vi.mocked(prisma.rating.upsert).mockResolvedValue(row);
+    expect(await rateBook(USER_ID, circeBook.id, 4)).toBe(row);
+    expect(vi.mocked(prisma.rating.upsert).mock.calls[0][0]).toEqual({
+      where: { userId_bookId: { userId: USER_ID, bookId: circeBook.id } },
+      update: { score: 4 },
+      create: { userId: USER_ID, bookId: circeBook.id, score: 4 },
     });
   });
 });

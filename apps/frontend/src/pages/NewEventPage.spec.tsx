@@ -1,11 +1,12 @@
-import { fireEvent, screen } from "@testing-library/react";
-import { createMeeting, createVenue, getVenues } from "../api";
+import { fireEvent, screen, within } from "@testing-library/react";
+import { createMeeting, createVenue, getBookSuggestions, getVenues } from "../api";
 import { renderRoutes, Route } from "../test-utils";
 import NewEventPage from "./NewEventPage";
 
 vi.mock("../api", () => ({
   createMeeting: vi.fn(),
   createVenue: vi.fn(),
+  getBookSuggestions: vi.fn(),
   getVenues: vi.fn(),
 }));
 
@@ -34,6 +35,7 @@ const submit = () =>
 
 describe("NewEventPage", () => {
   beforeEach(() => {
+    vi.mocked(getBookSuggestions).mockResolvedValue([]);
     vi.mocked(getVenues).mockResolvedValue([
       {
         id: VENUE_ID,
@@ -60,6 +62,7 @@ describe("NewEventPage", () => {
       start: new Date("2030-11-04T19:00"),
       end: new Date("2030-11-04T21:00"),
       venueId: VENUE_ID,
+      bookId: null,
       description: "Bring a snack",
     });
   });
@@ -119,7 +122,9 @@ describe("NewEventPage", () => {
     it("is the last option in the dropdown", async () => {
       renderPage();
       await screen.findByRole("option", { name: "Ada's house" });
-      const options = screen.getAllByRole("option");
+      const options = within(screen.getByLabelText("Venue")).getAllByRole(
+        "option",
+      );
       expect(options[options.length - 1].textContent).toBe("Add a new venue…");
     });
 

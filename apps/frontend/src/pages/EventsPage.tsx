@@ -35,6 +35,11 @@ const EventItem = ({
         {when.formatRange(event.start, event.end)}
       </time>
     </p>
+    {event.book && (
+      <p>
+        Reading <strong>{event.book.title}</strong> by {event.book.author}
+      </p>
+    )}
     {event.venue ? (
       <p>
         {event.venue.name}, {event.venue.streetAddress}, {event.venue.city}
