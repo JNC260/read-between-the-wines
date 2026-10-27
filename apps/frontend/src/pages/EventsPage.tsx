@@ -21,7 +21,9 @@ const EventItem = ({
   canEdit: boolean;
 }) => (
   <li>
-    <h2>{event.title}</h2>
+    <h2>
+      <Link to={`/events/${event.id}`}>{event.title}</Link>
+    </h2>
     {canEdit && (
       <Link
         to={`/events/${event.id}/edit`}

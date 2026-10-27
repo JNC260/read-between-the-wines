@@ -1,12 +1,11 @@
 // Uncomment this line to use CSS modules
 // import styles from './app.module.css';
 
-import { NavLink, Route, Routes } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ApiError } from "../api";
 import RequireAuth from "../components/RequireAuth";
-import SignOutButton from "../components/SignOutButton";
-import { authClient } from "../lib/auth-client";
+import SiteHeader from "../components/SiteHeader";
 import EditEventPage from "../pages/EditEventPage";
 import EventsPage from "../pages/EventsPage";
 import ForgotPasswordPage from "../pages/ForgotPasswordPage";
@@ -14,6 +13,7 @@ import InviteMemberPage from "../pages/InviteMemberPage";
 import InvitePage from "../pages/InvitePage";
 import LandingPage from "../pages/LandingPage";
 import LoginPage from "../pages/LoginPage";
+import MeetingPage from "../pages/MeetingPage";
 import MembersPage from "../pages/MembersPage";
 import NewEventPage from "../pages/NewEventPage";
 import NewPollPage from "../pages/NewPollPage";
@@ -37,57 +37,11 @@ const queryClient = new QueryClient({
   },
 });
 
-// Only shown to signed-in members.
-const Nav = () => {
-  const { data: session } = authClient.useSession();
-  if (!session) {
-    return null;
-  }
-  return (
-    <nav>
-      <ul>
-        <li>
-          <NavLink to="/" end>
-            Home
-          </NavLink>
-        </li>
-        <li>
-          <NavLink to="/members" end>Members</NavLink>
-        </li>
-        <li>
-          <NavLink to="/invite-member" end>Invite a member</NavLink>
-        </li>
-        <li>
-          <NavLink to="/events" end>Events</NavLink>
-        </li>
-        <li>
-          <NavLink to="/books/suggestions" end>Suggestions</NavLink>
-        </li>
-        <li>
-          <NavLink to="/books/suggest" end>Suggest a book</NavLink>
-        </li>
-        <li>
-          <NavLink to="/books/read" end>Books we've read</NavLink>
-        </li>
-        <li>
-          <NavLink to="/profile" end>My profile</NavLink>
-        </li>
-        {session.user.isAdmin && (
-          <li>
-            <NavLink to="/events/new" end>New event</NavLink>
-          </li>
-        )}
-      </ul>
-      <SignOutButton />
-    </nav>
-  );
-};
-
 export function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <div>
-        <Nav />
+      <SiteHeader />
+      <main className="page">
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginPage />} />
@@ -132,6 +86,14 @@ export function App() {
             element={
               <RequireAuth admin>
                 <NewEventPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/events/:id"
+            element={
+              <RequireAuth>
+                <MeetingPage />
               </RequireAuth>
             }
           />
@@ -184,7 +146,7 @@ export function App() {
             }
           />
         </Routes>
-      </div>
+      </main>
     </QueryClientProvider>
   );
 }

@@ -1,6 +1,14 @@
-import { type BookDTO, type PollDTO, type SuggestedBookDTO } from "shared";
+import {
+  type BookDTO,
+  type MeetingDTO,
+  type MeetingRsvpsDTO,
+  type PollDTO,
+  type ReadBookDTO,
+  type RsvpDTO,
+  type SuggestedBookDTO,
+} from "shared";
 
-// Shared by the poll specs. Override whatever a test cares about.
+// Shared by the specs. Override whatever a test cares about.
 
 export const testBook = (overrides: Partial<BookDTO> = {}): BookDTO => ({
   id: "00000000-0000-4000-8000-000000000010",
@@ -60,3 +68,58 @@ export const testPoll = (overrides: Partial<PollDTO> = {}): PollDTO => ({
   results: null,
   ...overrides,
 });
+
+export const testReadBook = (
+  overrides: Partial<ReadBookDTO> = {},
+): ReadBookDTO => {
+  const { synopsis: _, ...book } = testBook();
+  return {
+    ...book,
+    meetingId: "00000000-0000-4000-8000-000000000020",
+    meetingStart: new Date("2026-09-10T19:00:00Z"),
+    averageRating: null,
+    ratingCount: 0,
+    myRating: null,
+    ...overrides,
+  };
+};
+
+// Far in the future, at a venue, reading circe.
+export const testMeeting = (
+  overrides: Partial<MeetingDTO> = {},
+): MeetingDTO => ({
+  id: "00000000-0000-4000-8000-000000000030",
+  title: "November meeting",
+  start: new Date("2099-11-13T19:00:00"),
+  end: new Date("2099-11-13T21:00:00"),
+  description: null,
+  venueId: "00000000-0000-4000-8000-000000000040",
+  bookId: circe.id,
+  venue: {
+    id: "00000000-0000-4000-8000-000000000040",
+    name: "Priya's place",
+    streetAddress: "14 Elm St",
+    city: "Springfield",
+    state: "IL",
+    zip: "62701",
+  },
+  book: circe,
+  ...overrides,
+});
+
+export const testRsvp = (
+  firstName: string,
+  status: RsvpDTO["status"],
+  n: number,
+): RsvpDTO => ({
+  member: {
+    id: `00000000-0000-4000-8000-0000000001${String(n).padStart(2, "0")}`,
+    firstName,
+    lastName: "Reader",
+  },
+  status,
+});
+
+export const testRsvps = (
+  overrides: Partial<MeetingRsvpsDTO> = {},
+): MeetingRsvpsDTO => ({ myStatus: null, rsvps: [], ...overrides });

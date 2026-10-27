@@ -1,5 +1,5 @@
 import * as z from "zod";
-import { BookSchema } from "./books";
+import { BookSchema, SuggesterSchema } from "./books";
 import { isoDate } from "./dates";
 import { VenueSchema } from "./venues";
 
@@ -50,3 +50,30 @@ export const MeetingListQuerySchema = z.object({
 });
 
 export type MeetingListQuery = z.infer<typeof MeetingListQuerySchema>;
+
+// Mirrors the RsvpStatus enum in schema.prisma.
+export const RsvpStatusSchema = z.enum(["YES", "MAYBE", "NO"]);
+
+export type RsvpStatus = z.infer<typeof RsvpStatusSchema>;
+
+// PUT /meetings/:id/rsvp. Answering again replaces the member's answer.
+export const SetRsvpSchema = z.object({
+  status: RsvpStatusSchema,
+});
+
+export type SetRsvpDTO = z.infer<typeof SetRsvpSchema>;
+
+export const RsvpSchema = z.object({
+  member: SuggesterSchema,
+  status: RsvpStatusSchema,
+});
+
+export type RsvpDTO = z.output<typeof RsvpSchema>;
+
+// GET /meetings/:id/rsvps, and what PUT /meetings/:id/rsvp returns.
+export const MeetingRsvpsSchema = z.object({
+  myStatus: RsvpStatusSchema.nullable(), // null until this member answers
+  rsvps: z.array(RsvpSchema), // earliest answer first
+});
+
+export type MeetingRsvpsDTO = z.output<typeof MeetingRsvpsSchema>;

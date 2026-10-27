@@ -16,9 +16,12 @@ import {
   CurrentPollSchema,
   InviteLookupSchema,
   type MeetingListQuery,
+  MeetingRsvpsSchema,
   MeetingSchema,
   PollSchema,
   type RateBookDTO,
+  type SetRsvpDTO,
+  SetRsvpSchema,
   RateBookSchema,
   RatingSchema,
   ReadBookSchema,
@@ -212,6 +215,24 @@ export const updateMeeting = ({
     MeetingSchema,
     "Failed to update meeting",
     { method: "PATCH", schema: UpdateMeetingSchema, body },
+  );
+
+export const getMeetingRsvps = (meetingId: string) =>
+  apiFetch(
+    `/api/meetings/${encodeURIComponent(meetingId)}/rsvps`,
+    MeetingRsvpsSchema,
+    "Failed to fetch RSVPs",
+  );
+
+export const setRsvp = ({
+  meetingId,
+  ...body
+}: SetRsvpDTO & { meetingId: string }) =>
+  apiFetch(
+    `/api/meetings/${encodeURIComponent(meetingId)}/rsvp`,
+    MeetingRsvpsSchema,
+    "Failed to save your RSVP",
+    { method: "PUT", schema: SetRsvpSchema, body },
   );
 
 export const getVenues = () =>
