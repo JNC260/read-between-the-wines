@@ -16,6 +16,8 @@ enum UserStatus {
 // Better Auth's user table. name, emailVerified and image are its core
 // fields; firstName, lastName, status and isAdmin are registered as
 // additionalFields in src/lib/auth.ts. Passwords live on Account.
+// The profile fields after isAdmin are ours alone; Better Auth never reads
+// them. Every member can see them, so they're optional.
 model User {
   id            String     @id @default(uuid())
   name          String
@@ -26,6 +28,13 @@ model User {
   lastName      String
   isAdmin       Boolean    @default(false)
   status        UserStatus @default(ACTIVE)
+  phone         String? // E.164, e.g. "+15551234567"
+  facebookUrl   String?
+  goodreadsUrl  String?
+  instagram     String? // handles, without the @
+  tiktok        String?
+  x             String?
+  venmo         String?
   createdAt     DateTime   @default(now())
   updatedAt     DateTime   @updatedAt
 

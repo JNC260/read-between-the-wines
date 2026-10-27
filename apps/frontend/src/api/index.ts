@@ -25,6 +25,8 @@ import {
   SuggestedBookSchema,
   type UpdateMeetingDTO,
   UpdateMeetingSchema,
+  type UpdateProfileDTO,
+  UpdateProfileSchema,
   type UpdateVenueDTO,
   UpdateVenueSchema,
   UserSchema,
@@ -169,6 +171,14 @@ export const reactivateAccount = async () => {
     { method: "POST" },
   );
 };
+
+// Returns the member as everyone else will now see them.
+export const updateProfile = (body: UpdateProfileDTO) =>
+  apiFetch(`/api/users/me`, UserSchema, "Failed to save your profile", {
+    method: "PATCH",
+    schema: UpdateProfileSchema,
+    body,
+  });
 
 export const getMeetings = (when?: MeetingListQuery["when"]) => {
   const query = when ? `?when=${when}` : "";

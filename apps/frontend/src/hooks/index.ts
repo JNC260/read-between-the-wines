@@ -32,13 +32,23 @@ import {
   signOut,
   signUpWithInvite,
   updateMeeting,
+  updateProfile,
   updateVenue,
 } from "../api";
 
-export const useGetAllUsers = () => {
+// Active members only, sorted by name.
+export const useMembers = () => {
   return useQuery({
     queryKey: ["users"],
     queryFn: getUsersList,
+  });
+};
+
+export const useUpdateProfile = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: updateProfile,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["users"] }),
   });
 };
 
