@@ -3,7 +3,7 @@ import { Navigate, useLocation } from "react-router-dom";
 import { authClient } from "../lib/auth-client";
 
 // Wrap any page that needs a signed-in member:
-//   <Route path="/users" element={<RequireAuth><UsersPage /></RequireAuth>} />
+//   <Route path="/members" element={<RequireAuth><MembersPage /></RequireAuth>} />
 // Add `admin` for admin-only pages. The API checks too; this just saves
 // members from a form that would only fail.
 const RequireAuth = ({

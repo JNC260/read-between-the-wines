@@ -14,15 +14,16 @@ import InviteMemberPage from "../pages/InviteMemberPage";
 import InvitePage from "../pages/InvitePage";
 import LandingPage from "../pages/LandingPage";
 import LoginPage from "../pages/LoginPage";
+import MembersPage from "../pages/MembersPage";
 import NewEventPage from "../pages/NewEventPage";
 import NewPollPage from "../pages/NewPollPage";
 import PollPage from "../pages/PollPage";
+import ProfilePage from "../pages/ProfilePage";
 import ReactivatePage from "../pages/ReactivatePage";
 import ReadBooksPage from "../pages/ReadBooksPage";
 import ResetPasswordPage from "../pages/ResetPasswordPage";
 import SuggestBookPage from "../pages/SuggestBookPage";
 import SuggestionsPage from "../pages/SuggestionsPage";
-import UsersPage from "../pages/UsersPage";
 
 // A 4xx (not found, signed out, forbidden) won't change on a retry, so show
 // it right away. Server and network errors still get React Query's default
@@ -49,7 +50,7 @@ const Nav = () => {
           <Link to="/">Home</Link>
         </li>
         <li>
-          <Link to="/users">Users</Link>
+          <Link to="/members">Members</Link>
         </li>
         <li>
           <Link to="/invite-member">Invite a member</Link>
@@ -65,6 +66,9 @@ const Nav = () => {
         </li>
         <li>
           <Link to="/books/read">Books we've read</Link>
+        </li>
+        <li>
+          <Link to="/profile">My profile</Link>
         </li>
         {session.user.isAdmin && (
           <li>
@@ -90,10 +94,18 @@ export function App() {
           <Route path="/invite/:token" element={<InvitePage />} />
           <Route path="/reactivate" element={<ReactivatePage />} />
           <Route
-            path="/users"
+            path="/members"
             element={
               <RequireAuth>
-                <UsersPage />
+                <MembersPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <RequireAuth>
+                <ProfilePage />
               </RequireAuth>
             }
           />

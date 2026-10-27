@@ -12,7 +12,7 @@ const renderLogin = (from?: string) =>
     <>
       <Route path="/login" element={<LoginPage />} />
       <Route path="/" element="landing page" />
-      <Route path="/users" element="users page" />
+      <Route path="/members" element="members page" />
       <Route path="/reactivate" element="reactivate page" />
     </>,
   );
@@ -33,9 +33,9 @@ describe("LoginPage", () => {
   it("signs in and returns to the page RequireAuth redirected from", async () => {
     const refetch = mockSession(null);
     vi.mocked(signIn).mockResolvedValue(testUser() as never);
-    renderLogin("/users");
+    renderLogin("/members");
     submit();
-    expect(await screen.findByText("users page")).toBeTruthy();
+    expect(await screen.findByText("members page")).toBeTruthy();
     // Navigating before the session refreshes would bounce back to "/".
     expect(refetch).toHaveBeenCalled();
     expect(vi.mocked(signIn).mock.calls[0][0]).toEqual({
@@ -55,7 +55,7 @@ describe("LoginPage", () => {
     vi.mocked(signIn).mockResolvedValue(
       testUser({ status: "INACTIVE" }) as never,
     );
-    renderLogin("/users");
+    renderLogin("/members");
     submit();
     expect(await screen.findByText("reactivate page")).toBeTruthy();
   });

@@ -1,12 +1,25 @@
 import { type Request, type Response } from "express";
 import * as z from "zod";
-import { UserSchema } from "shared";
+import { type UpdateProfileDTO, UserSchema } from "shared";
 import { getUser } from "../middleware/auth";
-import { deactivateUser, getAllUsers, reactivateUser } from "./users.service";
+import {
+  deactivateUser,
+  getActiveUsers,
+  reactivateUser,
+  updateProfile,
+} from "./users.service";
 
 export const userList = async (_req: Request, res: Response) => {
-  const results = await getAllUsers();
+  const results = await getActiveUsers();
   res.json(z.encode(UserSchema.array(), results));
+};
+
+export const userUpdateSelf = async (
+  req: Request<Record<string, string>, unknown, UpdateProfileDTO>,
+  res: Response,
+) => {
+  const user = await updateProfile(getUser(req).id, req.body);
+  res.json(z.encode(UserSchema, user));
 };
 
 export const userDeactivateSelf = async (req: Request, res: Response) => {

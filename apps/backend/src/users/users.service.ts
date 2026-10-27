@@ -1,10 +1,15 @@
-import { type UserDTO } from "shared";
+import { type UpdateProfileDTO, type UserDTO } from "shared";
 import { UserStatus } from "../../generated/prisma/client";
 import { ConflictError, NotFoundError } from "../lib/errors";
 import { prisma } from "../lib/prisma";
 
-export const getAllUsers = (): Promise<UserDTO[]> => {
-  return prisma.user.findMany();
+// The member list. Inactive and banned accounts have left the club, so
+// they're left out, along with their contact details.
+export const getActiveUsers = (): Promise<UserDTO[]> => {
+  return prisma.user.findMany({
+    where: { status: UserStatus.ACTIVE },
+    orderBy: [{ firstName: "asc" }, { lastName: "asc" }],
+  });
 };
 
 // Members can deactivate themselves and admins can deactivate anyone. Either
@@ -31,3 +36,21 @@ export const deactivateUser = (id: string): Promise<UserDTO> =>
 
 export const reactivateUser = (id: string): Promise<UserDTO> =>
   changeStatus(id, UserStatus.INACTIVE, UserStatus.ACTIVE);
+
+// name is Better Auth's display name. Sign-up sets it to "First Last", so it
+// follows any change to either half.
+export const updateProfile = async (
+  id: string,
+  data: UpdateProfileDTO,
+): Promise<UserDTO> => {
+  const user = await prisma.user.findUnique({ where: { id } });
+  if (!user) {
+    throw new NotFoundError("User not found");
+  }
+  const firstName = data.firstName ?? user.firstName;
+  const lastName = data.lastName ?? user.lastName;
+  return prisma.user.update({
+    where: { id },
+    data: { ...data, name: `${firstName} ${lastName}` },
+  });
+};

@@ -30,14 +30,14 @@ describe("LandingPage", () => {
   it("passes RequireAuth's saved destination on to the log in link", () => {
     mockSession(null);
     renderRoutes(
-      { pathname: "/", state: { from: { pathname: "/users" } } },
+      { pathname: "/", state: { from: { pathname: "/members" } } },
       <>
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LoginStub />} />
       </>,
     );
     fireEvent.click(screen.getByRole("link", { name: "Log in" }));
-    expect(screen.getByText("login, then /users")).toBeTruthy();
+    expect(screen.getByText("login, then /members")).toBeTruthy();
   });
 
   describe("poll message", () => {
