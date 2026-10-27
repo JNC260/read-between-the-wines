@@ -1,7 +1,7 @@
 // Uncomment this line to use CSS modules
 // import styles from './app.module.css';
 
-import { Route, Routes, Link } from "react-router-dom";
+import { NavLink, Route, Routes } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ApiError } from "../api";
 import RequireAuth from "../components/RequireAuth";
@@ -47,32 +47,34 @@ const Nav = () => {
     <nav>
       <ul>
         <li>
-          <Link to="/">Home</Link>
+          <NavLink to="/" end>
+            Home
+          </NavLink>
         </li>
         <li>
-          <Link to="/members">Members</Link>
+          <NavLink to="/members" end>Members</NavLink>
         </li>
         <li>
-          <Link to="/invite-member">Invite a member</Link>
+          <NavLink to="/invite-member" end>Invite a member</NavLink>
         </li>
         <li>
-          <Link to="/events">Events</Link>
+          <NavLink to="/events" end>Events</NavLink>
         </li>
         <li>
-          <Link to="/books/suggestions">Suggestions</Link>
+          <NavLink to="/books/suggestions" end>Suggestions</NavLink>
         </li>
         <li>
-          <Link to="/books/suggest">Suggest a book</Link>
+          <NavLink to="/books/suggest" end>Suggest a book</NavLink>
         </li>
         <li>
-          <Link to="/books/read">Books we've read</Link>
+          <NavLink to="/books/read" end>Books we've read</NavLink>
         </li>
         <li>
-          <Link to="/profile">My profile</Link>
+          <NavLink to="/profile" end>My profile</NavLink>
         </li>
         {session.user.isAdmin && (
           <li>
-            <Link to="/events/new">New event</Link>
+            <NavLink to="/events/new" end>New event</NavLink>
           </li>
         )}
       </ul>

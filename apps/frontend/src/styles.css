@@ -1,1 +1,324 @@
-/* You can add global styles to this file, and also import other style files */
+/* Theme: Marginalia palette + Bookish type (Fraunces + Figtree).
+   Fonts are loaded in index.html. Pages are mostly unclassed markup, so
+   these are element-level base styles, written mobile-first. */
+
+:root {
+  --color-paper: #FFF6F7;
+  --color-surface: #FFFFFF;
+  --color-ink: #241B3A;
+  --color-ink-soft: #5E5470;
+  --color-line: #F0DCE3;
+  --color-accent: #C81D6B;
+  --color-on-accent: #FFFFFF;
+  --color-accent-soft: #FCE4EE;
+  --color-pop: #F29E38;
+  --color-on-pop: #2A1A05;
+  --color-highlight: #FFD3E2;
+  --color-danger: #B42318;
+
+  --font-display: "Fraunces", Georgia, "Times New Roman", serif;
+  --font-body: "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-stamp: "DM Mono", ui-monospace, Menlo, monospace;
+  --font-display-weight: 650;
+  --font-display-tracking: -0.01em;
+
+  --radius-card: 20px;
+  --radius-field: 12px;
+  --radius-pill: 999px;
+  --gutter: 18px;
+
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-paper: #1A1426;
+    --color-surface: #251C35;
+    --color-ink: #F8EEF4;
+    --color-ink-soft: #BCAEC6;
+    --color-line: #3A2E4D;
+    --color-accent: #FF6FA8;
+    --color-on-accent: #2A0A1B;
+    --color-accent-soft: #3D1E38;
+    --color-pop: #F5B354;
+    --color-on-pop: #2A1A05;
+    --color-highlight: #5C2347;
+    --color-danger: #FF8A80;
+  }
+}
+
+/* ---------- Base ---------- */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1.5;
+  -webkit-text-size-adjust: 100%;
+}
+
+#root > div {
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: 0 max(var(--gutter), env(safe-area-inset-right))
+    calc(2.5rem + env(safe-area-inset-bottom))
+    max(var(--gutter), env(safe-area-inset-left));
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* ---------- Type ---------- */
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+  font-weight: var(--font-display-weight);
+  letter-spacing: var(--font-display-tracking);
+  line-height: 1.12;
+  text-wrap: balance;
+  margin: 0 0 0.5rem;
+}
+
+h1 {
+  font-size: 1.85rem;
+  margin-top: 1.5rem;
+}
+
+h2 {
+  font-size: 1.3rem;
+}
+
+h3 {
+  font-size: 1.1rem;
+}
+
+p {
+  margin: 0 0 0.75rem;
+}
+
+a {
+  color: var(--color-accent);
+  font-weight: 600;
+  text-underline-offset: 0.2em;
+  text-decoration-thickness: 1.5px;
+}
+
+strong {
+  font-weight: 700;
+}
+
+/* The "highlighter" swipe, for a word or two in a heading. */
+mark {
+  background: linear-gradient(
+    transparent 58%,
+    var(--color-highlight) 58%,
+    var(--color-highlight) 94%,
+    transparent 94%
+  );
+  color: inherit;
+  padding: 0 0.08em;
+}
+
+[role="alert"] {
+  color: var(--color-danger);
+  font-weight: 600;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* ---------- Nav ---------- */
+
+/* One scrollable row of pills, so the nav stays one line tall on a phone. */
+nav {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 calc(-1 * var(--gutter));
+  padding: calc(0.6rem + env(safe-area-inset-top)) var(--gutter) 0.6rem;
+  background: var(--color-paper);
+  border-bottom: 1px solid var(--color-line);
+}
+
+nav ul {
+  display: flex;
+  gap: 0.4rem;
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+nav a {
+  display: block;
+  white-space: nowrap;
+  padding: 0.45rem 0.85rem;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
+  color: var(--color-ink);
+  font-size: 0.875rem;
+  text-decoration: none;
+}
+
+nav a[aria-current="page"] {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: var(--color-on-accent);
+}
+
+nav > button {
+  flex: none;
+  min-height: 2.25rem;
+  padding: 0 0.85rem;
+  font-size: 0.875rem;
+}
+
+/* ---------- Lists and cards ---------- */
+
+/* Item lists on the pages (events, suggestions, books, members) put an
+   h2 or h3 inside each li; those render as cards. */
+ul:has(> li > :is(h2, h3)) {
+  display: grid;
+  gap: 0.75rem;
+  margin: 1rem 0;
+  padding: 0;
+  list-style: none;
+}
+
+li:has(> :is(h2, h3)) {
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-card);
+  padding: 1rem;
+}
+
+li:has(> :is(h2, h3)) > :last-child {
+  margin-bottom: 0;
+}
+
+/* ---------- Forms ---------- */
+
+form {
+  display: grid;
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+form > div {
+  display: grid;
+  gap: 0.35rem;
+}
+
+label,
+legend {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+fieldset {
+  margin: 0;
+  padding: 1rem;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-card);
+  display: grid;
+  gap: 0.75rem;
+}
+
+legend {
+  padding: 0 0.35rem;
+}
+
+input:not([type="checkbox"], [type="radio"]),
+select,
+textarea {
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0.6rem 0.8rem;
+  /* 16px keeps iOS Safari from zooming into the field on focus. */
+  font: inherit;
+  font-size: 1rem;
+  color: var(--color-ink);
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-line);
+  border-radius: var(--radius-field);
+}
+
+textarea {
+  min-height: 6rem;
+  resize: vertical;
+}
+
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px var(--color-accent-soft);
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+  accent-color: var(--color-accent);
+  width: 1.15rem;
+  height: 1.15rem;
+}
+
+/* ---------- Buttons ---------- */
+
+button {
+  font: inherit;
+  font-weight: 600;
+  min-height: 2.75rem;
+  padding: 0 1.25rem;
+  border-radius: var(--radius-pill);
+  border: 1.5px solid var(--color-line);
+  background: var(--color-surface);
+  color: var(--color-ink);
+  cursor: pointer;
+}
+
+button[type="submit"] {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: var(--color-on-accent);
+}
+
+form > button[type="submit"] {
+  justify-self: stretch;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+@media (min-width: 40rem) {
+  h1 {
+    font-size: 2.25rem;
+  }
+
+  form > button[type="submit"] {
+    justify-self: start;
+  }
+}
