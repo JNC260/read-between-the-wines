@@ -39,6 +39,13 @@ export const UserSchema = z.object({
 
 export type UserDTO = z.output<typeof UserSchema>;
 
+// Profile image uploads. Shared so the file input's accept attribute and
+// size check match what the server takes.
+// TODO: pick the types to accept (jpeg, png, webp? heic from iPhones?) and
+// a size limit.
+export const PROFILE_IMAGE_TYPES: readonly string[] = [];
+export const MAX_PROFILE_IMAGE_BYTES = 0;
+
 // The messages show next to each field on the profile form.
 const requiredText = z.string().trim().min(1, "Required");
 

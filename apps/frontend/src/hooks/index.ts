@@ -31,9 +31,11 @@ import {
   signIn,
   signOut,
   signUpWithInvite,
+  removeProfileImage,
   updateMeeting,
   updateProfile,
   updateVenue,
+  uploadProfileImage,
 } from "../api";
 
 // Active members only, sorted by name.
@@ -50,6 +52,18 @@ export const useUpdateProfile = () => {
     mutationFn: updateProfile,
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["users"] }),
   });
+};
+
+// The members page shows each photo, so the member list goes stale.
+export const useUploadProfileImage = () => {
+  // TODO: like useUpdateProfile. The nav or anywhere else reading the
+  // session's user.image also needs authClient.useSession()'s refetch.
+  return useMutation({ mutationFn: uploadProfileImage });
+};
+
+export const useRemoveProfileImage = () => {
+  // TODO
+  return useMutation({ mutationFn: removeProfileImage });
 };
 
 export const useInvite = (token: string) => {

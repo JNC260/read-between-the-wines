@@ -29,6 +29,7 @@ import {
   UpdateProfileSchema,
   type UpdateVenueDTO,
   UpdateVenueSchema,
+  type UserDTO,
   UserSchema,
   VenueSchema,
 } from "shared";
@@ -179,6 +180,20 @@ export const updateProfile = (body: UpdateProfileDTO) =>
     schema: UpdateProfileSchema,
     body,
   });
+
+// Sent as multipart/form-data with the file in "image", not JSON, so it
+// can't go through apiFetch as it is.
+export const uploadProfileImage = async (_file: File): Promise<UserDTO> => {
+  // TODO: build a FormData, fetch with method PUT to /api/users/me/image
+  // (no Content-Type header: the browser sets it, with the boundary), then
+  // handle errors and decode the response the way apiFetch does.
+  throw new Error("TODO: uploadProfileImage");
+};
+
+export const removeProfileImage = async (): Promise<UserDTO> => {
+  // TODO: DELETE /api/users/me/image. No body, so apiFetch works here.
+  throw new Error("TODO: removeProfileImage");
+};
 
 export const getMeetings = (when?: MeetingListQuery["when"]) => {
   const query = when ? `?when=${when}` : "";

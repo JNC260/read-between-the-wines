@@ -22,6 +22,19 @@ export const userUpdateSelf = async (
   res.json(z.encode(UserSchema, user));
 };
 
+// After uploadImage, which leaves the parsed file on the request.
+export const userUploadImage = async (_req: Request, _res: Response) => {
+  // TODO: pass the file's buffer and type to updateProfileImage in
+  // users.service, then respond with the updated user, encoded like the
+  // other handlers.
+  throw new Error("TODO: userUploadImage");
+};
+
+export const userRemoveImage = async (_req: Request, _res: Response) => {
+  // TODO: call removeProfileImage in users.service.
+  throw new Error("TODO: userRemoveImage");
+};
+
 export const userDeactivateSelf = async (req: Request, res: Response) => {
   const user = await deactivateUser(getUser(req).id);
   res.json(z.encode(UserSchema, user));

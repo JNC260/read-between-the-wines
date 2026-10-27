@@ -11,6 +11,7 @@ import {
   UpdateProfileSchema,
   type UserDTO,
 } from "shared";
+import ProfileImageField from "../components/ProfileImageField";
 import { useMembers, useUpdateProfile } from "../hooks";
 import { authClient } from "../lib/auth-client";
 
@@ -210,6 +211,7 @@ const ProfilePage = () => {
   return (
     <div>
       <h1>My profile</h1>
+      <ProfileImageField user={me} />
       <ProfileForm user={me} />
     </div>
   );

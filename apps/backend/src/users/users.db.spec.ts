@@ -176,3 +176,20 @@ describe("PATCH /users/me", () => {
     expect(res.status).toBe(401);
   });
 });
+
+// TODO: these need a fixture image (a tiny real PNG, as a Buffer) and the
+// request helper in test/http.ts to send FormData; it only sends JSON now.
+describe("PUT /users/me/image", () => {
+  it.todo("saves the image and returns the user with its URL");
+  it.todo("replaces an existing image and deletes the old file");
+  it.todo("returns 400 with no file");
+  it.todo("returns 400 for a file that isn't an allowed image type");
+  it.todo("returns 400 for a file over the size limit");
+  it.todo("returns 401 when signed out");
+});
+
+describe("DELETE /users/me/image", () => {
+  it.todo("clears the image and deletes the file");
+  it.todo("succeeds when there's no image");
+  it.todo("returns 401 when signed out");
+});

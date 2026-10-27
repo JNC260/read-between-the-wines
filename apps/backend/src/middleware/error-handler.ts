@@ -18,6 +18,10 @@ export const errorHandler: ErrorRequestHandler = (err, _req, res, next) => {
     return;
   }
 
+  // TODO: the upload parser throws its own errors (with multer, a
+  // MulterError with code LIMIT_FILE_SIZE for a file over the limit). Turn
+  // those into a 400 here, or in middleware/upload.ts.
+
   if (isJsonParseError(err)) {
     res
       .status(400)

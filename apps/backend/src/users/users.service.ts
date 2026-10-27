@@ -2,6 +2,7 @@ import { type UpdateProfileDTO, type UserDTO } from "shared";
 import { UserStatus } from "../../generated/prisma/client";
 import { ConflictError, NotFoundError } from "../lib/errors";
 import { prisma } from "../lib/prisma";
+import { type UploadedImage } from "../lib/storage";
 
 // The member list. Inactive and banned accounts have left the club, so
 // they're left out, along with their contact details.
@@ -53,4 +54,21 @@ export const updateProfile = async (
     where: { id },
     data: { ...data, name: `${firstName} ${lastName}` },
   });
+};
+
+// Saves the new image, points User.image at it, then deletes the old one.
+export const updateProfileImage = async (
+  _id: string,
+  _image: UploadedImage,
+): Promise<UserDTO> => {
+  // TODO: saveImage(), update the user, then deleteImage() the old URL.
+  // Think about the order: what's left behind if the update fails after
+  // the save, or the delete fails after the update?
+  throw new Error("TODO: updateProfileImage");
+};
+
+// Clears User.image and deletes the file.
+export const removeProfileImage = async (_id: string): Promise<UserDTO> => {
+  // TODO
+  throw new Error("TODO: removeProfileImage");
 };
