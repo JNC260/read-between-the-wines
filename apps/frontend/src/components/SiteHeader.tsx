@@ -1,8 +1,8 @@
 import { useEffect, useRef } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
 import { authClient } from "../lib/auth-client";
+import { initials } from "../lib/initials";
 import Logo from "./Logo";
-import { initials } from "./RsvpButtons";
 import SignOutButton from "./SignOutButton";
 
 // Everything a member does less often. A <details> opens and closes without

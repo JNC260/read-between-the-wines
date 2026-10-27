@@ -75,7 +75,7 @@ body {
     max(var(--gutter), env(safe-area-inset-left));
 }
 
-.page:has(> .landing) {
+.page:has(> .landing, > .suggestions-page) {
   max-width: 72rem;
 }
 
@@ -887,6 +887,283 @@ li:has(> :is(h2, h3)) > :last-child {
   width: 3.5rem;
 }
 
+/* ---------- Suggested books ---------- */
+
+.page-head {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 0.75rem 1rem;
+  margin: 1.5rem 0 1rem;
+}
+
+.page-head h1 {
+  margin: 0;
+}
+
+.page-head p {
+  margin: 0.25rem 0 0;
+}
+
+.notice {
+  padding: 0.75rem 1rem;
+  border-radius: 14px;
+  background: var(--color-accent-soft);
+}
+
+.catalog {
+  display: grid;
+  gap: 1rem;
+}
+
+.catalog-filters {
+  display: grid;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.search {
+  position: relative;
+  display: block;
+}
+
+/* Beats the base input rule further down, which sets padding-inline. */
+.search input[type="search"] {
+  padding-left: 2.5rem;
+  border-radius: var(--radius-pill);
+}
+
+.search-icon {
+  position: absolute;
+  left: 0.9rem;
+  top: 50%;
+  width: 1.05rem;
+  height: 1.05rem;
+  transform: translateY(-50%);
+  fill: none;
+  stroke: var(--color-ink-soft);
+  stroke-width: 2;
+  stroke-linecap: round;
+  pointer-events: none;
+}
+
+/* Phone: every chip in one row that scrolls sideways, running to the screen
+   edges; the group labels are for screen readers only. */
+.filter-groups {
+  display: flex;
+  gap: 0.4rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+  margin: 0 calc(-1 * var(--gutter));
+  padding: 0.1rem var(--gutter);
+}
+
+.filter-groups > div {
+  display: flex;
+  gap: 0.4rem;
+  flex: none;
+}
+
+.filter-groups .filter-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.filter-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--color-ink-soft);
+}
+
+.chip {
+  flex: none;
+  min-height: 2.25rem;
+  padding: 0 0.9rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+.chip[aria-pressed="true"] {
+  background: var(--color-ink);
+  border-color: var(--color-ink);
+  color: var(--color-paper);
+}
+
+.sort {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.sort label {
+  flex: none;
+}
+
+.sort-controls {
+  display: flex;
+  gap: 0.5rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.sort-controls select {
+  flex: 1;
+  min-width: 0;
+  border-radius: var(--radius-pill);
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.sort-order {
+  flex: none;
+  width: 2.75rem;
+  padding: 0;
+  font-size: 1.05rem;
+}
+
+.catalog-results {
+  min-width: 0;
+}
+
+.catalog-list {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.catalog-card {
+  position: relative;
+  display: grid;
+  grid-template-columns: 4.5rem minmax(0, 1fr);
+  gap: 0.9rem;
+  align-items: start;
+  padding: 0.9rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
+  border-radius: 18px;
+}
+
+.catalog-card-picked {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 1px var(--color-accent);
+}
+
+.catalog-card-text {
+  min-width: 0;
+}
+
+.catalog-card h2 {
+  font-size: 1.1rem;
+  line-height: 1.2;
+  margin: 0;
+}
+
+.catalog-card:has(.catalog-card-check) h2 {
+  padding-right: 2rem;
+}
+
+.catalog-card .byline {
+  margin: 0.15rem 0 0.3rem;
+}
+
+.catalog-card-meta {
+  margin: 0 0 0.5rem;
+  font-size: 0.85rem;
+  color: var(--color-ink-soft);
+  font-variant-numeric: tabular-nums;
+}
+
+.catalog-card-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.5rem;
+  font-size: 0.82rem;
+  color: var(--color-ink-soft);
+}
+
+.catalog-card .face {
+  width: 1.5rem;
+  height: 1.5rem;
+  font-size: 0.6rem;
+}
+
+.catalog-card-check {
+  position: absolute;
+  top: 0.9rem;
+  right: 0.9rem;
+}
+
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin: 0.5rem 0 0;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.1rem 0.55rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.badge-ballot {
+  background: var(--color-pop);
+  color: var(--color-on-pop);
+}
+
+.badge-mine {
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+}
+
+.catalog-empty {
+  display: grid;
+  justify-items: start;
+  gap: 0.75rem;
+}
+
+/* Stays at the bottom of the screen while an admin scrolls and picks. */
+.pick-bar {
+  position: sticky;
+  bottom: calc(0.75rem + env(safe-area-inset-bottom));
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  padding: 0.5rem 0.5rem 0.5rem 1.1rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-pill);
+  box-shadow: 0 14px 30px -16px rgb(36 27 58 / 0.45);
+}
+
+.pick-bar p {
+  margin: 0;
+  font-size: 0.85rem;
+  line-height: 1.3;
+}
+
+.pick-bar strong {
+  display: block;
+  font-size: 0.95rem;
+}
+
 /* ---------- Forms ---------- */
 
 form {
@@ -924,7 +1201,8 @@ select,
 textarea {
   width: 100%;
   min-height: 2.75rem;
-  padding: 0.6rem 0.8rem;
+  padding-block: 0.6rem;
+  padding-inline: 0.8rem;
   /* 16px keeps iOS Safari from zooming into the field on focus. */
   font: inherit;
   font-size: 1rem;
@@ -937,6 +1215,22 @@ textarea {
 textarea {
   min-height: 6rem;
   resize: vertical;
+}
+
+/* The native arrow sits wherever the browser likes; this one sits as far
+   from the right edge (0.8rem) as the text does from the left. */
+select {
+  appearance: none;
+  padding-right: 2.25rem;
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--color-ink-soft) 50%),
+    linear-gradient(135deg, var(--color-ink-soft) 50%, transparent 50%);
+  background-position:
+    calc(100% - 1.15rem) 50%,
+    calc(100% - 0.8rem) 50%;
+  background-size: 0.35rem 0.35rem;
+  background-repeat: no-repeat;
+  cursor: pointer;
 }
 
 input:focus-visible,
@@ -978,6 +1272,12 @@ form > button[type="submit"] {
   justify-self: stretch;
 }
 
+.button-primary {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: var(--color-on-accent);
+}
+
 button:disabled {
   opacity: 0.6;
   cursor: progress;
@@ -1013,6 +1313,14 @@ button:disabled {
   .card {
     padding: 1.25rem;
   }
+
+  .catalog-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .catalog-card {
+    grid-template-columns: 5rem minmax(0, 1fr);
+  }
 }
 
 /* Two columns once both fit comfortably: what's next on the left,
@@ -1021,5 +1329,54 @@ button:disabled {
   .landing-grid {
     grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
     gap: 2.5rem;
+  }
+
+  /* Filters move into a sidebar; chips wrap inside it under their labels. */
+  .catalog {
+    grid-template-columns: 15rem minmax(0, 1fr);
+    gap: 2rem;
+    align-items: start;
+  }
+
+  .catalog-filters {
+    position: sticky;
+    top: 5rem;
+    gap: 1.1rem;
+    padding: 1rem;
+    background: var(--color-surface);
+    border: 1px solid var(--color-line);
+    border-radius: var(--radius-card);
+  }
+
+  .filter-groups {
+    flex-direction: column;
+    gap: 1.1rem;
+    overflow: visible;
+    margin: 0;
+    padding: 0;
+  }
+
+  .filter-groups > div {
+    flex-wrap: wrap;
+    flex: initial;
+  }
+
+  .filter-groups .filter-label {
+    position: static;
+    width: auto;
+    height: auto;
+    clip-path: none;
+    flex-basis: 100%;
+  }
+
+  .sort {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.4rem;
+  }
+
+  .chip {
+    white-space: normal;
+    text-align: left;
   }
 }

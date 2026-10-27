@@ -1,5 +1,6 @@
 import { type RsvpDTO, type RsvpStatus } from "shared";
 import { useMeetingRsvps, useSetRsvp } from "../hooks";
+import { initials } from "../lib/initials";
 
 const CHOICES: { status: RsvpStatus; label: string }[] = [
   { status: "YES", label: "I'm in" },
@@ -34,9 +35,6 @@ export const RsvpButtons = ({ meetingId }: { meetingId: string }) => {
     </div>
   );
 };
-
-export const initials = (member: { firstName: string; lastName?: string }) =>
-  `${member.firstName.charAt(0)}${member.lastName?.charAt(0) ?? ""}`;
 
 const MAX_FACES = 4;
 
