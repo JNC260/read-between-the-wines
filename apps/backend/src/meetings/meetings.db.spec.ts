@@ -343,3 +343,119 @@ describe("PATCH /meetings/:id", () => {
     expect(res.status).toBe(401);
   });
 });
+
+describe("GET /meetings/:id/rsvps", () => {
+  const getRsvps = (id: string, as: User = ada) =>
+    api.request("GET", `/meetings/${id}/rsvps`, { as });
+
+  it("lists every answer, earliest first, with this member's own", async () => {
+    const meeting = await createMeeting({ start: hoursFromNow(48) });
+    await prisma.rsvp.create({
+      data: {
+        userId: admin.id,
+        meetingId: meeting.id,
+        status: "MAYBE",
+        createdAt: hoursFromNow(-2),
+      },
+    });
+    await prisma.rsvp.create({
+      data: { userId: ada.id, meetingId: meeting.id, status: "YES" },
+    });
+
+    const res = await getRsvps(meeting.id);
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual({
+      myStatus: "YES",
+      rsvps: [
+        {
+          member: { id: admin.id, firstName: "Admin", lastName: "Reader" },
+          status: "MAYBE",
+        },
+        {
+          member: { id: ada.id, firstName: "Ada", lastName: "Reader" },
+          status: "YES",
+        },
+      ],
+    });
+  });
+
+  it("returns a null myStatus before this member answers", async () => {
+    const meeting = await createMeeting();
+    const res = await getRsvps(meeting.id);
+    expect(res.body).toEqual({ myStatus: null, rsvps: [] });
+  });
+
+  it("returns 404 for an unknown meeting", async () => {
+    const res = await getRsvps(randomUUID());
+    expect(res.status).toBe(404);
+    expect(errorCode(res)).toBe("NOT_FOUND");
+  });
+
+  it("returns 401 when signed out", async () => {
+    const meeting = await createMeeting();
+    const res = await api.request("GET", `/meetings/${meeting.id}/rsvps`);
+    expect(res.status).toBe(401);
+  });
+});
+
+describe("PUT /meetings/:id/rsvp", () => {
+  const rsvp = (id: string, body: unknown, as: User = ada) =>
+    api.request("PUT", `/meetings/${id}/rsvp`, { as, body });
+
+  it("saves the answer and returns everyone's", async () => {
+    const meeting = await createMeeting({ start: hoursFromNow(48) });
+    const res = await rsvp(meeting.id, { status: "YES" });
+
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({
+      myStatus: "YES",
+      rsvps: [{ member: { id: ada.id }, status: "YES" }],
+    });
+  });
+
+  it("replaces an earlier answer", async () => {
+    const meeting = await createMeeting({ start: hoursFromNow(48) });
+    await rsvp(meeting.id, { status: "YES" });
+    const res = await rsvp(meeting.id, { status: "NO" });
+
+    expect(res.body.myStatus).toBe("NO");
+    expect(await prisma.rsvp.count()).toBe(1);
+  });
+
+  it("still takes answers while the meeting is in progress", async () => {
+    const meeting = await createMeeting({
+      start: hoursFromNow(-1),
+      end: hoursFromNow(1),
+    });
+    expect((await rsvp(meeting.id, { status: "YES" })).status).toBe(200);
+  });
+
+  it("rejects an answer once the meeting is over", async () => {
+    const meeting = await createMeeting({ start: hoursFromNow(-48) });
+    const res = await rsvp(meeting.id, { status: "YES" });
+    expect(res.status).toBe(400);
+    expect(errorCode(res)).toBe("BAD_REQUEST");
+    expect(await prisma.rsvp.count()).toBe(0);
+  });
+
+  it("rejects an unknown status with 400", async () => {
+    const meeting = await createMeeting({ start: hoursFromNow(48) });
+    const res = await rsvp(meeting.id, { status: "PROBABLY" });
+    expect(res.status).toBe(400);
+    expect(errorCode(res)).toBe("BAD_REQUEST");
+  });
+
+  it("returns 404 for an unknown meeting", async () => {
+    const res = await rsvp(randomUUID(), { status: "YES" });
+    expect(res.status).toBe(404);
+    expect(errorCode(res)).toBe("NOT_FOUND");
+  });
+
+  it("returns 401 when signed out", async () => {
+    const meeting = await createMeeting({ start: hoursFromNow(48) });
+    const res = await api.request("PUT", `/meetings/${meeting.id}/rsvp`, {
+      body: { status: "YES" },
+    });
+    expect(res.status).toBe(401);
+  });
+});

@@ -1,11 +1,17 @@
 import express from "express";
-import { CreateMeetingSchema, UpdateMeetingSchema } from "shared";
+import {
+  CreateMeetingSchema,
+  SetRsvpSchema,
+  UpdateMeetingSchema,
+} from "shared";
 import { requireAdmin, requireAuth } from "../middleware/auth";
 import { validate } from "../middleware/validate";
 import {
   createMeeting,
   getMeeting,
   getMeetingList,
+  getRsvps,
+  setRsvp,
   updateMeeting,
 } from "./meetings.controller";
 
@@ -23,5 +29,8 @@ router.patch(
   validate(UpdateMeetingSchema),
   updateMeeting,
 );
+// Any member, for themselves.
+router.get("/:id/rsvps", getRsvps);
+router.put("/:id/rsvp", validate(SetRsvpSchema), setRsvp);
 
 export default router;

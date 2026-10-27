@@ -5,7 +5,12 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { type MeetingListQuery, type PollDTO, type VenueDTO } from "shared";
+import {
+  type MeetingListQuery,
+  type MeetingRsvpsDTO,
+  type PollDTO,
+  type VenueDTO,
+} from "shared";
 import {
   castVotes,
   createBookSuggestion,
@@ -16,6 +21,7 @@ import {
   getBookSuggestions,
   getCurrentPoll,
   getMeeting,
+  getMeetingRsvps,
   getMeetings,
   getPoll,
   getReadBooks,
@@ -28,6 +34,7 @@ import {
   requestPasswordReset,
   resetPassword,
   searchBooks,
+  setRsvp,
   signIn,
   signOut,
   signUpWithInvite,
@@ -131,6 +138,27 @@ export const useUpdateMeeting = () => {
         queryClient.invalidateQueries({ queryKey: ["meetings"] }),
         queryClient.invalidateQueries({ queryKey: ["books"] }),
       ]),
+  });
+};
+
+// Under "meetings" too, so invalidating meetings refreshes RSVPs.
+export const useMeetingRsvps = (meetingId: string) => {
+  return useQuery({
+    queryKey: ["meetings", meetingId, "rsvps"],
+    queryFn: () => getMeetingRsvps(meetingId),
+  });
+};
+
+// The response is the updated list, so it goes straight into the cache.
+export const useSetRsvp = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: setRsvp,
+    onSuccess: (rsvps, { meetingId }) =>
+      queryClient.setQueryData<MeetingRsvpsDTO>(
+        ["meetings", meetingId, "rsvps"],
+        rsvps,
+      ),
   });
 };
 
