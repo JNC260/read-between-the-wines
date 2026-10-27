@@ -32,6 +32,7 @@ export const UserSchema = z.object({
   tiktok: z.string().nullable(),
   x: z.string().nullable(),
   venmo: z.string().nullable(),
+  memberSince: z.int().nullable(), // a year
   status: UserStatusSchema,
   createdAt: isoDate,
   updatedAt: isoDate,
@@ -62,6 +63,13 @@ const phone = z
   .overwrite((value) => normalizePhone(value) ?? value)
   .regex(/^\+1\d{10}$/, "Enter a 10-digit US phone number");
 
+// The year they joined the club. Members set it themselves, since the club
+// is older than the site and account creation dates would undersell it.
+const memberSince = z
+  .int("Enter a year, like 2019")
+  .min(1900, "Enter a year, like 2019")
+  .refine((year) => year <= new Date().getFullYear(), "That year hasn't happened yet");
+
 // PATCH semantics: leave a field out to keep it, send null to clear it.
 // Email is changed through Better Auth (it has to be re-verified), and the
 // image will get its own upload endpoint.
@@ -75,6 +83,7 @@ export const UpdateProfileSchema = z.object({
   tiktok: handle("tiktok", "TikTok").nullable().optional(),
   x: handle("x", "X").nullable().optional(),
   venmo: handle("venmo", "Venmo").nullable().optional(),
+  memberSince: memberSince.nullable().optional(),
 });
 
 export type UpdateProfileDTO = z.infer<typeof UpdateProfileSchema>;

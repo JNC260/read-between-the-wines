@@ -1,4 +1,4 @@
-import { screen, within } from "@testing-library/react";
+import { fireEvent, screen, within } from "@testing-library/react";
 import { type UserDTO } from "shared";
 import { getUsersList } from "../api";
 import { mockSession, renderRoutes, Route, testUser } from "../test-utils";
@@ -23,6 +23,7 @@ const member = (overrides: Partial<UserDTO>): UserDTO => ({
   tiktok: null,
   x: null,
   venmo: null,
+  memberSince: null,
   status: "ACTIVE",
   createdAt: new Date("2026-10-01T00:00:00Z"),
   updatedAt: new Date("2026-10-01T00:00:00Z"),
@@ -53,70 +54,111 @@ const grace = member({
 const renderPage = () =>
   renderRoutes("/members", <Route path="/members" element={<MembersPage />} />);
 
-const card = (name: RegExp) =>
-  screen.getByRole("article", { name });
+const card = (name: RegExp) => screen.getByRole("article", { name });
 
-const headings = () =>
-  screen.getAllByRole("heading", { level: 2 }).map((h) => h.textContent);
+const loaded = async (members: UserDTO[] = [ada, grace]) => {
+  vi.mocked(getUsersList).mockResolvedValue(members);
+  const result = renderPage();
+  await screen.findByRole("heading", { name: "Members" });
+  return result;
+};
+
+const openDetails = (name: string) => {
+  fireEvent.click(screen.getByRole("button", { name }));
+  return screen.getByRole("dialog");
+};
+
+const hrefs = (links: HTMLElement[]) =>
+  links.map((a) => [a.getAttribute("aria-label") ?? a.textContent, a.getAttribute("href")]);
 
 describe("MembersPage", () => {
   beforeEach(() => mockSession(me));
 
   // The API filters and sorts; the page keeps its order.
-  it("lists members in the order the API sends them", async () => {
-    vi.mocked(getUsersList).mockResolvedValue([ada, grace]);
-    renderPage();
-    await screen.findByRole("heading", { name: "Members" });
-    expect(headings()).toEqual(["Ada Lovelace (you)", "Grace Hopper"]);
+  it("lists members in the order the API sends them, marking the signed-in one", async () => {
+    await loaded();
+    const names = screen
+      .getAllByRole("heading", { level: 2 })
+      .map((h) => h.textContent);
+    expect(names).toEqual(["Ada LovelaceYou", "Grace Hopper"]);
   });
 
-  it("links each contact detail a member added", async () => {
-    vi.mocked(getUsersList).mockResolvedValue([ada, grace]);
-    renderPage();
-    await screen.findByRole("heading", { name: "Members" });
-    const links = within(card(/Grace/)).getAllByRole("link");
-    expect(
-      links.map((a) => [a.textContent, a.getAttribute("href")]),
-    ).toEqual([
-      ["grace@example.com", "mailto:grace@example.com"],
-      ["(555) 123-4567", "tel:+15551234567"],
-      ["@grace", "https://www.instagram.com/grace"],
-      ["@gracet", "https://www.tiktok.com/@gracet"],
-      ["@gracex", "https://x.com/gracex"],
-      ["@grace-h", "https://venmo.com/u/grace-h"],
-      ["Facebook", "https://www.facebook.com/grace"],
-      ["Goodreads", "https://www.goodreads.com/user/show/1-grace"],
+  it("puts an icon link on the card for each social a member added, except Venmo", async () => {
+    await loaded();
+    expect(hrefs(within(card(/Grace/)).getAllByRole("link"))).toEqual([
+      ["Grace on Instagram", "https://www.instagram.com/grace"],
+      ["Grace on TikTok", "https://www.tiktok.com/@gracet"],
+      ["Grace on X", "https://x.com/gracex"],
+      ["Grace on Facebook", "https://www.facebook.com/grace"],
+      ["Grace on Goodreads", "https://www.goodreads.com/user/show/1-grace"],
     ]);
   });
 
-  it("leaves out fields a member hasn't added", async () => {
-    vi.mocked(getUsersList).mockResolvedValue([ada, grace]);
-    renderPage();
-    await screen.findByRole("heading", { name: "Members" });
-    const list = within(card(/Ada/)).getByRole("list");
-    expect(within(list).getAllByRole("listitem")).toHaveLength(1);
-    expect(within(list).queryByText(/Phone/)).toBeNull();
+  it("leaves Venmo off the card, since it has a Pay button in the details", async () => {
+    await loaded([ada, { ...grace, instagram: null, tiktok: null, x: null, facebookUrl: null, goodreadsUrl: null }]);
+    expect(within(card(/Grace/)).queryByRole("list")).toBeNull();
   });
 
-  it("links only the signed-in member to the profile page", async () => {
-    vi.mocked(getUsersList).mockResolvedValue([ada, grace]);
-    renderPage();
-    await screen.findByRole("heading", { name: "Members" });
+  it("shows nothing in place of socials for a member with none", async () => {
+    await loaded();
+    expect(within(card(/Ada/)).queryByRole("list")).toBeNull();
+  });
+
+  it("shows member since only once it's set", async () => {
+    await loaded([ada, { ...grace, memberSince: 2019 }]);
+    expect(within(card(/Grace/)).getByText("Member since 2019")).toBeTruthy();
+    expect(within(card(/Ada/)).queryByText(/Member since/)).toBeNull();
+  });
+
+  it("opens a member's contact details, with quick actions and Venmo", async () => {
+    await loaded();
+    const details = openDetails("Grace Hopper");
+    expect(within(details).getByRole("heading", { name: "Grace Hopper" })).toBeTruthy();
+    expect(within(details).getByText("(555) 123-4567")).toBeTruthy();
+    expect(within(details).getByText("grace@example.com")).toBeTruthy();
+    const link = (name: string | RegExp) =>
+      within(details).getByRole("link", { name }).getAttribute("href");
+    expect(link("Text")).toBe("sms:+15551234567");
+    expect(link("Call")).toBe("tel:+15551234567");
+    expect(link("Email")).toBe("mailto:grace@example.com");
+    expect(link("Pay Grace on Venmo")).toBe("https://venmo.com/u/grace-h");
+    expect(link(/Instagram/)).toBe("https://www.instagram.com/grace");
+    expect(within(details).queryByRole("link", { name: "Edit your profile" })).toBeNull();
+  });
+
+  it("leaves out text, call and Venmo when a member hasn't added them", async () => {
+    await loaded();
+    const details = openDetails("Ada Lovelace");
+    expect(within(details).queryByRole("link", { name: "Text" })).toBeNull();
+    expect(within(details).queryByRole("link", { name: /Venmo/ })).toBeNull();
+    expect(within(details).queryByText("Phone")).toBeNull();
+    expect(within(details).getByRole("link", { name: "Email" })).toBeTruthy();
+  });
+
+  it("links the signed-in member's own details to the profile page", async () => {
+    await loaded();
+    const details = openDetails("Ada Lovelace");
     expect(
-      within(card(/Ada/)).getByRole("link", { name: "Edit your profile" }),
-    ).toBeTruthy();
-    expect(
-      within(card(/Grace/)).queryByRole("link", { name: "Edit your profile" }),
-    ).toBeNull();
+      within(details).getByRole("link", { name: "Edit your profile" }).getAttribute("href"),
+    ).toBe("/profile");
+  });
+
+  it("closes the details with the close button or Escape", async () => {
+    await loaded();
+    openDetails("Grace Hopper");
+    fireEvent.click(screen.getByRole("button", { name: "Close" }));
+    expect(screen.queryByRole("dialog")).toBeNull();
+
+    openDetails("Grace Hopper");
+    fireEvent.keyDown(document, { key: "Escape" });
+    expect(screen.queryByRole("dialog")).toBeNull();
   });
 
   it("shows a photo when there is one, and initials when there isn't", async () => {
-    vi.mocked(getUsersList).mockResolvedValue([
+    const { container } = await loaded([
       ada,
       { ...grace, image: "https://example.com/grace.jpg" },
     ]);
-    const { container } = renderPage();
-    await screen.findByRole("heading", { name: "Members" });
     expect(within(card(/Ada/)).getByText("AL")).toBeTruthy();
     expect(container.querySelector("img")?.getAttribute("src")).toBe(
       "https://example.com/grace.jpg",
