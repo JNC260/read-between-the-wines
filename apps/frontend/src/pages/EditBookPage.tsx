@@ -17,8 +17,7 @@ type FieldName =
   | "genres"
   | "synopsis"
   | "coverUrl"
-  | "goodreadsUrl"
-  | "openLibraryWorkId";
+  | "goodreadsUrl";
 
 const initialValues = (book: BookDetailDTO): Record<FieldName, string> => ({
   title: book.title,
@@ -29,7 +28,6 @@ const initialValues = (book: BookDetailDTO): Record<FieldName, string> => ({
   synopsis: book.synopsis ?? "",
   coverUrl: book.coverUrl ?? "",
   goodreadsUrl: book.goodreadsUrl ?? "",
-  openLibraryWorkId: book.openLibraryWorkId ?? "",
 });
 
 // "Thriller, suspense, Thriller" -> ["Thriller", "suspense"]: commas split,
@@ -109,7 +107,6 @@ const BookForm = ({
       synopsis: orNull(values.synopsis),
       coverUrl: orNull(values.coverUrl),
       goodreadsUrl: orNull(values.goodreadsUrl),
-      openLibraryWorkId: orNull(values.openLibraryWorkId),
     };
     const result = UpdateBookSchema.safeParse(body);
     if (!result.success) {
@@ -164,13 +161,6 @@ const BookForm = ({
       </div>
       <Field {...bind("coverUrl")} label="Cover image link" type="url" />
       <Field {...bind("goodreadsUrl")} label="Goodreads link" type="url" />
-      <Field
-        {...bind("openLibraryWorkId")}
-        label="Open Library work id"
-        hint="Like OL27482W, from the book's openlibrary.org/works/ link"
-        autoCapitalize="characters"
-        spellCheck={false}
-      />
 
       {error && <p role="alert">{error.message}</p>}
       <button type="submit" className="button-primary" disabled={isPending}>

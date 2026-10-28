@@ -62,6 +62,10 @@ describe("UpdateBookSchema", () => {
     ).toEqual({ title: "Circe", genres: ["Fantasy"] });
   });
 
+  it("leaves out the work id, which isn't editable", () => {
+    expect(UpdateBookSchema.parse({ openLibraryWorkId: "OL27482W" })).toEqual({});
+  });
+
   it("accepts null to clear an optional field", () => {
     expect(
       UpdateBookSchema.parse({ synopsis: null, coverUrl: null, yearPublished: null }),
@@ -76,7 +80,6 @@ describe("UpdateBookSchema", () => {
     { pageCount: -1 },
     { coverUrl: "ftp://example.com/cover.jpg" },
     { goodreadsUrl: "https://example.com" },
-    { openLibraryWorkId: "OL1M" },
   ])("rejects %j", (body) => {
     expect(UpdateBookSchema.safeParse(body).success).toBe(false);
   });

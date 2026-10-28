@@ -235,8 +235,8 @@ export const getBook = async (
   return { ...rest, canEdit: !!viewer.isAdmin || suggestions.length > 0 };
 };
 
-// Every field is editable, for the "that's not what I meant" fixes. A new
-// title gets a new normalizedTitle, which duplicate checks rely on.
+// For the "that's not what I meant" fixes. A new title gets a new
+// normalizedTitle, which duplicate checks rely on.
 export const updateBook = async (
   viewer: Viewer,
   bookId: string,
@@ -249,20 +249,13 @@ export const updateBook = async (
     );
   }
 
-  try {
-    return await prisma.book.update({
-      where: { id: bookId },
-      data: {
-        ...data,
-        ...(data.title && { normalizedTitle: normalizeTitle(data.title) }),
-      },
-    });
-  } catch (e) {
-    if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002") {
-      throw new ConflictError("Another book already has that Open Library work");
-    }
-    throw e;
-  }
+  return prisma.book.update({
+    where: { id: bookId },
+    data: {
+      ...data,
+      ...(data.title && { normalizedTitle: normalizeTitle(data.title) }),
+    },
+  });
 };
 
 // Same rule as the read-books page: a book counts as read once it's on a

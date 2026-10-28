@@ -488,7 +488,6 @@ describe("PATCH /books/:id", () => {
     coverUrl: "https://covers.openlibrary.org/b/id/1-L.jpg",
     synopsis: "Patroclus and Achilles.",
     pageCount: 378,
-    openLibraryWorkId: "OL16295851W",
     goodreadsUrl: "https://www.goodreads.com/book/show/11250317",
   };
 
@@ -542,12 +541,18 @@ describe("PATCH /books/:id", () => {
     );
   });
 
-  it("returns 409 when another book already has the work id", async () => {
-    await createBook({ title: "Circe", openLibraryWorkId: CIRCE_WORK_ID });
-    const book = await createBook({ title: "Not Circe", suggestedBy: ada.id });
-    const res = await edit(book.id, { openLibraryWorkId: CIRCE_WORK_ID });
-    expect(res.status).toBe(409);
-    expect(errorCode(res)).toBe("CONFLICT");
+  it("ignores a work id, which isn't editable", async () => {
+    const book = await createBook({
+      title: "Circe",
+      openLibraryWorkId: CIRCE_WORK_ID,
+      suggestedBy: ada.id,
+    });
+    const res = await edit(book.id, { openLibraryWorkId: "OL16295851W", pageCount: 393 });
+    expect(res.status).toBe(200);
+    expect(await prisma.book.findUniqueOrThrow({ where: { id: book.id } })).toMatchObject({
+      openLibraryWorkId: CIRCE_WORK_ID,
+      pageCount: 393,
+    });
   });
 
   it.each([
@@ -557,7 +562,6 @@ describe("PATCH /books/:id", () => {
     ["zero pages", { pageCount: 0 }],
     ["a cover that isn't a web link", { coverUrl: "javascript:alert(1)" }],
     ["a link that isn't Goodreads", { goodreadsUrl: "https://example.com/book" }],
-    ["an edition id", { openLibraryWorkId: "OL7353617M" }],
     ["a blank genre", { genres: ["Fantasy", " "] }],
   ])("rejects %s with 400", async (_, body) => {
     const book = await createBook({ title: "Circe", suggestedBy: ada.id });

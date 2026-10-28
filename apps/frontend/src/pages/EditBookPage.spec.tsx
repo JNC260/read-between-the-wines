@@ -55,7 +55,8 @@ describe("EditBookPage", () => {
     expect(valueOf("Pages")).toBe("404");
     expect(valueOf("Genres")).toBe("Fantasy, Mythology");
     expect(valueOf("Synopsis")).toBe("A witch on an island.");
-    expect(valueOf("Open Library work id")).toBe("OL18012166W");
+    // The work id stops duplicate books, so it isn't offered.
+    expect(screen.queryByLabelText(/Open Library/)).toBeNull();
   });
 
   it("saves every field, clearing emptied ones, then goes back", async () => {
@@ -81,7 +82,6 @@ describe("EditBookPage", () => {
       synopsis: null,
       coverUrl: "https://covers.openlibrary.org/b/id/1-L.jpg",
       goodreadsUrl: "https://www.goodreads.com/book/show/35959740",
-      openLibraryWorkId: "OL18012166W",
     });
   });
 
@@ -104,14 +104,14 @@ describe("EditBookPage", () => {
   it("shows the server's reason when a save fails", async () => {
     vi.mocked(getBook).mockResolvedValue(circe());
     vi.mocked(updateBook).mockRejectedValue(
-      new ApiError(409, "Another book already has that Open Library work"),
+      new ApiError(403, "Only members who suggested this book, or an admin, can edit it"),
     );
     renderPage();
     await screen.findByLabelText("Title");
     fireEvent.click(screen.getByRole("button", { name: "Save changes" }));
 
     expect((await screen.findByRole("alert")).textContent).toBe(
-      "Another book already has that Open Library work",
+      "Only members who suggested this book, or an admin, can edit it",
     );
     expect(screen.queryByText("suggestions page")).toBeNull();
   });

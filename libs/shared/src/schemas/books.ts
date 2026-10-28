@@ -39,8 +39,10 @@ const goodreadsBookUrl = z
 const requiredText = z.string().trim().min(1, "Required").max(300);
 const optionalText = (max: number) => z.string().trim().min(1).max(max).nullable();
 
-// PATCH /books/:id. For fixing a suggestion after the fact, so every field
-// can change. null clears an optional field; leaving it out keeps it.
+// PATCH /books/:id. For fixing a suggestion after the fact, so nearly every
+// field can change. Not the Open Library work id: it's what keeps a book
+// from being added twice, and members wouldn't know what to put there.
+// null clears an optional field; leaving it out keeps it.
 export const UpdateBookSchema = z
   .object({
     title: requiredText,
@@ -51,8 +53,6 @@ export const UpdateBookSchema = z
     coverUrl: z.url({ protocol: /^https?$/ }).nullable(),
     synopsis: optionalText(10_000),
     pageCount: z.int().min(1).max(20_000).nullable(),
-    // Relinks the book to another Open Library work. Must stay unique.
-    openLibraryWorkId: openLibraryWorkId.nullable(),
     goodreadsUrl: goodreadsBookUrl.nullable(),
   })
   .partial();
