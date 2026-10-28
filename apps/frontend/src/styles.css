@@ -75,7 +75,7 @@ body {
     max(var(--gutter), env(safe-area-inset-left));
 }
 
-.page:has(> .landing, > .suggestions-page, > .members-page) {
+.page:has(> .landing, > .suggestions-page, > .members-page, > .read-page) {
   max-width: 72rem;
 }
 
@@ -1681,3 +1681,306 @@ button:disabled {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
+
+/* ---------- Read books: the club shelf ---------- */
+
+.button-outline {
+  background: transparent;
+  color: var(--color-ink);
+  border: 1px solid var(--color-line);
+}
+
+.up-next {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1.5rem;
+  margin: 1.5rem 0 2.5rem;
+  padding: 1.5rem;
+  border-radius: var(--radius-card);
+  background: var(--color-ink);
+  color: var(--color-paper);
+}
+
+.up-next-cover {
+  width: 6rem;
+  flex: none;
+}
+
+.up-next-text {
+  flex: 1 1 18rem;
+  min-width: 0;
+}
+
+.up-next-text h2 {
+  margin: 0.75rem 0 0.25rem;
+  font-size: 2.2rem;
+}
+
+.up-next-text p {
+  margin: 0;
+  opacity: 0.85;
+}
+
+.up-next .up-next-tag {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--radius-pill);
+  background: var(--color-pop);
+  color: var(--color-on-pop);
+  font-family: var(--font-stamp);
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 1;
+}
+
+.up-next-link {
+  flex: none;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-weight: 700;
+}
+
+.shelf-layout {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 2rem;
+}
+
+.shelves {
+  flex: 999 1 36rem;
+  min-width: 0;
+}
+
+.read-shelf {
+  margin-bottom: 2.75rem;
+}
+
+.shelf-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 0.9rem;
+  padding: 0 0.4rem;
+}
+
+.shelf-head h2 {
+  margin: 0;
+  font-size: 2rem;
+  color: var(--color-accent);
+}
+
+.shelf-head p {
+  margin: 0;
+}
+
+/* Long shelves scroll sideways on a phone instead of wrapping. The top
+   padding leaves room for a picked book to rise into. */
+.shelf-scroll {
+  overflow-x: auto;
+}
+
+.shelf-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  min-width: max-content;
+  padding: 3.5rem 1.75rem 0;
+}
+
+.shelf-plank {
+  height: 1rem;
+  border-radius: 4px;
+  background: #7a5068;
+  border-bottom: 7px solid #4e3445;
+}
+
+.bookend {
+  flex: none;
+  margin-left: 0.75rem;
+}
+
+.book-spine {
+  position: relative;
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 0 8px;
+  border: 0;
+  border-radius: 3px 3px 2px 2px;
+  font: inherit;
+  cursor: pointer;
+  transform-origin: 50% 100%;
+  box-shadow:
+    inset -4px 0 0 rgb(0 0 0 / 0.16),
+    inset 2px 0 0 rgb(255 255 255 / 0.14);
+}
+
+.book-spine:focus-visible {
+  outline: 3px solid var(--color-accent);
+  outline-offset: 3px;
+}
+
+/* Pulled off the shelf: up, tipped toward you, with a shadow underneath. */
+.book-spine.is-picked {
+  z-index: 1;
+  transform: translateY(-46px) rotate(-7deg) scale(1.06);
+  box-shadow:
+    inset -4px 0 0 rgb(0 0 0 / 0.16),
+    inset 2px 0 0 rgb(255 255 255 / 0.14),
+    10px 22px 22px -10px rgb(36 27 58 / 0.45);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .book-spine {
+    transition:
+      transform 0.5s cubic-bezier(0.34, 1.7, 0.5, 1),
+      box-shadow 0.5s ease;
+  }
+
+  .book-spine:not(.is-picked):hover {
+    transform: translateY(-8px);
+  }
+}
+
+.book-spine-band {
+  width: 70%;
+  border-top: 2px solid currentColor;
+  opacity: 0.55;
+}
+
+.book-spine-title {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+  writing-mode: vertical-rl;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-family: var(--font-display);
+  font-weight: var(--font-display-weight);
+  font-size: 13px;
+  line-height: 1;
+}
+
+.book-spine-month {
+  font-family: var(--font-stamp);
+  font-size: 9px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.book-spine-flag {
+  position: absolute;
+  top: -2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0.2rem 0.55rem;
+  border-radius: var(--radius-pill);
+  background: var(--color-pop);
+  color: var(--color-on-pop);
+  font-family: var(--font-stamp);
+  font-size: 0.62rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* Clears the sticky site header (about 3.75rem) as it scrolls. */
+.shelf-aside {
+  position: sticky;
+  top: 5.25rem;
+  flex: 1 1 18rem;
+  min-width: 0;
+}
+
+.book-details h2 {
+  margin: 0.35rem 0 0;
+  font-size: 1.6rem;
+}
+
+.book-details h3 {
+  margin: 1.25rem 0 0.25rem;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  letter-spacing: 0;
+}
+
+.book-details-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.1rem;
+}
+
+.book-details-cover {
+  width: 5.25rem;
+  flex: none;
+}
+
+.book-details-when {
+  margin: 0;
+  font-family: var(--font-stamp);
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+
+.book-details-facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin: 1.25rem 0 0;
+}
+
+.book-details-facts div {
+  padding: 0.6rem 0.75rem;
+  border-radius: var(--radius-field);
+  background: var(--color-paper);
+}
+
+.book-details-facts dt {
+  font-size: 0.75rem;
+  color: var(--color-ink-soft);
+}
+
+.book-details-facts dd {
+  margin: 0.15rem 0 0;
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.rating-stars {
+  display: flex;
+  gap: 0.4rem;
+  margin-top: 0.6rem;
+}
+
+.rating-star {
+  width: 2.75rem;
+  height: 2.75rem;
+  padding: 0;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-field);
+  background: var(--color-surface);
+  color: var(--color-pop);
+  font-size: 1.25rem;
+}
+
+.book-details-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 1.4rem;
+}
+
+/* Stacked under the shelves on a phone, where sticking would cover them. */
+@media (max-width: 45rem) {
+  .shelf-aside {
+    position: static;
+  }
+}
+
