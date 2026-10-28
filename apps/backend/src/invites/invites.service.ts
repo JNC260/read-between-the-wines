@@ -4,6 +4,7 @@ import {
   type InviteDTO,
   type InviteLookupDTO,
 } from "shared";
+import { config } from "../lib/config";
 import { ConflictError, NotFoundError } from "../lib/errors";
 import { prisma } from "../lib/prisma";
 
@@ -35,12 +36,10 @@ export const createInvite = async (
 export const createInviteLink = async (
   invitedById: string,
 ): Promise<CreatedInviteDTO> => {
-  const appUrl = process.env.BETTER_AUTH_URL;
-  if (!appUrl) {
-    throw new Error("BETTER_AUTH_URL is not set");
-  }
+  // The public site address, never a request's Host header, so a link
+  // can't be pointed somewhere else.
   const { invite, token } = await createInvite(invitedById);
-  return { ...invite, url: `${appUrl}/invite/${token}` };
+  return { ...invite, url: `${config.BETTER_AUTH_URL}/invite/${token}` };
 };
 
 export const listInvites = (): Promise<InviteDTO[]> => {
