@@ -153,10 +153,13 @@ type Selection = {
 const SuggestionItem = ({
   book,
   onBallot,
+  canEdit,
   selection,
 }: {
   book: SuggestedBookDTO;
   onBallot: boolean;
+  // suggested by this member, or they're an admin
+  canEdit: boolean;
   selection?: Selection;
 }) => (
   <li
@@ -189,6 +192,15 @@ const SuggestionItem = ({
             <span className="badge badge-mine">You suggested this</span>
           )}
         </p>
+      )}
+      {canEdit && (
+        <Link
+          to={`/books/${book.id}/edit`}
+          className="catalog-card-edit"
+          aria-label={`Edit ${book.title}`}
+        >
+          Edit
+        </Link>
       )}
     </div>
     {selection && (
@@ -439,6 +451,7 @@ const SuggestionsPage = () => {
                     key={book.id}
                     book={book}
                     onBallot={ballot.has(book.id)}
+                    canEdit={book.suggestedByMe || !!session?.user.isAdmin}
                     selection={selectionFor(book.id)}
                   />
                 ))}

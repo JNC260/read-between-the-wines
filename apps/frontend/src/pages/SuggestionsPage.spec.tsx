@@ -312,4 +312,25 @@ describe("SuggestionsPage", () => {
       expect(screen.getAllByText("On the ballot")).toHaveLength(1);
     });
   });
+
+  describe("edit links", () => {
+    it("shows members an edit link only on books they suggested", async () => {
+      vi.mocked(getBookSuggestions).mockResolvedValue([
+        book({ suggestedBy: [ada, ben], suggestedByMe: true }),
+        books[0],
+      ]);
+      renderPage();
+      const link = await screen.findByRole("link", { name: "Edit Circe" });
+      expect(link.getAttribute("href")).toBe(`/books/${books[1].id}/edit`);
+      expect(screen.queryByRole("link", { name: "Edit Piranesi" })).toBeNull();
+    });
+
+    it("shows admins an edit link on every book", async () => {
+      mockSession(testUser({ isAdmin: true }));
+      vi.mocked(getBookSuggestions).mockResolvedValue(books);
+      renderPage();
+      expect(await screen.findByRole("link", { name: "Edit Piranesi" })).toBeTruthy();
+      expect(screen.getAllByRole("link", { name: /^Edit / })).toHaveLength(3);
+    });
+  });
 });

@@ -18,6 +18,7 @@ import {
   createInvite,
   createMeeting,
   createVenue,
+  getBook,
   getBookSuggestions,
   getCurrentPoll,
   getMeeting,
@@ -38,6 +39,7 @@ import {
   signIn,
   signOut,
   signUpWithInvite,
+  updateBook,
   updateMeeting,
   updateProfile,
   updateVenue,
@@ -239,6 +241,27 @@ export const useReadBooks = () => {
   return useQuery({
     queryKey: ["books", "read"],
     queryFn: getReadBooks,
+  });
+};
+
+export const useBook = (id: string) => {
+  return useQuery({
+    queryKey: ["books", id],
+    queryFn: () => getBook(id),
+  });
+};
+
+// Books also show up inside meetings and poll ballots, so those refetch too.
+export const useUpdateBook = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: updateBook,
+    onSuccess: () =>
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["books"] }),
+        queryClient.invalidateQueries({ queryKey: ["meetings"] }),
+        queryClient.invalidateQueries({ queryKey: ["polls"] }),
+      ]),
   });
 };
 
