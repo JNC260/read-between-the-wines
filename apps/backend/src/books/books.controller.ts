@@ -2,6 +2,7 @@ import { type Request, type Response } from "express";
 import * as z from "zod";
 import {
   BookCandidateSchema,
+  BookDetailSchema,
   BookSchema,
   BookSearchQuerySchema,
   type CreateBookSuggestionDTO,
@@ -9,6 +10,7 @@ import {
   RatingSchema,
   ReadBookSchema,
   SuggestedBookSchema,
+  type UpdateBookDTO,
 } from "shared";
 import { BadRequestError } from "../lib/errors";
 import { getUser } from "../middleware/auth";
@@ -52,4 +54,17 @@ export const rateBook = async (
     req.body.score,
   );
   res.json(z.encode(RatingSchema, rating));
+};
+
+export const getBook = async (req: Request<{ id: string }>, res: Response) => {
+  const book = await service.getBook(getUser(req), req.params.id);
+  res.json(z.encode(BookDetailSchema, book));
+};
+
+export const updateBook = async (
+  req: Request<{ id: string }, unknown, UpdateBookDTO>,
+  res: Response,
+) => {
+  const book = await service.updateBook(getUser(req), req.params.id, req.body);
+  res.json(z.encode(BookSchema, book));
 };

@@ -1,6 +1,7 @@
 import * as z from "zod";
 import {
   BookCandidateSchema,
+  BookDetailSchema,
   BookSchema,
   type CastVotesDTO,
   CastVotesSchema,
@@ -26,6 +27,8 @@ import {
   RatingSchema,
   ReadBookSchema,
   SuggestedBookSchema,
+  type UpdateBookDTO,
+  UpdateBookSchema,
   type UpdateMeetingDTO,
   UpdateMeetingSchema,
   type UpdateProfileDTO,
@@ -284,6 +287,22 @@ export const getBookSuggestions = () =>
 
 export const getReadBooks = () =>
   apiFetch(`/api/books/read`, ReadBookSchema.array(), "Failed to fetch books");
+
+// With canEdit, for the edit page.
+export const getBook = (id: string) =>
+  apiFetch(
+    `/api/books/${encodeURIComponent(id)}`,
+    BookDetailSchema,
+    "Failed to fetch book",
+  );
+
+export const updateBook = ({ id, ...body }: UpdateBookDTO & { id: string }) =>
+  apiFetch(
+    `/api/books/${encodeURIComponent(id)}`,
+    BookSchema,
+    "Failed to save book",
+    { method: "PATCH", schema: UpdateBookSchema, body },
+  );
 
 export const rateBook = ({ bookId, ...body }: RateBookDTO & { bookId: string }) =>
   apiFetch(

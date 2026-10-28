@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ApiError } from "../api";
 import RequireAuth from "../components/RequireAuth";
 import SiteHeader from "../components/SiteHeader";
+import EditBookPage from "../pages/EditBookPage";
 import EditEventPage from "../pages/EditEventPage";
 import EventsPage from "../pages/EventsPage";
 import ForgotPasswordPage from "../pages/ForgotPasswordPage";
@@ -142,6 +143,16 @@ export function App() {
             element={
               <RequireAuth>
                 <ReadBooksPage />
+              </RequireAuth>
+            }
+          />
+          {/* Not admin-only: suggesters can edit their own. The page and
+              the API check which books. */}
+          <Route
+            path="/books/:id/edit"
+            element={
+              <RequireAuth>
+                <EditBookPage />
               </RequireAuth>
             }
           />

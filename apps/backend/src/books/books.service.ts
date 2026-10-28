@@ -1,5 +1,6 @@
 import {
   type BookCandidateDTO,
+  type BookDetailDTO,
   type BookDTO,
   type CreateBookSuggestionDTO,
   normalizeTitle,
@@ -7,6 +8,7 @@ import {
   type ReadBookDTO,
   type SuggestedBookDTO,
   parseGoodreadsUrl,
+  type UpdateBookDTO,
 } from "shared";
 import {
   BadGatewayError,
@@ -184,7 +186,12 @@ export const listReadBooks = async (userId: string): Promise<ReadBookDTO[]> => {
     where: { bookId: { not: null } },
     orderBy: { start: "desc" },
     include: {
-      book: { include: { ratings: { select: { userId: true, score: true } } } },
+      book: {
+        include: {
+          ratings: { select: { userId: true, score: true } },
+          suggestions: { where: { userId }, select: { userId: true } },
+        },
+      },
     },
   });
 
@@ -192,11 +199,12 @@ export const listReadBooks = async (userId: string): Promise<ReadBookDTO[]> => {
     if (!book) {
       return [];
     }
-    const { ratings, ...rest } = book;
+    const { ratings, suggestions, ...rest } = book;
     const total = ratings.reduce((sum, r) => sum + r.score, 0);
     return [
       {
         ...rest,
+        suggestedByMe: suggestions.length > 0,
         meetingId: id,
         meetingStart: start,
         averageRating: ratings.length > 0 ? total / ratings.length : null,
@@ -205,6 +213,56 @@ export const listReadBooks = async (userId: string): Promise<ReadBookDTO[]> => {
       },
     ];
   });
+};
+
+// Who's asking, for the edit check. Better Auth types isAdmin as optional.
+type Viewer = { id: string; isAdmin?: boolean | null };
+
+// Anyone who suggested a book can edit it, even when others suggested it
+// too; admins can edit any book.
+export const getBook = async (
+  viewer: Viewer,
+  bookId: string,
+): Promise<BookDetailDTO> => {
+  const book = await prisma.book.findUnique({
+    where: { id: bookId },
+    include: { suggestions: { where: { userId: viewer.id }, select: { userId: true } } },
+  });
+  if (!book) {
+    throw new NotFoundError("Book not found");
+  }
+  const { suggestions, ...rest } = book;
+  return { ...rest, canEdit: !!viewer.isAdmin || suggestions.length > 0 };
+};
+
+// Every field is editable, for the "that's not what I meant" fixes. A new
+// title gets a new normalizedTitle, which duplicate checks rely on.
+export const updateBook = async (
+  viewer: Viewer,
+  bookId: string,
+  data: UpdateBookDTO,
+): Promise<BookDTO> => {
+  const { canEdit } = await getBook(viewer, bookId);
+  if (!canEdit) {
+    throw new ForbiddenError(
+      "Only members who suggested this book, or an admin, can edit it",
+    );
+  }
+
+  try {
+    return await prisma.book.update({
+      where: { id: bookId },
+      data: {
+        ...data,
+        ...(data.title && { normalizedTitle: normalizeTitle(data.title) }),
+      },
+    });
+  } catch (e) {
+    if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002") {
+      throw new ConflictError("Another book already has that Open Library work");
+    }
+    throw e;
+  }
 };
 
 // Same rule as the read-books page: a book counts as read once it's on a

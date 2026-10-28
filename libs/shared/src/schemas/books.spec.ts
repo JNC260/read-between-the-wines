@@ -1,4 +1,8 @@
-import { BookSearchQuerySchema, CreateBookSuggestionSchema } from "./books";
+import {
+  BookSearchQuerySchema,
+  CreateBookSuggestionSchema,
+  UpdateBookSchema,
+} from "./books";
 
 describe("BookSearchQuerySchema", () => {
   it("trims q", () => {
@@ -48,5 +52,32 @@ describe("CreateBookSuggestionSchema", () => {
         goodreadsUrl: "https://openlibrary.org/works/OL27482W",
       }).success,
     ).toBe(false);
+  });
+});
+
+describe("UpdateBookSchema", () => {
+  it("accepts any subset of fields, trimming text", () => {
+    expect(
+      UpdateBookSchema.parse({ title: " Circe ", genres: [" Fantasy "] }),
+    ).toEqual({ title: "Circe", genres: ["Fantasy"] });
+  });
+
+  it("accepts null to clear an optional field", () => {
+    expect(
+      UpdateBookSchema.parse({ synopsis: null, coverUrl: null, yearPublished: null }),
+    ).toEqual({ synopsis: null, coverUrl: null, yearPublished: null });
+  });
+
+  it.each([
+    { title: "" },
+    { title: null },
+    { author: "   " },
+    { synopsis: "" },
+    { pageCount: -1 },
+    { coverUrl: "ftp://example.com/cover.jpg" },
+    { goodreadsUrl: "https://example.com" },
+    { openLibraryWorkId: "OL1M" },
+  ])("rejects %j", (body) => {
+    expect(UpdateBookSchema.safeParse(body).success).toBe(false);
   });
 });

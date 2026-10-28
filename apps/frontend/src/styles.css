@@ -1105,6 +1105,13 @@ li:has(> :is(h2, h3)) > :last-child {
   right: 0.9rem;
 }
 
+.catalog-card-edit {
+  display: inline-block;
+  margin-top: 0.5rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
 .badges {
   display: flex;
   flex-wrap: wrap;

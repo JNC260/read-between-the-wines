@@ -75,6 +75,7 @@ export const testReadBook = (
   const { synopsis: _, ...book } = testBook();
   return {
     ...book,
+    suggestedByMe: false,
     meetingId: "00000000-0000-4000-8000-000000000020",
     meetingStart: new Date("2026-09-10T19:00:00Z"),
     averageRating: null,

@@ -1,9 +1,10 @@
 import { fireEvent, screen, within } from "@testing-library/react";
 import { type ReadBookDTO } from "shared";
 import { getReadBooks, rateBook } from "../api";
-import { renderRoutes, Route } from "../test-utils";
+import { mockSession, renderRoutes, Route, testUser } from "../test-utils";
 import ReadBooksPage from "./ReadBooksPage";
 
+vi.mock("../lib/auth-client", () => ({ authClient: { useSession: vi.fn() } }));
 vi.mock("../api", () => ({ getReadBooks: vi.fn(), rateBook: vi.fn() }));
 
 const book = (overrides: Partial<ReadBookDTO> = {}): ReadBookDTO => ({
@@ -17,6 +18,7 @@ const book = (overrides: Partial<ReadBookDTO> = {}): ReadBookDTO => ({
   openLibraryWorkId: "OL18012166W",
   goodreadsUrl: null,
   createdAt: new Date("2026-08-01T00:00:00Z"),
+  suggestedByMe: false,
   meetingId: "00000000-0000-4000-8000-000000000020",
   meetingStart: new Date("2020-09-10T19:00:00Z"),
   averageRating: null,
@@ -29,6 +31,10 @@ const renderPage = () =>
   renderRoutes("/books/read", <Route path="/books/read" element={<ReadBooksPage />} />);
 
 describe("ReadBooksPage", () => {
+  beforeEach(() => {
+    mockSession(testUser());
+  });
+
   it("shows an empty state", async () => {
     vi.mocked(getReadBooks).mockResolvedValue([]);
     renderPage();
@@ -108,5 +114,30 @@ describe("ReadBooksPage", () => {
     expect((await screen.findByRole("alert")).textContent).toBe(
       "Only books the club has read can be rated",
     );
+  });
+
+  describe("edit links", () => {
+    const piranesi = book({
+      id: "00000000-0000-4000-8000-000000000011",
+      title: "Piranesi",
+      meetingId: "00000000-0000-4000-8000-000000000021",
+      suggestedByMe: true,
+    });
+
+    it("shows members an edit link only on books they suggested", async () => {
+      vi.mocked(getReadBooks).mockResolvedValue([piranesi, book()]);
+      renderPage();
+      const link = await screen.findByRole("link", { name: "Edit Piranesi" });
+      expect(link.getAttribute("href")).toBe(`/books/${piranesi.id}/edit`);
+      expect(screen.queryByRole("link", { name: "Edit Circe" })).toBeNull();
+    });
+
+    it("shows admins an edit link on every book", async () => {
+      mockSession(testUser({ isAdmin: true }));
+      vi.mocked(getReadBooks).mockResolvedValue([piranesi, book()]);
+      renderPage();
+      expect(await screen.findByRole("link", { name: "Edit Piranesi" })).toBeTruthy();
+      expect(screen.getByRole("link", { name: "Edit Circe" })).toBeTruthy();
+    });
   });
 });

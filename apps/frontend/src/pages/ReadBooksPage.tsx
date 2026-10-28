@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { type ReadBookDTO } from "shared";
 import { useRateBook, useReadBooks } from "../hooks";
+import { authClient } from "../lib/auth-client";
 
 const meetingDate = new Intl.DateTimeFormat(undefined, { dateStyle: "medium" });
 
@@ -52,7 +53,16 @@ const RateBook = ({ book }: { book: ReadBookDTO }) => {
 };
 
 // A book whose meeting hasn't started yet is the one being read now.
-const ReadBookItem = ({ book, now }: { book: ReadBookDTO; now: Date }) => (
+const ReadBookItem = ({
+  book,
+  now,
+  canEdit,
+}: {
+  book: ReadBookDTO;
+  now: Date;
+  // suggested by this member, or they're an admin
+  canEdit: boolean;
+}) => (
   <li>
     {book.coverUrl && (
       <img src={book.coverUrl} alt="" width={60} loading="lazy" />
@@ -68,12 +78,18 @@ const ReadBookItem = ({ book, now }: { book: ReadBookDTO; now: Date }) => (
       </p>
       <p>Club rating: {average(book)}</p>
       <RateBook book={book} />
+      {canEdit && (
+        <Link to={`/books/${book.id}/edit`} aria-label={`Edit ${book.title}`}>
+          Edit
+        </Link>
+      )}
     </div>
   </li>
 );
 
 const ReadBooksPage = () => {
   const { data: books, isPending, error } = useReadBooks();
+  const { data: session } = authClient.useSession();
   const now = new Date();
 
   return (
@@ -88,7 +104,12 @@ const ReadBooksPage = () => {
       {books && books.length > 0 && (
         <ul aria-label="Books we've read">
           {books.map((book) => (
-            <ReadBookItem key={book.id} book={book} now={now} />
+            <ReadBookItem
+              key={book.id}
+              book={book}
+              now={now}
+              canEdit={book.suggestedByMe || !!session?.user.isAdmin}
+            />
           ))}
         </ul>
       )}

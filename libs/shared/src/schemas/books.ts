@@ -23,6 +23,42 @@ export const BookSchema = z.object({
 
 export type BookDTO = z.output<typeof BookSchema>;
 
+// GET /books/:id. The whole book, synopsis included, for the edit page.
+// canEdit: this member suggested it (alone or with others), or is an admin.
+export const BookDetailSchema = BookSchema.extend({
+  canEdit: z.boolean(),
+});
+
+export type BookDetailDTO = z.output<typeof BookDetailSchema>;
+
+const goodreadsBookUrl = z
+  .string()
+  .trim()
+  .refine((url) => parseGoodreadsUrl(url) !== null, "Not a Goodreads book link");
+
+const requiredText = z.string().trim().min(1, "Required").max(300);
+const optionalText = (max: number) => z.string().trim().min(1).max(max).nullable();
+
+// PATCH /books/:id. For fixing a suggestion after the fact, so every field
+// can change. null clears an optional field; leaving it out keeps it.
+export const UpdateBookSchema = z
+  .object({
+    title: requiredText,
+    author: requiredText,
+    // Negative for BCE, for the occasional Odyssey.
+    yearPublished: z.int().min(-3000).max(9999).nullable(),
+    genres: z.array(z.string().trim().min(1).max(50)).max(20),
+    coverUrl: z.url({ protocol: /^https?$/ }).nullable(),
+    synopsis: optionalText(10_000),
+    pageCount: z.int().min(1).max(20_000).nullable(),
+    // Relinks the book to another Open Library work. Must stay unique.
+    openLibraryWorkId: openLibraryWorkId.nullable(),
+    goodreadsUrl: goodreadsBookUrl.nullable(),
+  })
+  .partial();
+
+export type UpdateBookDTO = z.output<typeof UpdateBookSchema>;
+
 // GET /books/search?q=. q is a pasted Goodreads link or a typed title; the
 // server works out which.
 export const BookSearchQuerySchema = z.object({
@@ -53,14 +89,7 @@ export type BookCandidateDTO = z.output<typeof BookCandidateSchema>;
 // trusted from the client: the server looks the book up itself.
 export const CreateBookSuggestionSchema = z.object({
   openLibraryWorkId,
-  goodreadsUrl: z
-    .string()
-    .trim()
-    .refine(
-      (url) => parseGoodreadsUrl(url) !== null,
-      "Not a Goodreads book link",
-    )
-    .optional(),
+  goodreadsUrl: goodreadsBookUrl.optional(),
 });
 
 export type CreateBookSuggestionDTO = z.infer<
@@ -89,6 +118,7 @@ export type SuggestedBookDTO = z.output<typeof SuggestedBookSchema>;
 // GET /books/read. Books assigned to a meeting, with that meeting's date. The
 // latest meeting may still be upcoming.
 export const ReadBookSchema = BookSchema.omit({ synopsis: true }).extend({
+  suggestedByMe: z.boolean(),
   meetingId: z.uuidv4(),
   meetingStart: isoDate,
   averageRating: z.number().nullable(), // null until someone rates it
