@@ -53,6 +53,9 @@ const AccountMenu = ({ isAdmin }: { isAdmin: boolean }) => {
             <li>
               <Link to="/polls/new">New poll</Link>
             </li>
+            <li>
+              <Link to="/members/legacy">Legacy members</Link>
+            </li>
           </>
         )}
         <li>
