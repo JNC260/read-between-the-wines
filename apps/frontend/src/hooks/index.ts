@@ -9,6 +9,7 @@ import {
   type MeetingListQuery,
   type MeetingRsvpsDTO,
   type PollDTO,
+  type UserDTO,
   type VenueDTO,
 } from "shared";
 import {
@@ -48,6 +49,7 @@ import {
   updateVenue,
   uploadProfileImage,
 } from "../api";
+import { authClient } from "../lib/auth-client";
 
 // Active members only, sorted by name.
 export const useMembers = () => {
@@ -65,17 +67,31 @@ export const useUpdateProfile = () => {
   });
 };
 
-// The members page shows each photo, so the member list goes stale.
-export const useUploadProfileImage = () => {
-  // TODO: like useUpdateProfile. The nav or anywhere else reading the
-  // session's user.image also needs authClient.useSession()'s refetch.
-  return useMutation({ mutationFn: uploadProfileImage });
+// The members page shows each photo, so the member list goes stale. The
+// saved member goes straight into the cached list, so the new photo shows
+// at once instead of after the refetch, and the session (which has its own
+// copy of user.image) is refreshed too.
+const usePhotoMutation = <T>(mutationFn: (input: T) => Promise<UserDTO>) => {
+  const queryClient = useQueryClient();
+  const { refetch } = authClient.useSession();
+  return useMutation({
+    mutationFn,
+    onSuccess: (saved) => {
+      queryClient.setQueryData<UserDTO[]>(["users"], (list) =>
+        list?.map((u) => (u.id === saved.id ? saved : u)),
+      );
+      return Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["users"] }),
+        refetch(),
+      ]);
+    },
+  });
 };
 
-export const useRemoveProfileImage = () => {
-  // TODO
-  return useMutation({ mutationFn: removeProfileImage });
-};
+export const useUploadProfileImage = () => usePhotoMutation(uploadProfileImage);
+
+export const useRemoveProfileImage = () =>
+  usePhotoMutation((_: void) => removeProfileImage());
 
 export const usePlaceholders = () => {
   return useQuery({

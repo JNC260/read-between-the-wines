@@ -3,8 +3,9 @@ import { fileURLToPath } from "node:url";
 import express, { type RequestHandler } from "express";
 import { toNodeHandler } from "better-auth/node";
 import { auth } from "./lib/auth";
-import { isProduction } from "./lib/config";
+import { config, isProduction } from "./lib/config";
 import { NotFoundError } from "./lib/errors";
+import { UPLOADS_URL_PATH } from "./lib/storage";
 import { errorHandler } from "./middleware/error-handler";
 import rootRoutes from "./root.routes";
 
@@ -20,6 +21,24 @@ app.set("trust proxy", 1);
 app.all("/api/auth/*splat", toNodeHandler(auth));
 
 app.use(express.json());
+
+// Members' photos, in development and production alike. Every upload gets a
+// new random name, so a URL's contents never change and can be cached for
+// good. Not behind sign-in: the names can't be guessed, and an <img> on the
+// members page shouldn't cost a session lookup each. A missing file falls
+// through to the JSON 404 below.
+app.use(
+  UPLOADS_URL_PATH,
+  express.static(config.UPLOAD_DIR, {
+    index: false,
+    dotfiles: "deny",
+    setHeaders: (res) => {
+      res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+      // Trust our extension's type; never let a browser guess another.
+      res.setHeader("X-Content-Type-Options", "nosniff");
+    },
+  }),
+);
 
 app.use("/api", rootRoutes);
 // Unknown endpoints answer in the same JSON error shape as everything else,

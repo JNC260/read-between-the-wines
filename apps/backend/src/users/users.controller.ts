@@ -4,6 +4,7 @@ import {
   type MergePlaceholderDTO,
   MergeResultSchema,
   PlaceholderSchema,
+  type ProfileImageType,
   type UpdateProfileDTO,
   UserSchema,
 } from "shared";
@@ -14,7 +15,9 @@ import {
   listPlaceholders,
   mergePlaceholder,
   reactivateUser,
+  removeProfileImage,
   updateProfile,
+  updateProfileImage,
 } from "./users.service";
 
 export const userList = async (_req: Request, res: Response) => {
@@ -30,17 +33,20 @@ export const userUpdateSelf = async (
   res.json(z.encode(UserSchema, user));
 };
 
-// After uploadImage, which leaves the parsed file on the request.
-export const userUploadImage = async (_req: Request, _res: Response) => {
-  // TODO: pass the file's buffer and type to updateProfileImage in
-  // users.service, then respond with the updated user, encoded like the
-  // other handlers.
-  throw new Error("TODO: userUploadImage");
+// After uploadImage, which only calls this with a file of an allowed type
+// on req.file, the same way validate() leaves a checked req.body.
+export const userUploadImage = async (req: Request, res: Response) => {
+  const file = req.file as Express.Multer.File;
+  const user = await updateProfileImage(getUser(req).id, {
+    buffer: file.buffer,
+    contentType: file.mimetype as ProfileImageType,
+  });
+  res.json(z.encode(UserSchema, user));
 };
 
-export const userRemoveImage = async (_req: Request, _res: Response) => {
-  // TODO: call removeProfileImage in users.service.
-  throw new Error("TODO: userRemoveImage");
+export const userRemoveImage = async (req: Request, res: Response) => {
+  const user = await removeProfileImage(getUser(req).id);
+  res.json(z.encode(UserSchema, user));
 };
 
 export const userDeactivateSelf = async (req: Request, res: Response) => {

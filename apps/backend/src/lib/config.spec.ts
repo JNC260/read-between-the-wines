@@ -1,3 +1,4 @@
+import path from "node:path";
 import { parseConfig } from "./config";
 
 const SECRET = "s".repeat(32);
@@ -42,6 +43,13 @@ describe("parseConfig", () => {
     expect(
       parseConfig({ ...valid, BETTER_AUTH_URL: "https://example.org/" }).BETTER_AUTH_URL,
     ).toBe("https://example.org");
+  });
+
+  it("makes UPLOAD_DIR absolute, defaulting to uploads/ where the server starts", () => {
+    expect(parseConfig(valid).UPLOAD_DIR).toBe(path.resolve("uploads"));
+    expect(parseConfig({ ...valid, UPLOAD_DIR: "/data/uploads" }).UPLOAD_DIR).toBe(
+      "/data/uploads",
+    );
   });
 
   it("accepts a production setup", () => {
