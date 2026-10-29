@@ -1,9 +1,10 @@
 import { app } from "./app";
+import { config } from "./lib/config";
 import { prisma } from "./lib/prisma";
 
-const port = process.env.PORT || 3333;
-const server = app.listen(port, () => {
-  console.log(`Listening at http://localhost:${port}/`);
+// Railway sets PORT; locally it's 3333, where Vite's proxy expects it.
+const server = app.listen(config.PORT, () => {
+  console.log(`Listening on port ${config.PORT} (${config.NODE_ENV})`);
 });
 server.on("error", console.error);
 

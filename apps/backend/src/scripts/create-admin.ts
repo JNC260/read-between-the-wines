@@ -3,12 +3,23 @@
 //
 //   npx nx run backend:create-admin --email=you@example.com --first-name=Ada --last-name=Lovelace
 //
+// Against production, run it with the live service's variables so the
+// password email goes out through Resend with links to the real site, and
+// point DATABASE_URL at the Postgres service's public URL (its
+// DATABASE_PUBLIC_URL in Railway), since the private one only works inside
+// Railway:
+//
+//   railway run --service web -- env DATABASE_URL='<DATABASE_PUBLIC_URL>' \
+//     npx nx run backend:create-admin --email=... --first-name=... --last-name=...
+//
 // Safe to run again: an existing account is only made a verified admin.
 import { randomBytes } from "node:crypto";
 import { parseArgs } from "node:util";
 import { createInvite } from "../invites/invites.service";
 import { auth } from "../lib/auth";
+import { config, isProduction } from "../lib/config";
 import { prisma } from "../lib/prisma";
+import { databaseTarget, printDatabaseTarget } from "./database-target";
 
 const { values } = parseArgs({
   options: {
@@ -24,6 +35,21 @@ const lastName = values["last-name"]?.trim();
 if (!email || !firstName || !lastName) {
   console.error(
     "Usage: npx nx run backend:create-admin --email=<email> --first-name=<first> --last-name=<last>",
+  );
+  process.exit(1);
+}
+
+printDatabaseTarget();
+console.log(
+  `Password email: ${isProduction ? "Resend" : "Mailpit (local only)"}, with links to ${config.BETTER_AUTH_URL}`,
+);
+
+// The new admin sets a password from the reset email, so it has to reach
+// them. Outside production it goes to Mailpit with a localhost link, which
+// would leave a production account nobody can sign in to.
+if (!databaseTarget.isLocal && !isProduction) {
+  console.error(
+    "Refusing to write to a remote database with local email settings. Run it with the live service's variables (see the comment at the top of this script).",
   );
   process.exit(1);
 }

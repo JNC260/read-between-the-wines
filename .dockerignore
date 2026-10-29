@@ -1,0 +1,17 @@
+# Rebuilt inside the image
+node_modules
+dist
+.nx
+apps/backend/generated
+
+# Secrets stay out of the image; Railway injects them as variables.
+.env
+.env.*
+!.env.example
+
+# Member names from the old Google Forms. Never ship them.
+apps/backend/prisma/seed-data
+
+.git
+.vscode
+**/*.swp

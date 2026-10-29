@@ -2,6 +2,7 @@ import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { APIError } from "better-auth/api";
 import { UserStatus } from "../../generated/prisma/client";
+import { config, isProduction } from "./config";
 import { isInviteValid, markInviteUsed } from "../invites/invites.service";
 import { type Email, sendEmail } from "./email";
 import { prisma } from "./prisma";
@@ -14,12 +15,21 @@ const sendInBackground = (email: Email) => {
   });
 };
 
-// BETTER_AUTH_SECRET and BETTER_AUTH_URL are read from the environment.
 export const auth = betterAuth({
   database: prismaAdapter(prisma, { provider: "postgresql" }),
+  // Passed explicitly so they're validated by lib/config first. baseURL is
+  // what verification and reset links point at.
+  secret: config.BETTER_AUTH_SECRET,
+  baseURL: config.BETTER_AUTH_URL,
+  // Sign-in and sign-up only accepted from the site itself. Locally that's
+  // Vite's origin, which proxies /api; in production, the one service.
+  trustedOrigins: [config.BETTER_AUTH_URL],
   advanced: {
     // Our UserSchema expects UUID ids; Better Auth's default ids aren't.
     database: { generateId: "uuid" },
+    // HTTPS-only cookies in production. Locally the site is plain http, and
+    // browsers would drop them.
+    useSecureCookies: isProduction,
   },
   emailAndPassword: {
     enabled: true,

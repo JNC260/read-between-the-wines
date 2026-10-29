@@ -4,6 +4,13 @@
 //   npx nx run backend:legacy-seed --dry-run    counts only; nothing is kept
 //   npx nx run backend:legacy-seed
 //
+// Against production, use the live service's variables with DATABASE_URL
+// set to the Postgres service's DATABASE_PUBLIC_URL, and run create-admin
+// first: my rows link to the existing admin.
+//
+//   railway run --service web -- env DATABASE_URL='<DATABASE_PUBLIC_URL>' \
+//     npx nx run backend:legacy-seed --dry-run
+//
 // Safe to rerun. Every row is found by a natural key (email, work id,
 // user + book, book) and only fields that differ are written, so a second
 // run reports nothing created or updated. It all happens in one
@@ -13,6 +20,7 @@ import { parseArgs } from "node:util";
 import { normalizeTitle } from "shared";
 import type { Prisma } from "../../../generated/prisma/client";
 import { prisma } from "../../lib/prisma";
+import { printDatabaseTarget } from "../database-target";
 import { type LegacyBook, type LegacyData, legacyPath } from "./common";
 
 const { values } = parseArgs({
@@ -24,10 +32,7 @@ const data = JSON.parse(
   fs.readFileSync(legacyPath("legacy-books.json"), "utf8"),
 ) as LegacyData;
 
-const target = new URL(process.env.DATABASE_URL ?? "");
-console.log(
-  `Target database: ${target.hostname}:${target.port || "5432"}${target.pathname}`,
-);
+printDatabaseTarget();
 console.log(
   dryRun
     ? "Dry run: writes happen inside the transaction, which is then rolled back"
