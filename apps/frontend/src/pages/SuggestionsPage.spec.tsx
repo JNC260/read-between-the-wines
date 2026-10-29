@@ -97,8 +97,9 @@ describe("SuggestionsPage", () => {
     ]);
     renderPage();
     expect(await screen.findByText(/Suggested by Ada L\., Ben O\./)).toBeTruthy();
-    expect(screen.getByText("by Madeline Miller · 2018 · 404 pages")).toBeTruthy();
-    expect(screen.getByText("You suggested this.")).toBeTruthy();
+    expect(screen.getByText("Madeline Miller")).toBeTruthy();
+    expect(screen.getByText("2018 · 404 pages")).toBeTruthy();
+    expect(screen.getByText("You suggested this")).toBeTruthy();
   });
 
   it("defaults to newest suggestion first", async () => {
@@ -137,6 +138,72 @@ describe("SuggestionsPage", () => {
     vi.mocked(getBookSuggestions).mockResolvedValue(books);
     renderPage("/books/suggestions?sort=nonsense");
     expect(await titles()).toEqual(["Piranesi", "Circe", "Beloved"]);
+  });
+
+  describe("filters", () => {
+    it("searches titles and authors", async () => {
+      vi.mocked(getBookSuggestions).mockResolvedValue(books);
+      renderPage();
+      await titles();
+      fireEvent.change(screen.getByLabelText("Search titles and authors"), {
+        target: { value: "morrison" },
+      });
+      expect(await titles()).toEqual(["Beloved"]);
+      expect(screen.getByText("1 of 3 books")).toBeTruthy();
+    });
+
+    it("filters by length, and a second tap turns it off", async () => {
+      vi.mocked(getBookSuggestions).mockResolvedValue(books);
+      renderPage();
+      await titles();
+      const short = screen.getByRole("button", { name: "Under 300 pages" });
+      fireEvent.click(short);
+      expect(await titles()).toEqual(["Piranesi"]);
+      expect(short.getAttribute("aria-pressed")).toBe("true");
+      fireEvent.click(short);
+      expect(await titles()).toHaveLength(3);
+    });
+
+    it("shows only the member's own suggestions", async () => {
+      vi.mocked(getBookSuggestions).mockResolvedValue([
+        ...books.slice(0, 2),
+        { ...books[2], suggestedByMe: true },
+      ]);
+      renderPage();
+      await titles();
+      fireEvent.click(screen.getByRole("button", { name: "Suggested by me" }));
+      expect(await titles()).toEqual(["Beloved"]);
+    });
+
+    it("reads filters from the URL", async () => {
+      vi.mocked(getBookSuggestions).mockResolvedValue(books);
+      renderPage("/books/suggestions?length=medium&q=c");
+      expect(await titles()).toEqual(["Circe"]);
+    });
+
+    it("offers genre chips only for genres some book has", async () => {
+      vi.mocked(getBookSuggestions).mockResolvedValue(books);
+      const { unmount } = renderPage();
+      await titles();
+      expect(screen.queryByRole("group", { name: "Genre" })).toBeNull();
+      unmount();
+
+      vi.mocked(getBookSuggestions).mockResolvedValue([
+        { ...books[0], genres: ["Fantasy"] },
+        ...books.slice(1),
+      ]);
+      renderPage();
+      await titles();
+      fireEvent.click(screen.getByRole("button", { name: "Fantasy" }));
+      expect(await titles()).toEqual(["Piranesi"]);
+    });
+
+    it("offers to clear filters when nothing matches", async () => {
+      vi.mocked(getBookSuggestions).mockResolvedValue(books);
+      renderPage("/books/suggestions?q=zzz");
+      fireEvent.click(await screen.findByRole("button", { name: "Clear filters" }));
+      expect(await titles()).toHaveLength(3);
+    });
   });
 
   describe("starting a poll", () => {
@@ -243,6 +310,27 @@ describe("SuggestionsPage", () => {
         .closest("li") as HTMLElement;
       expect(await within(circe).findByText("On the ballot")).toBeTruthy();
       expect(screen.getAllByText("On the ballot")).toHaveLength(1);
+    });
+  });
+
+  describe("edit links", () => {
+    it("shows members an edit link only on books they suggested", async () => {
+      vi.mocked(getBookSuggestions).mockResolvedValue([
+        book({ suggestedBy: [ada, ben], suggestedByMe: true }),
+        books[0],
+      ]);
+      renderPage();
+      const link = await screen.findByRole("link", { name: "Edit Circe" });
+      expect(link.getAttribute("href")).toBe(`/books/${books[1].id}/edit`);
+      expect(screen.queryByRole("link", { name: "Edit Piranesi" })).toBeNull();
+    });
+
+    it("shows admins an edit link on every book", async () => {
+      mockSession(testUser({ isAdmin: true }));
+      vi.mocked(getBookSuggestions).mockResolvedValue(books);
+      renderPage();
+      expect(await screen.findByRole("link", { name: "Edit Piranesi" })).toBeTruthy();
+      expect(screen.getAllByRole("link", { name: /^Edit / })).toHaveLength(3);
     });
   });
 });

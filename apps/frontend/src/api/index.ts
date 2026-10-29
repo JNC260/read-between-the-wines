@@ -1,6 +1,7 @@
 import * as z from "zod";
 import {
   BookCandidateSchema,
+  BookDetailSchema,
   BookSchema,
   type CastVotesDTO,
   CastVotesSchema,
@@ -16,13 +17,22 @@ import {
   CurrentPollSchema,
   InviteLookupSchema,
   type MeetingListQuery,
+  MeetingRsvpsSchema,
+  type MergePlaceholderDTO,
+  MergePlaceholderSchema,
+  MergeResultSchema,
+  PlaceholderSchema,
   MeetingSchema,
   PollSchema,
   type RateBookDTO,
+  type SetRsvpDTO,
+  SetRsvpSchema,
   RateBookSchema,
   RatingSchema,
   ReadBookSchema,
   SuggestedBookSchema,
+  type UpdateBookDTO,
+  UpdateBookSchema,
   type UpdateMeetingDTO,
   UpdateMeetingSchema,
   type UpdateProfileDTO,
@@ -194,6 +204,25 @@ export const removeProfileImage = async (): Promise<UserDTO> => {
   // TODO: DELETE /api/users/me/image. No body, so apiFetch works here.
   throw new Error("TODO: removeProfileImage");
 };
+// Admin-only: legacy members who haven't joined, and handing one's history
+// to the member who turned out to be them.
+export const getPlaceholders = () =>
+  apiFetch(
+    `/api/users/placeholders`,
+    PlaceholderSchema.array(),
+    "Failed to fetch legacy members",
+  );
+
+export const mergePlaceholder = ({
+  placeholderId,
+  ...body
+}: MergePlaceholderDTO & { placeholderId: string }) =>
+  apiFetch(
+    `/api/users/placeholders/${encodeURIComponent(placeholderId)}/merge`,
+    MergeResultSchema,
+    "Failed to merge",
+    { method: "POST", schema: MergePlaceholderSchema, body },
+  );
 
 export const getMeetings = (when?: MeetingListQuery["when"]) => {
   const query = when ? `?when=${when}` : "";
@@ -227,6 +256,24 @@ export const updateMeeting = ({
     MeetingSchema,
     "Failed to update meeting",
     { method: "PATCH", schema: UpdateMeetingSchema, body },
+  );
+
+export const getMeetingRsvps = (meetingId: string) =>
+  apiFetch(
+    `/api/meetings/${encodeURIComponent(meetingId)}/rsvps`,
+    MeetingRsvpsSchema,
+    "Failed to fetch RSVPs",
+  );
+
+export const setRsvp = ({
+  meetingId,
+  ...body
+}: SetRsvpDTO & { meetingId: string }) =>
+  apiFetch(
+    `/api/meetings/${encodeURIComponent(meetingId)}/rsvp`,
+    MeetingRsvpsSchema,
+    "Failed to save your RSVP",
+    { method: "PUT", schema: SetRsvpSchema, body },
   );
 
 export const getVenues = () =>
@@ -279,7 +326,26 @@ export const getBookSuggestions = () =>
 export const getReadBooks = () =>
   apiFetch(`/api/books/read`, ReadBookSchema.array(), "Failed to fetch books");
 
-export const rateBook = ({ bookId, ...body }: RateBookDTO & { bookId: string }) =>
+// With canEdit, for the edit page.
+export const getBook = (id: string) =>
+  apiFetch(
+    `/api/books/${encodeURIComponent(id)}`,
+    BookDetailSchema,
+    "Failed to fetch book",
+  );
+
+export const updateBook = ({ id, ...body }: UpdateBookDTO & { id: string }) =>
+  apiFetch(
+    `/api/books/${encodeURIComponent(id)}`,
+    BookSchema,
+    "Failed to save book",
+    { method: "PATCH", schema: UpdateBookSchema, body },
+  );
+
+export const rateBook = ({
+  bookId,
+  ...body
+}: RateBookDTO & { bookId: string }) =>
   apiFetch(
     `/api/books/${encodeURIComponent(bookId)}/rating`,
     RatingSchema,

@@ -52,3 +52,11 @@ export class BadGatewayError extends AppError {
     super(502, "BAD_GATEWAY", message);
   }
 }
+
+// 503: we're up but can't do our job right now, like when the database is
+// unreachable. Railway's health check reads this as "don't send traffic".
+export class ServiceUnavailableError extends AppError {
+  constructor(message = "Service unavailable") {
+    super(503, "SERVICE_UNAVAILABLE", message);
+  }
+}

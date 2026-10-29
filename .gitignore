@@ -8,3 +8,5 @@ vitest.config.*.timestamp*
 .nx/cache
 .nx/workspace-data
 apps/backend/generated
+# Legacy Google Form exports: contain member names
+apps/backend/prisma/seed-data/legacy/

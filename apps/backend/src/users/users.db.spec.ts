@@ -88,6 +88,7 @@ describe("PATCH /users/me", () => {
       tiktok: "https://www.tiktok.com/@ada",
       x: "x.com/ada",
       venmo: "https://venmo.com/u/ada",
+      memberSince: 2019,
     });
     expect(res.status).toBe(200);
     expect(res.body).toMatchObject({
@@ -99,6 +100,7 @@ describe("PATCH /users/me", () => {
       tiktok: "ada",
       x: "ada",
       venmo: "ada",
+      memberSince: 2019,
     });
     const saved = await prisma.user.findUniqueOrThrow({ where: { id: ada.id } });
     expect(saved.phone).toBe("+15551234567");
@@ -153,12 +155,14 @@ describe("PATCH /users/me", () => {
       firstName: " ",
       phone: "555-1234",
       instagram: "https://facebook.com/ada",
+      memberSince: new Date().getFullYear() + 1,
     });
     expect(res.status).toBe(400);
     expect(errorCode(res)).toBe("BAD_REQUEST");
     expect(Object.keys(fieldErrors(res)).sort()).toEqual([
       "firstName",
       "instagram",
+      "memberSince",
       "phone",
     ]);
   });

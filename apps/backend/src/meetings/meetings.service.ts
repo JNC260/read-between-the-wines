@@ -2,6 +2,8 @@ import {
   type CreateMeetingDTO,
   type MeetingDTO,
   type MeetingListQuery,
+  type MeetingRsvpsDTO,
+  type RsvpStatus,
   type UpdateMeetingDTO,
 } from "shared";
 import { BadRequestError, ConflictError, NotFoundError } from "../lib/errors";
@@ -85,4 +87,49 @@ export const updateMeeting = async (
   }
   await checkReferences(id, data);
   return prisma.meeting.update({ where: { id }, data, include });
+};
+
+const findMeeting = async (id: string) => {
+  const meeting = await prisma.meeting.findUnique({ where: { id } });
+  if (!meeting) {
+    throw new NotFoundError("Meeting not found");
+  }
+  return meeting;
+};
+
+// Every answer, from userId's point of view (myStatus).
+export const getRsvps = async (
+  meetingId: string,
+  userId: string,
+): Promise<MeetingRsvpsDTO> => {
+  await findMeeting(meetingId);
+  const rsvps = await prisma.rsvp.findMany({
+    where: { meetingId },
+    orderBy: { createdAt: "asc" },
+    include: {
+      user: { select: { id: true, firstName: true, lastName: true } },
+    },
+  });
+  return {
+    myStatus: rsvps.find((r) => r.userId === userId)?.status ?? null,
+    rsvps: rsvps.map((r) => ({ member: r.user, status: r.status })),
+  };
+};
+
+// Members can answer, or change their answer, until the meeting ends.
+export const setRsvp = async (
+  meetingId: string,
+  userId: string,
+  status: RsvpStatus,
+): Promise<MeetingRsvpsDTO> => {
+  const meeting = await findMeeting(meetingId);
+  if (meeting.end < new Date()) {
+    throw new BadRequestError("This meeting is over");
+  }
+  await prisma.rsvp.upsert({
+    where: { userId_meetingId: { userId, meetingId } },
+    create: { userId, meetingId, status },
+    update: { status },
+  });
+  return getRsvps(meetingId, userId);
 };

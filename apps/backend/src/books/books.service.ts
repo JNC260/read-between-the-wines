@@ -1,5 +1,6 @@
 import {
   type BookCandidateDTO,
+  type BookDetailDTO,
   type BookDTO,
   type CreateBookSuggestionDTO,
   normalizeTitle,
@@ -7,22 +8,22 @@ import {
   type ReadBookDTO,
   type SuggestedBookDTO,
   parseGoodreadsUrl,
+  type UpdateBookDTO,
 } from "shared";
 import {
-  BadGatewayError,
   ConflictError,
   ForbiddenError,
   NotFoundError,
 } from "../lib/errors";
 import { prisma } from "../lib/prisma";
 import {
-  OPEN_LIBRARY_URL,
-  SEARCH_FIELDS,
+  coverUrlFor,
+  fetchWorkDescription,
+  formatAuthors,
   type SearchDoc,
-  SearchResponseSchema,
-  USER_AGENT,
-  type WorkDescription,
-  WorkDescriptionSchema,
+  searchOpenLibrary,
+  synopsisFrom,
+  workIdFromKey,
 } from "./open-library";
 import { Prisma, type Suggestion } from "../../generated/prisma/client";
 
@@ -39,6 +40,8 @@ import { Prisma, type Suggestion } from "../../generated/prisma/client";
 //   fetchWorkDescription  Plain HTTP call to /works/<id>.json. Only used for
 //                         the synopsis (description). Used by
 //                         createSuggestion.
+//
+// searchOpenLibrary and fetchWorkDescription live in open-library.ts.
 //
 // All Goodreads-link parsing happens in searchBooks. createSuggestion never
 // parses the link: by then the member has already picked a candidate.
@@ -184,7 +187,12 @@ export const listReadBooks = async (userId: string): Promise<ReadBookDTO[]> => {
     where: { bookId: { not: null } },
     orderBy: { start: "desc" },
     include: {
-      book: { include: { ratings: { select: { userId: true, score: true } } } },
+      book: {
+        include: {
+          ratings: { select: { userId: true, score: true } },
+          suggestions: { where: { userId }, select: { userId: true } },
+        },
+      },
     },
   });
 
@@ -192,11 +200,12 @@ export const listReadBooks = async (userId: string): Promise<ReadBookDTO[]> => {
     if (!book) {
       return [];
     }
-    const { ratings, ...rest } = book;
+    const { ratings, suggestions, ...rest } = book;
     const total = ratings.reduce((sum, r) => sum + r.score, 0);
     return [
       {
         ...rest,
+        suggestedByMe: suggestions.length > 0,
         meetingId: id,
         meetingStart: start,
         averageRating: ratings.length > 0 ? total / ratings.length : null,
@@ -204,6 +213,49 @@ export const listReadBooks = async (userId: string): Promise<ReadBookDTO[]> => {
         myRating: ratings.find((r) => r.userId === userId)?.score ?? null,
       },
     ];
+  });
+};
+
+// Who's asking, for the edit check. Better Auth types isAdmin as optional.
+type Viewer = { id: string; isAdmin?: boolean | null };
+
+// Anyone who suggested a book can edit it, even when others suggested it
+// too; admins can edit any book.
+export const getBook = async (
+  viewer: Viewer,
+  bookId: string,
+): Promise<BookDetailDTO> => {
+  const book = await prisma.book.findUnique({
+    where: { id: bookId },
+    include: { suggestions: { where: { userId: viewer.id }, select: { userId: true } } },
+  });
+  if (!book) {
+    throw new NotFoundError("Book not found");
+  }
+  const { suggestions, ...rest } = book;
+  return { ...rest, canEdit: !!viewer.isAdmin || suggestions.length > 0 };
+};
+
+// For the "that's not what I meant" fixes. A new title gets a new
+// normalizedTitle, which duplicate checks rely on.
+export const updateBook = async (
+  viewer: Viewer,
+  bookId: string,
+  data: UpdateBookDTO,
+): Promise<BookDTO> => {
+  const { canEdit } = await getBook(viewer, bookId);
+  if (!canEdit) {
+    throw new ForbiddenError(
+      "Only members who suggested this book, or an admin, can edit it",
+    );
+  }
+
+  return prisma.book.update({
+    where: { id: bookId },
+    data: {
+      ...data,
+      ...(data.title && { normalizedTitle: normalizeTitle(data.title) }),
+    },
   });
 };
 
@@ -233,122 +285,8 @@ export const rateBook = async (
 };
 
 // ---------------------------------------------------------------------------
-// Open Library calls
-// ---------------------------------------------------------------------------
-
-// GET /search.json?q=<query>&fields=SEARCH_FIELDS&limit=<limit>
-const searchOpenLibrary = async (
-  query: string,
-  limit = 10,
-): Promise<SearchDoc[]> => {
-  const searchUrl = new URL(`${OPEN_LIBRARY_URL}/search.json`);
-  searchUrl.searchParams.set("q", query);
-  searchUrl.searchParams.set("fields", SEARCH_FIELDS);
-  searchUrl.searchParams.set("limit", String(limit));
-
-  let searchResponse: Response;
-  try {
-    searchResponse = await fetch(searchUrl, {
-      headers: { "User-Agent": USER_AGENT },
-      signal: AbortSignal.timeout(5000),
-    });
-  } catch {
-    throw new BadGatewayError();
-  }
-  if (!searchResponse.ok) {
-    throw new BadGatewayError();
-  }
-
-  let body: unknown;
-  try {
-    body = await searchResponse.json();
-  } catch {
-    throw new BadGatewayError();
-  }
-
-  const result = SearchResponseSchema.safeParse(body);
-  if (result.error) {
-    throw new BadGatewayError();
-  }
-  return result.data.docs;
-};
-
-// GET /works/<id>.json
-const fetchWorkDescription = async (
-  workId: string,
-): Promise<WorkDescription> => {
-  // No answer at all (network down, DNS, timeout): fetch throws.
-  let workDescriptionResponse: Response;
-  try {
-    workDescriptionResponse = await fetch(
-      `${OPEN_LIBRARY_URL}/works/${workId}.json`,
-      {
-        headers: { "User-Agent": USER_AGENT },
-        signal: AbortSignal.timeout(5000),
-      },
-    );
-  } catch {
-    throw new BadGatewayError();
-  }
-
-  // An answer, but an error status (404, 500): fetch returned normally.
-  if (!workDescriptionResponse.ok) {
-    throw new BadGatewayError();
-  }
-
-  // A body that isn't JSON (e.g. an HTML error page): .json() throws.
-  let body: unknown;
-  try {
-    body = await workDescriptionResponse.json();
-  } catch {
-    throw new BadGatewayError();
-  }
-
-  // JSON, but the wrong shape: safeParse returns an error instead of throwing.
-  const description = WorkDescriptionSchema.safeParse(body);
-  if (description.error) {
-    throw new BadGatewayError();
-  }
-  return description.data;
-};
-
-// ---------------------------------------------------------------------------
 // Mapping
 // ---------------------------------------------------------------------------
-
-// "/works/OL27482W" -> "OL27482W"
-const workIdFromKey = (key: string): string => {
-  return key.split("/")[2];
-};
-
-// Large cover by cover id. Use the id form, not /b/isbn/, which is rate
-// limited: https://covers.openlibrary.org/b/id/<coverId>-L.jpg
-const coverUrlFor = (coverId: number | undefined): string | null => {
-  if (!coverId) {
-    return null;
-  } else {
-    return `https://covers.openlibrary.org/b/id/${coverId}-L.jpg`;
-  }
-};
-
-// Normalizes Work.description's two shapes into one string, or null.
-const synopsisFrom = (work: WorkDescription): string | null => {
-  if (typeof work.description === "string") {
-    return work.description;
-  } else {
-    return work.description?.value ?? null;
-  }
-};
-
-const formatAuthors = (authorsArray: string[]) => {
-  let author = "Unknown author";
-  if (authorsArray.length === 1) {
-    author = authorsArray[0];
-  } else if (authorsArray.length > 1) {
-    author = authorsArray.join(" & ");
-  }
-  return author;
-};
 
 const toCandidate = (
   doc: SearchDoc,

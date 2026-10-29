@@ -23,6 +23,7 @@ const ada: UserDTO = {
   tiktok: null,
   x: null,
   venmo: null,
+  memberSince: null,
   status: "ACTIVE",
   createdAt: new Date("2026-10-01T00:00:00Z"),
   updatedAt: new Date("2026-10-01T00:00:00Z"),
@@ -109,8 +110,30 @@ describe("ProfilePage", () => {
       tiktok: null,
       x: null,
       venmo: "augusta",
+      memberSince: null,
     });
     expect(refetch).toHaveBeenCalled();
+  });
+
+  it("saves the year they joined as a number", async () => {
+    mockSession(me);
+    await loaded();
+    fill("Member since", "2019");
+    save();
+    await screen.findByRole("status");
+    expect(vi.mocked(updateProfile).mock.calls[0][0].memberSince).toBe(2019);
+  });
+
+  it.each([
+    ["a typo", "20l9", "Enter a year, like 2019"],
+    ["a future year", String(new Date().getFullYear() + 1), "That year hasn't happened yet"],
+  ])("rejects %s in member since", async (_, value, message) => {
+    mockSession(me);
+    await loaded();
+    fill("Member since", value);
+    save();
+    expect(screen.getByText(message)).toBeTruthy();
+    expect(updateProfile).not.toHaveBeenCalled();
   });
 
   it("shows a message next to each bad field and doesn't save", async () => {

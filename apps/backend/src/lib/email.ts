@@ -1,21 +1,5 @@
 import nodemailer from "nodemailer";
-
-const { SMTP_HOST, SMTP_PORT, SMTP_SECURE, SMTP_USER, SMTP_PASS, EMAIL_FROM } =
-  process.env;
-if (!SMTP_HOST || !SMTP_PORT || !EMAIL_FROM) {
-  throw new Error("SMTP_HOST, SMTP_PORT and EMAIL_FROM must be set");
-}
-
-// One transport for the whole app, like the Prisma client. Locally this
-// points at Mailpit; in production, change the SMTP_* vars to a provider's.
-const transport = nodemailer.createTransport({
-  host: SMTP_HOST,
-  port: Number(SMTP_PORT),
-  // true for port 465 (TLS from the start); false lets 587 upgrade via STARTTLS.
-  secure: SMTP_SECURE === "true",
-  // Mailpit needs no login, so only send credentials when they're set.
-  auth: SMTP_USER ? { user: SMTP_USER, pass: SMTP_PASS } : undefined,
-});
+import { config, isProduction } from "./config";
 
 export type Email = {
   to: string;
@@ -23,6 +7,50 @@ export type Email = {
   html: string;
 };
 
-export const sendEmail = async ({ to, subject, html }: Email): Promise<void> => {
-  await transport.sendMail({ from: EMAIL_FROM, to, subject, html });
+type Sender = (email: Email) => Promise<void>;
+
+const RESEND_URL = "https://api.resend.com/emails";
+
+// Production: Resend's HTTP API. Railway turns off outgoing SMTP on its
+// Hobby plan and recommends Resend, and this one request is all the SDK
+// would do for us.
+const sendWithResend =
+  (apiKey: string): Sender =>
+  async ({ to, subject, html }) => {
+    const response = await fetch(RESEND_URL, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ from: config.EMAIL_FROM, to: [to], subject, html }),
+      signal: AbortSignal.timeout(10_000),
+    });
+    if (!response.ok) {
+      // Resend says why in the body: an unverified sending domain, a revoked
+      // key, a malformed address. Worth having in the logs.
+      const detail = await response.text().catch(() => "");
+      throw new Error(`Resend refused the email (${response.status}): ${detail.slice(0, 500)}`);
+    }
+  };
+
+// Everywhere else: SMTP to Mailpit, which catches every message so nothing
+// reaches a real inbox. lib/config makes sure host and port are set.
+const sendWithSmtp = (): Sender => {
+  const transport = nodemailer.createTransport({
+    host: config.SMTP_HOST,
+    port: config.SMTP_PORT,
+    secure: config.SMTP_SECURE,
+    // Mailpit needs no login, so only send credentials when they're set.
+    auth: config.SMTP_USER ? { user: config.SMTP_USER, pass: config.SMTP_PASS } : undefined,
+  });
+  return async ({ to, subject, html }) => {
+    await transport.sendMail({ from: config.EMAIL_FROM, to, subject, html });
+  };
 };
+
+// Chosen once at startup. lib/config requires RESEND_API_KEY in production.
+export const sendEmail: Sender =
+  isProduction && config.RESEND_API_KEY
+    ? sendWithResend(config.RESEND_API_KEY)
+    : sendWithSmtp();

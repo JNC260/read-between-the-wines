@@ -5,7 +5,12 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import { type MeetingListQuery, type PollDTO, type VenueDTO } from "shared";
+import {
+  type MeetingListQuery,
+  type MeetingRsvpsDTO,
+  type PollDTO,
+  type VenueDTO,
+} from "shared";
 import {
   castVotes,
   createBookSuggestion,
@@ -13,10 +18,13 @@ import {
   createInvite,
   createMeeting,
   createVenue,
+  getBook,
   getBookSuggestions,
   getCurrentPoll,
   getMeeting,
+  getMeetingRsvps,
   getMeetings,
+  getPlaceholders,
   getPoll,
   getReadBooks,
   rateBook,
@@ -24,14 +32,17 @@ import {
   getVenues,
   getInvite,
   getUsersList,
+  mergePlaceholder,
   reactivateAccount,
   requestPasswordReset,
   resetPassword,
   searchBooks,
+  setRsvp,
   signIn,
   signOut,
   signUpWithInvite,
   removeProfileImage,
+  updateBook,
   updateMeeting,
   updateProfile,
   updateVenue,
@@ -64,6 +75,27 @@ export const useUploadProfileImage = () => {
 export const useRemoveProfileImage = () => {
   // TODO
   return useMutation({ mutationFn: removeProfileImage });
+};
+
+export const usePlaceholders = () => {
+  return useQuery({
+    queryKey: ["placeholders"],
+    queryFn: getPlaceholders,
+  });
+};
+
+// Books and meetings show who suggested, rated and RSVPed, so they change too.
+export const useMergePlaceholder = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: mergePlaceholder,
+    onSuccess: () =>
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["placeholders"] }),
+        queryClient.invalidateQueries({ queryKey: ["books"] }),
+        queryClient.invalidateQueries({ queryKey: ["meetings"] }),
+      ]),
+  });
 };
 
 export const useInvite = (token: string) => {
@@ -148,6 +180,27 @@ export const useUpdateMeeting = () => {
   });
 };
 
+// Under "meetings" too, so invalidating meetings refreshes RSVPs.
+export const useMeetingRsvps = (meetingId: string) => {
+  return useQuery({
+    queryKey: ["meetings", meetingId, "rsvps"],
+    queryFn: () => getMeetingRsvps(meetingId),
+  });
+};
+
+// The response is the updated list, so it goes straight into the cache.
+export const useSetRsvp = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: setRsvp,
+    onSuccess: (rsvps, { meetingId }) =>
+      queryClient.setQueryData<MeetingRsvpsDTO>(
+        ["meetings", meetingId, "rsvps"],
+        rsvps,
+      ),
+  });
+};
+
 export const useVenues = () => {
   return useQuery({
     queryKey: ["venues"],
@@ -225,6 +278,27 @@ export const useReadBooks = () => {
   return useQuery({
     queryKey: ["books", "read"],
     queryFn: getReadBooks,
+  });
+};
+
+export const useBook = (id: string) => {
+  return useQuery({
+    queryKey: ["books", id],
+    queryFn: () => getBook(id),
+  });
+};
+
+// Books also show up inside meetings and poll ballots, so those refetch too.
+export const useUpdateBook = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: updateBook,
+    onSuccess: () =>
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["books"] }),
+        queryClient.invalidateQueries({ queryKey: ["meetings"] }),
+        queryClient.invalidateQueries({ queryKey: ["polls"] }),
+      ]),
   });
 };
 

@@ -1,13 +1,19 @@
 import express from "express";
-import { CreateBookSuggestionSchema, RateBookSchema } from "shared";
+import {
+  CreateBookSuggestionSchema,
+  RateBookSchema,
+  UpdateBookSchema,
+} from "shared";
 import { requireAuth } from "../middleware/auth";
 import { validate } from "../middleware/validate";
 import {
   createSuggestion,
+  getBook,
   listReadBooks,
   listSuggestions,
   rateBook,
   searchBooks,
+  updateBook,
 } from "./books.controller";
 
 const router = express.Router();
@@ -27,5 +33,9 @@ router.post(
   validate(CreateBookSuggestionSchema),
   createSuggestion,
 );
+// After the fixed paths above, so "/suggestions" isn't read as an id.
+// Suggesters and admins can edit; the service checks which.
+router.get("/:id", getBook);
+router.patch("/:id", validate(UpdateBookSchema), updateBook);
 
 export default router;

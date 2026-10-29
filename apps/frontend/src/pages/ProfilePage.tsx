@@ -49,6 +49,7 @@ const initialValues = (user: UserDTO): Record<FieldName, string> => ({
   tiktok: user.tiktok ?? "",
   x: user.x ?? "",
   venmo: user.venmo ?? "",
+  memberSince: user.memberSince?.toString() ?? "",
 });
 
 // A labelled input with its error message, if any, read out with it.
@@ -100,7 +101,7 @@ const ProfileForm = ({ user }: { user: UserDTO }) => {
     e.preventDefault();
     // Every field is sent, so an emptied input clears it (null) rather than
     // leaving the old value.
-    const body = Object.fromEntries(
+    const body: Record<string, string | number | null> = Object.fromEntries(
       Object.entries(values).map(([name, value]) => [
         name,
         value.trim() === "" && name !== "firstName" && name !== "lastName"
@@ -108,6 +109,10 @@ const ProfileForm = ({ user }: { user: UserDTO }) => {
           : value,
       ]),
     );
+    // The only number; a typo like "20l9" becomes NaN, which the schema rejects.
+    if (body.memberSince !== null) {
+      body.memberSince = Number(body.memberSince);
+    }
     const result = UpdateProfileSchema.safeParse(body);
     if (!result.success) {
       setFieldErrors(z.flattenError(result.error).fieldErrors);
@@ -131,6 +136,13 @@ const ProfileForm = ({ user }: { user: UserDTO }) => {
     <form onSubmit={handleSubmit} noValidate>
       <Field {...bind("firstName")} label="First name" autoComplete="given-name" />
       <Field {...bind("lastName")} label="Last name" autoComplete="family-name" />
+      <Field
+        {...bind("memberSince")}
+        label="Member since"
+        inputMode="numeric"
+        maxLength={4}
+        placeholder="The year you joined, like 2019"
+      />
       <div>
         <label htmlFor="email">Email</label>
         <input

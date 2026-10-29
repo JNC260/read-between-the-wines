@@ -3,10 +3,13 @@ import * as z from "zod";
 import {
   type CreateMeetingDTO,
   MeetingListQuerySchema,
+  MeetingRsvpsSchema,
   MeetingSchema,
+  type SetRsvpDTO,
   type UpdateMeetingDTO,
 } from "shared";
 import { BadRequestError } from "../lib/errors";
+import { getUser } from "../middleware/auth";
 import * as service from "./meetings.service";
 
 type Params = { id: string };
@@ -41,4 +44,21 @@ export const updateMeeting = async (
 ) => {
   const meeting = await service.updateMeeting(req.params.id, req.body);
   res.json(z.encode(MeetingSchema, meeting));
+};
+
+export const getRsvps = async (req: Request<Params>, res: Response) => {
+  const rsvps = await service.getRsvps(req.params.id, getUser(req).id);
+  res.json(z.encode(MeetingRsvpsSchema, rsvps));
+};
+
+export const setRsvp = async (
+  req: Request<Params, unknown, SetRsvpDTO>,
+  res: Response,
+) => {
+  const rsvps = await service.setRsvp(
+    req.params.id,
+    getUser(req).id,
+    req.body.status,
+  );
+  res.json(z.encode(MeetingRsvpsSchema, rsvps));
 };

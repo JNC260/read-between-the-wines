@@ -1,19 +1,21 @@
 // Uncomment this line to use CSS modules
 // import styles from './app.module.css';
 
-import { Route, Routes, Link } from "react-router-dom";
+import { Route, Routes } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ApiError } from "../api";
 import RequireAuth from "../components/RequireAuth";
-import SignOutButton from "../components/SignOutButton";
-import { authClient } from "../lib/auth-client";
+import SiteHeader from "../components/SiteHeader";
+import EditBookPage from "../pages/EditBookPage";
 import EditEventPage from "../pages/EditEventPage";
 import EventsPage from "../pages/EventsPage";
 import ForgotPasswordPage from "../pages/ForgotPasswordPage";
 import InviteMemberPage from "../pages/InviteMemberPage";
 import InvitePage from "../pages/InvitePage";
 import LandingPage from "../pages/LandingPage";
+import LegacyMembersPage from "../pages/LegacyMembersPage";
 import LoginPage from "../pages/LoginPage";
+import MeetingPage from "../pages/MeetingPage";
 import MembersPage from "../pages/MembersPage";
 import NewEventPage from "../pages/NewEventPage";
 import NewPollPage from "../pages/NewPollPage";
@@ -37,55 +39,11 @@ const queryClient = new QueryClient({
   },
 });
 
-// Only shown to signed-in members.
-const Nav = () => {
-  const { data: session } = authClient.useSession();
-  if (!session) {
-    return null;
-  }
-  return (
-    <nav>
-      <ul>
-        <li>
-          <Link to="/">Home</Link>
-        </li>
-        <li>
-          <Link to="/members">Members</Link>
-        </li>
-        <li>
-          <Link to="/invite-member">Invite a member</Link>
-        </li>
-        <li>
-          <Link to="/events">Events</Link>
-        </li>
-        <li>
-          <Link to="/books/suggestions">Suggestions</Link>
-        </li>
-        <li>
-          <Link to="/books/suggest">Suggest a book</Link>
-        </li>
-        <li>
-          <Link to="/books/read">Books we've read</Link>
-        </li>
-        <li>
-          <Link to="/profile">My profile</Link>
-        </li>
-        {session.user.isAdmin && (
-          <li>
-            <Link to="/events/new">New event</Link>
-          </li>
-        )}
-      </ul>
-      <SignOutButton />
-    </nav>
-  );
-};
-
 export function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <div>
-        <Nav />
+      <SiteHeader />
+      <main className="page">
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginPage />} />
@@ -98,6 +56,14 @@ export function App() {
             element={
               <RequireAuth>
                 <MembersPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/members/legacy"
+            element={
+              <RequireAuth admin>
+                <LegacyMembersPage />
               </RequireAuth>
             }
           />
@@ -130,6 +96,14 @@ export function App() {
             element={
               <RequireAuth admin>
                 <NewEventPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/events/:id"
+            element={
+              <RequireAuth>
+                <MeetingPage />
               </RequireAuth>
             }
           />
@@ -181,8 +155,18 @@ export function App() {
               </RequireAuth>
             }
           />
+          {/* Not admin-only: suggesters can edit their own. The page and
+              the API check which books. */}
+          <Route
+            path="/books/:id/edit"
+            element={
+              <RequireAuth>
+                <EditBookPage />
+              </RequireAuth>
+            }
+          />
         </Routes>
-      </div>
+      </main>
     </QueryClientProvider>
   );
 }

@@ -102,6 +102,23 @@
         "command": "jiti src/scripts/create-admin.ts"
       }
     },
+    "legacy-transform": {
+      "executor": "nx:run-commands",
+      "cache": false,
+      "options": {
+        "cwd": "{projectRoot}",
+        "command": "JITI_ALIAS='{\"shared\":\"'\"$PWD\"'/../../libs/shared/src/index.ts\"}' jiti src/scripts/legacy-import/transform.ts"
+      }
+    },
+    "legacy-seed": {
+      "executor": "nx:run-commands",
+      "cache": false,
+      "dependsOn": ["prisma-generate"],
+      "options": {
+        "cwd": "{projectRoot}",
+        "command": "JITI_ALIAS='{\"shared\":\"'\"$PWD\"'/../../libs/shared/src/index.ts\"}' jiti src/scripts/legacy-import/seed.ts"
+      }
+    },
     "test-db": {
       "executor": "nx:run-commands",
       "cache": false,

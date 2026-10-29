@@ -342,6 +342,17 @@ describe("GET /books/read", () => {
     });
   });
 
+  it("flags the books this member suggested", async () => {
+    const circe = await createBook({ title: "Circe", suggestedBy: ben.id });
+    const piranesi = await createBook({ title: "Piranesi", suggestedBy: ada.id });
+    await createMeeting({ bookId: circe.id, start: new Date("2026-09-10T19:00:00Z") });
+    await createMeeting({ bookId: piranesi.id, start: new Date("2026-08-10T19:00:00Z") });
+
+    const [byBen, byMe] = (await list()).body;
+    expect(byBen).toMatchObject({ title: "Circe", suggestedByMe: false });
+    expect(byMe).toMatchObject({ title: "Piranesi", suggestedByMe: true });
+  });
+
   it("returns 401 when signed out", async () => {
     expect((await api.request("GET", "/books/read")).status).toBe(401);
   });
@@ -421,6 +432,154 @@ describe("PUT /books/:id/rating", () => {
     const book = await readBook();
     const res = await api.request("PUT", `/books/${book.id}/rating`, {
       body: { score: 4 },
+    });
+    expect(res.status).toBe(401);
+  });
+});
+
+describe("GET /books/:id", () => {
+  const get = (id: string, as: User = ada) =>
+    api.request("GET", `/books/${id}`, { as });
+
+  it("returns the whole book, synopsis included", async () => {
+    const book = await createBook({ title: "Circe", suggestedBy: ada.id });
+    const res = await get(book.id);
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({
+      id: book.id,
+      title: "Circe",
+      synopsis: "What Circe is about.",
+    });
+  });
+
+  it("lets every suggester and admins edit, and nobody else", async () => {
+    const book = await createBook({ title: "Circe", suggestedBy: ada.id });
+    await addSuggestion(ben.id, book.id);
+    const cy = await createUser({ firstName: "Cy" });
+    const admin = await createUser({ firstName: "Dee", isAdmin: true });
+
+    expect((await get(book.id, ada)).body.canEdit).toBe(true);
+    expect((await get(book.id, ben)).body.canEdit).toBe(true);
+    expect((await get(book.id, cy)).body.canEdit).toBe(false);
+    expect((await get(book.id, admin)).body.canEdit).toBe(true);
+  });
+
+  it("returns 404 for an unknown book", async () => {
+    const res = await get(randomUUID());
+    expect(res.status).toBe(404);
+    expect(errorCode(res)).toBe("NOT_FOUND");
+  });
+
+  it("returns 401 when signed out", async () => {
+    const book = await createBook();
+    expect((await api.request("GET", `/books/${book.id}`)).status).toBe(401);
+  });
+});
+
+describe("PATCH /books/:id", () => {
+  const edit = (id: string, body: unknown, as: User = ada) =>
+    api.request("PATCH", `/books/${id}`, { as, body });
+
+  const everyField = {
+    title: "The Song of Achilles",
+    author: "Madeline Miller",
+    yearPublished: 2011,
+    genres: ["Fantasy", "Historical fiction"],
+    coverUrl: "https://covers.openlibrary.org/b/id/1-L.jpg",
+    synopsis: "Patroclus and Achilles.",
+    pageCount: 378,
+    goodreadsUrl: "https://www.goodreads.com/book/show/11250317",
+  };
+
+  it("saves every field for the member who suggested it", async () => {
+    const book = await createBook({ title: "Circe", suggestedBy: ada.id });
+    const res = await edit(book.id, everyField);
+
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({ id: book.id, ...everyField });
+    expect(await prisma.book.findUniqueOrThrow({ where: { id: book.id } })).toMatchObject({
+      ...everyField,
+      normalizedTitle: "song of achilles",
+    });
+  });
+
+  it("keeps fields left out and clears fields sent as null", async () => {
+    const book = await createBook({ title: "Circe", suggestedBy: ada.id });
+    await edit(book.id, { synopsis: null, yearPublished: 2018 });
+
+    expect(await prisma.book.findUniqueOrThrow({ where: { id: book.id } })).toMatchObject({
+      title: "Circe",
+      normalizedTitle: "circe",
+      synopsis: null,
+      yearPublished: 2018,
+    });
+  });
+
+  it("lets a second suggester edit too", async () => {
+    const book = await createBook({ title: "Circe", suggestedBy: ada.id });
+    await addSuggestion(ben.id, book.id);
+    const res = await edit(book.id, { pageCount: 393 }, ben);
+    expect(res.status).toBe(200);
+    expect(res.body.pageCount).toBe(393);
+  });
+
+  it("lets an admin edit a book they didn't suggest", async () => {
+    const book = await createBook({ title: "Circe", suggestedBy: ben.id });
+    const admin = await createUser({ firstName: "Dee", isAdmin: true });
+    const res = await edit(book.id, { title: "Circe: A Novel" }, admin);
+    expect(res.status).toBe(200);
+    expect(res.body.title).toBe("Circe: A Novel");
+  });
+
+  it("returns 403 for a member who didn't suggest it, and changes nothing", async () => {
+    const book = await createBook({ title: "Circe", suggestedBy: ben.id });
+    const res = await edit(book.id, { title: "Hacked" });
+    expect(res.status).toBe(403);
+    expect(errorCode(res)).toBe("FORBIDDEN");
+    expect((await prisma.book.findUniqueOrThrow({ where: { id: book.id } })).title).toBe(
+      "Circe",
+    );
+  });
+
+  it("ignores a work id, which isn't editable", async () => {
+    const book = await createBook({
+      title: "Circe",
+      openLibraryWorkId: CIRCE_WORK_ID,
+      suggestedBy: ada.id,
+    });
+    const res = await edit(book.id, { openLibraryWorkId: "OL16295851W", pageCount: 393 });
+    expect(res.status).toBe(200);
+    expect(await prisma.book.findUniqueOrThrow({ where: { id: book.id } })).toMatchObject({
+      openLibraryWorkId: CIRCE_WORK_ID,
+      pageCount: 393,
+    });
+  });
+
+  it.each([
+    ["a blank title", { title: "  " }],
+    ["a null author", { author: null }],
+    ["a fractional year", { yearPublished: 2011.5 }],
+    ["zero pages", { pageCount: 0 }],
+    ["a cover that isn't a web link", { coverUrl: "javascript:alert(1)" }],
+    ["a link that isn't Goodreads", { goodreadsUrl: "https://example.com/book" }],
+    ["a blank genre", { genres: ["Fantasy", " "] }],
+  ])("rejects %s with 400", async (_, body) => {
+    const book = await createBook({ title: "Circe", suggestedBy: ada.id });
+    const res = await edit(book.id, body);
+    expect(res.status).toBe(400);
+    expect(errorCode(res)).toBe("BAD_REQUEST");
+  });
+
+  it("returns 404 for an unknown book", async () => {
+    const res = await edit(randomUUID(), { title: "Circe" });
+    expect(res.status).toBe(404);
+    expect(errorCode(res)).toBe("NOT_FOUND");
+  });
+
+  it("returns 401 when signed out", async () => {
+    const book = await createBook({ suggestedBy: ada.id });
+    const res = await api.request("PATCH", `/books/${book.id}`, {
+      body: { title: "Circe" },
     });
     expect(res.status).toBe(401);
   });

@@ -1,0 +1,98 @@
+<!doctype html>
+<!--
+  Source for public/og-image.png, the picture shown when a link to the site
+  is texted, emailed or posted. Re-render it with scripts/render-og-image.sh
+  after changing this file. 1200x630 is the size Facebook, iMessage, Slack
+  and X all crop to.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,650;1,9..144,650&family=Figtree:wght@500;600&family=DM+Mono:wght@500&display=block">
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; width: 1200px; height: 630px; overflow: hidden; }
+  body {
+    background: #FFF6F7;
+    color: #241B3A;
+    font-family: Figtree, sans-serif;
+    display: grid;
+    grid-template-columns: 1fr 470px;
+    align-items: center;
+    padding: 0 72px 0 84px;
+  }
+  .eyebrow {
+    margin: 0 0 22px;
+    font-family: "DM Mono", monospace;
+    font-size: 22px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #C81D6B;
+  }
+  h1 {
+    margin: 0;
+    font-family: Fraunces, Georgia, serif;
+    font-weight: 650;
+    font-size: 96px;
+    line-height: 0.98;
+    letter-spacing: -0.015em;
+  }
+  h1 em { color: #C81D6B; }
+  .tagline {
+    margin: 26px 0 0;
+    font-size: 30px;
+    line-height: 1.35;
+    color: #5E5470;
+    max-width: 560px;
+  }
+  .shelf { align-self: end; margin-bottom: 118px; }
+  .row { display: flex; align-items: flex-end; gap: 5px; padding: 0 18px; }
+  .spine {
+    border-radius: 4px 4px 2px 2px;
+    box-shadow: inset -6px 0 0 rgba(0,0,0,0.16), inset 3px 0 0 rgba(255,255,255,0.14);
+    position: relative;
+  }
+  .spine::before, .spine::after {
+    content: ""; position: absolute; left: 18%; right: 18%;
+    border-top: 3px solid currentColor; opacity: 0.55;
+  }
+  .spine::before { top: 16px; }
+  .spine::after { bottom: 16px; }
+  .tilt { transform: rotate(-8deg) translateY(-6px); transform-origin: 50% 100%; }
+  .plank { height: 22px; border-radius: 6px; background: #7A5068; border-bottom: 10px solid #4E3445; }
+  .stamp {
+    margin: 34px 0 0;
+    font-family: "DM Mono", monospace; font-size: 22px; letter-spacing: 0.04em; color: #5E5470;
+  }
+</style>
+</head>
+<body>
+  <div>
+    <p class="eyebrow">Paducah book club</p>
+    <h1>Read Between <em>the</em> Wines</h1>
+    <p class="tagline">Suggest a book, vote on what's next, and RSVP for the next meeting.</p>
+    <p class="stamp">readbetweenthewinespaducah.org</p>
+  </div>
+
+  <div class="shelf" aria-hidden="true">
+    <div class="row">
+      <div class="spine" style="width:46px;height:250px;background:#241B3A;color:#FFF6F7"></div>
+      <div class="spine" style="width:58px;height:290px;background:#C81D6B;color:#FFFFFF"></div>
+      <div class="spine" style="width:40px;height:232px;background:#F3E3C3;color:#241B3A"></div>
+      <div class="spine" style="width:52px;height:272px;background:#2E5E4E;color:#FFF6F7"></div>
+      <div class="spine tilt" style="width:48px;height:262px;background:#F29E38;color:#2A1A05"></div>
+      <div class="spine" style="width:44px;height:240px;background:#FFD3E2;color:#241B3A"></div>
+      <div class="spine" style="width:56px;height:284px;background:#34507A;color:#FFFFFF"></div>
+      <div class="spine" style="width:42px;height:246px;background:#6B2D5C;color:#FFFFFF"></div>
+      <svg width="54" height="182" viewBox="0 0 38 128" style="margin-left:14px">
+        <path d="M14 0h10v32c0 7 12 11 12 24v64a8 8 0 0 1-8 8H10a8 8 0 0 1-8-8V56c0-13 12-17 12-24z" fill="#6B2D5C"/>
+        <rect x="6" y="70" width="26" height="30" rx="3" fill="#F3E3C3"/>
+        <rect x="11" y="78" width="16" height="3" rx="1.5" fill="#C81D6B"/>
+        <rect x="13" y="0" width="12" height="8" rx="2" fill="#C81D6B"/>
+      </svg>
+    </div>
+    <div class="plank"></div>
+  </div>
+
+</body>
+</html>
