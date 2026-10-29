@@ -87,3 +87,33 @@ export const UpdateProfileSchema = z.object({
 });
 
 export type UpdateProfileDTO = z.infer<typeof UpdateProfileSchema>;
+
+// A member from the old Google Form who hasn't joined the site yet. The
+// legacy import made them so their suggestions had someone to belong to;
+// they can't sign in. Only admins see these.
+export const PlaceholderSchema = z.object({
+  id: z.uuid(),
+  firstName: z.string(),
+  lastName: z.string(),
+  suggestionCount: z.int(),
+});
+
+export type PlaceholderDTO = z.output<typeof PlaceholderSchema>;
+
+// Hands a placeholder's history to the member who turned out to be them.
+export const MergePlaceholderSchema = z.object({
+  memberId: z.uuid("Pick a member"),
+});
+
+export type MergePlaceholderDTO = z.infer<typeof MergePlaceholderSchema>;
+
+// How many rows moved to the member. Ones they already had (the same book
+// suggested twice, say) are dropped rather than counted.
+export const MergeResultSchema = z.object({
+  suggestions: z.int(),
+  ratings: z.int(),
+  rsvps: z.int(),
+  votes: z.int(),
+});
+
+export type MergeResultDTO = z.output<typeof MergeResultSchema>;

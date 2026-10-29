@@ -13,6 +13,7 @@ import ForgotPasswordPage from "../pages/ForgotPasswordPage";
 import InviteMemberPage from "../pages/InviteMemberPage";
 import InvitePage from "../pages/InvitePage";
 import LandingPage from "../pages/LandingPage";
+import LegacyMembersPage from "../pages/LegacyMembersPage";
 import LoginPage from "../pages/LoginPage";
 import MeetingPage from "../pages/MeetingPage";
 import MembersPage from "../pages/MembersPage";
@@ -55,6 +56,14 @@ export function App() {
             element={
               <RequireAuth>
                 <MembersPage />
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/members/legacy"
+            element={
+              <RequireAuth admin>
+                <LegacyMembersPage />
               </RequireAuth>
             }
           />

@@ -1,10 +1,18 @@
 import { type Request, type Response } from "express";
 import * as z from "zod";
-import { type UpdateProfileDTO, UserSchema } from "shared";
+import {
+  type MergePlaceholderDTO,
+  MergeResultSchema,
+  PlaceholderSchema,
+  type UpdateProfileDTO,
+  UserSchema,
+} from "shared";
 import { getUser } from "../middleware/auth";
 import {
   deactivateUser,
   getActiveUsers,
+  listPlaceholders,
+  mergePlaceholder,
   reactivateUser,
   updateProfile,
 } from "./users.service";
@@ -38,4 +46,17 @@ export const userDeactivate = async (
 ) => {
   const user = await deactivateUser(req.params.id);
   res.json(z.encode(UserSchema, user));
+};
+
+export const placeholderList = async (_req: Request, res: Response) => {
+  const results = await listPlaceholders();
+  res.json(z.encode(PlaceholderSchema.array(), results));
+};
+
+export const placeholderMerge = async (
+  req: Request<{ id: string }, unknown, MergePlaceholderDTO>,
+  res: Response,
+) => {
+  const result = await mergePlaceholder(req.params.id, req.body.memberId);
+  res.json(z.encode(MergeResultSchema, result));
 };

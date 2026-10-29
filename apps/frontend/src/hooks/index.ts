@@ -24,6 +24,7 @@ import {
   getMeeting,
   getMeetingRsvps,
   getMeetings,
+  getPlaceholders,
   getPoll,
   getReadBooks,
   rateBook,
@@ -31,6 +32,7 @@ import {
   getVenues,
   getInvite,
   getUsersList,
+  mergePlaceholder,
   reactivateAccount,
   requestPasswordReset,
   resetPassword,
@@ -58,6 +60,27 @@ export const useUpdateProfile = () => {
   return useMutation({
     mutationFn: updateProfile,
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["users"] }),
+  });
+};
+
+export const usePlaceholders = () => {
+  return useQuery({
+    queryKey: ["placeholders"],
+    queryFn: getPlaceholders,
+  });
+};
+
+// Books and meetings show who suggested, rated and RSVPed, so they change too.
+export const useMergePlaceholder = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: mergePlaceholder,
+    onSuccess: () =>
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["placeholders"] }),
+        queryClient.invalidateQueries({ queryKey: ["books"] }),
+        queryClient.invalidateQueries({ queryKey: ["meetings"] }),
+      ]),
   });
 };
 

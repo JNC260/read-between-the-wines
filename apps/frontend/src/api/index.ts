@@ -18,6 +18,10 @@ import {
   InviteLookupSchema,
   type MeetingListQuery,
   MeetingRsvpsSchema,
+  type MergePlaceholderDTO,
+  MergePlaceholderSchema,
+  MergeResultSchema,
+  PlaceholderSchema,
   MeetingSchema,
   PollSchema,
   type RateBookDTO,
@@ -185,6 +189,26 @@ export const updateProfile = (body: UpdateProfileDTO) =>
     schema: UpdateProfileSchema,
     body,
   });
+
+// Admin-only: legacy members who haven't joined, and handing one's history
+// to the member who turned out to be them.
+export const getPlaceholders = () =>
+  apiFetch(
+    `/api/users/placeholders`,
+    PlaceholderSchema.array(),
+    "Failed to fetch legacy members",
+  );
+
+export const mergePlaceholder = ({
+  placeholderId,
+  ...body
+}: MergePlaceholderDTO & { placeholderId: string }) =>
+  apiFetch(
+    `/api/users/placeholders/${encodeURIComponent(placeholderId)}/merge`,
+    MergeResultSchema,
+    "Failed to merge",
+    { method: "POST", schema: MergePlaceholderSchema, body },
+  );
 
 export const getMeetings = (when?: MeetingListQuery["when"]) => {
   const query = when ? `?when=${when}` : "";

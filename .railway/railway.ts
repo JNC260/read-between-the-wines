@@ -21,7 +21,8 @@ export default defineRailway(() => {
     preDeploy: "npx prisma migrate deploy --config apps/backend/prisma.config.ts",
     healthcheck: "/api/health",
     healthcheckTimeout: 120,
-    domains: [SITE],
+    // The custom domain (SITE) can't be registered from here: Railway only
+    // accepts it in the dashboard, under web → Settings → Networking.
     env: {
       NODE_ENV: "production",
       DATABASE_URL: db.env.DATABASE_URL,

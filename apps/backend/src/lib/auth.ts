@@ -4,6 +4,7 @@ import { APIError } from "better-auth/api";
 import { UserStatus } from "../../generated/prisma/client";
 import { config, isProduction } from "./config";
 import { isInviteValid, markInviteUsed } from "../invites/invites.service";
+import { claimPlaceholder } from "../users/users.service";
 import { type Email, sendEmail } from "./email";
 import { prisma } from "./prisma";
 
@@ -95,6 +96,16 @@ export const auth = betterAuth({
     // Clicking the link signs them in, so a new member goes straight from
     // the email to the club without typing their password again.
     autoSignInAfterVerification: true,
+    // Waits for verification so a typo'd or made-up email can't take
+    // someone's legacy history. A failure is logged, not shown: they're
+    // signed up either way, and an admin can merge them by hand.
+    afterEmailVerification: async (user) => {
+      try {
+        await claimPlaceholder(user.id);
+      } catch (err) {
+        console.error(`Couldn't claim a placeholder for user ${user.id}`, err);
+      }
+    },
     sendVerificationEmail: async ({ user, url }) => {
       sendInBackground({
         to: user.email,
