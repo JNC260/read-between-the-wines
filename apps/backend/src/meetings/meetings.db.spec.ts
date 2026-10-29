@@ -163,6 +163,7 @@ describe("POST /meetings", () => {
       validMeeting({
         title: "  November meeting  ",
         description: "Bring snacks",
+        craft: "  Bookmarks: bring old magazines  ",
         venueId: venue.id,
         bookId: book.id,
       }),
@@ -174,6 +175,7 @@ describe("POST /meetings", () => {
       start: "2026-11-20T19:00:00.000Z",
       end: "2026-11-20T21:00:00.000Z",
       description: "Bring snacks",
+      craft: "Bookmarks: bring old magazines",
       venue: { id: venue.id },
       book: { id: book.id },
     });
@@ -185,6 +187,7 @@ describe("POST /meetings", () => {
     expect(res.status).toBe(201);
     expect(res.body).toMatchObject({
       description: null,
+      craft: null,
       venueId: null,
       venue: null,
       bookId: null,
@@ -270,17 +273,19 @@ describe("PATCH /meetings/:id", () => {
     const meeting = await createMeeting({ venueId: venue.id, bookId: book.id });
     await prisma.meeting.update({
       where: { id: meeting.id },
-      data: { description: "Bring snacks" },
+      data: { description: "Bring snacks", craft: "Bookmarks" },
     });
 
     const res = await update(meeting.id, {
       description: null,
+      craft: null,
       venueId: null,
       bookId: null,
     });
     expect(res.status).toBe(200);
     expect(res.body).toMatchObject({
       description: null,
+      craft: null,
       venue: null,
       book: null,
     });
@@ -359,7 +364,13 @@ describe("GET /meetings/:id/rsvps", () => {
       },
     });
     await prisma.rsvp.create({
-      data: { userId: ada.id, meetingId: meeting.id, status: "YES" },
+      data: {
+        userId: ada.id,
+        meetingId: meeting.id,
+        status: "YES",
+        dish: "Lemon bars",
+        guestCount: 1,
+      },
     });
 
     const res = await getRsvps(meeting.id);
@@ -370,10 +381,14 @@ describe("GET /meetings/:id/rsvps", () => {
         {
           member: { id: admin.id, firstName: "Admin", lastName: "Reader" },
           status: "MAYBE",
+          dish: null,
+          guestCount: 0,
         },
         {
           member: { id: ada.id, firstName: "Ada", lastName: "Reader" },
           status: "YES",
+          dish: "Lemon bars",
+          guestCount: 1,
         },
       ],
     });
@@ -420,6 +435,54 @@ describe("PUT /meetings/:id/rsvp", () => {
 
     expect(res.body.myStatus).toBe("NO");
     expect(await prisma.rsvp.count()).toBe(1);
+  });
+
+  it("saves what they're bringing and how many guests", async () => {
+    const meeting = await createMeeting({ start: hoursFromNow(48) });
+    const res = await rsvp(meeting.id, {
+      status: "YES",
+      dish: "  Lemon bars  ",
+      guestCount: 2,
+    });
+    expect(res.status).toBe(200);
+    expect(res.body.rsvps[0]).toMatchObject({ dish: "Lemon bars", guestCount: 2 });
+  });
+
+  it("keeps the dish and guests when only the status changes", async () => {
+    const meeting = await createMeeting({ start: hoursFromNow(48) });
+    await rsvp(meeting.id, { status: "YES", dish: "Lemon bars", guestCount: 2 });
+    const res = await rsvp(meeting.id, { status: "MAYBE" });
+    expect(res.body.rsvps[0]).toMatchObject({
+      status: "MAYBE",
+      dish: "Lemon bars",
+      guestCount: 2,
+    });
+  });
+
+  it("clears the dish when sent empty", async () => {
+    const meeting = await createMeeting({ start: hoursFromNow(48) });
+    await rsvp(meeting.id, { status: "YES", dish: "Lemon bars" });
+    const res = await rsvp(meeting.id, { status: "YES", dish: "  " });
+    expect(res.body.rsvps[0].dish).toBeNull();
+  });
+
+  it("clears the dish and guests for someone who can't come", async () => {
+    const meeting = await createMeeting({ start: hoursFromNow(48) });
+    await rsvp(meeting.id, { status: "YES", dish: "Lemon bars", guestCount: 2 });
+    const res = await rsvp(meeting.id, { status: "NO" });
+    expect(res.body.rsvps[0]).toMatchObject({ dish: null, guestCount: 0 });
+  });
+
+  it.each([
+    ["negative guests", { guestCount: -1 }],
+    ["too many guests", { guestCount: 11 }],
+    ["a fractional guest", { guestCount: 1.5 }],
+    ["a very long dish", { dish: "x".repeat(101) }],
+  ])("rejects %s with 400", async (_label, details) => {
+    const meeting = await createMeeting({ start: hoursFromNow(48) });
+    const res = await rsvp(meeting.id, { status: "YES", ...details });
+    expect(res.status).toBe(400);
+    expect(await prisma.rsvp.count()).toBe(0);
   });
 
   it("still takes answers while the meeting is in progress", async () => {

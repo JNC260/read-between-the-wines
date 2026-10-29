@@ -513,8 +513,6 @@ li:has(> :is(h2, h3)) > :last-child {
 .meeting-card h2 {
   font-size: 1.25rem;
   margin: 0;
-  /* Room for the stamp. */
-  padding-right: 3.5rem;
 }
 
 .meeting-card h2 a {
@@ -543,30 +541,6 @@ li:has(> :is(h2, h3)) > :last-child {
 .facts dd {
   margin: 0;
   min-width: 0;
-}
-
-/* A library due-date stamp, slightly askew. */
-.stamp {
-  position: absolute;
-  top: 0.9rem;
-  right: 0.8rem;
-  padding: 0.25rem 0.4rem;
-  font-family: var(--font-stamp);
-  font-size: 0.62rem;
-  line-height: 1.15;
-  letter-spacing: 0.06em;
-  text-align: center;
-  color: var(--color-accent);
-  border: 1.5px solid currentColor;
-  border-radius: 4px;
-  transform: rotate(7deg);
-  opacity: 0.9;
-}
-
-.stamp strong {
-  display: block;
-  font-size: 0.95rem;
-  font-weight: 500;
 }
 
 /* ---------- RSVP ---------- */
@@ -1174,20 +1148,35 @@ li:has(> :is(h2, h3)) > :last-child {
 
 /* ---------- Members ---------- */
 
+/* One per row on phones, so the social icons fit on one line. */
 .member-list {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   gap: 0.75rem;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
+.member-list > li {
+  display: grid;
+}
+
+/* Photo on top, everything centered under it. */
 .member-card {
   display: grid;
-  grid-template-columns: 3.5rem minmax(0, 1fr);
-  gap: 0.9rem;
-  align-items: center;
-  padding: 0.9rem;
+  align-content: start;
+  justify-items: center;
+  gap: 0.75rem;
+  padding: 1.25rem 0.75rem 1rem;
+  text-align: center;
+}
+
+.member-card .avatar {
+  width: min(7.5rem, 80%);
+  height: auto;
+  aspect-ratio: 1;
+  font-size: 2.1rem;
 }
 
 .member-card-text {
@@ -1205,8 +1194,13 @@ li:has(> :is(h2, h3)) > :last-child {
 }
 
 .member-card .muted {
-  margin: 0.1rem 0 0;
+  margin: 0.2rem 0 0;
   font-size: 0.82rem;
+}
+
+.member-card .social-links {
+  justify-content: center;
+  margin: 0.25rem 0 0;
 }
 
 .you-badge {
@@ -1265,9 +1259,9 @@ li:has(> :is(h2, h3)) > :last-child {
 }
 
 .avatar-large {
-  width: 5.5rem;
-  height: 5.5rem;
-  font-size: 1.75rem;
+  width: 7.5rem;
+  height: 7.5rem;
+  font-size: 2.25rem;
 }
 
 .avatar-0 {
@@ -1602,7 +1596,7 @@ button:disabled {
   }
 
   .member-list {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   /* A centered window instead of a bottom sheet. */
@@ -1678,7 +1672,7 @@ button:disabled {
   }
 
   .member-list {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
 
@@ -1984,3 +1978,104 @@ button:disabled {
   }
 }
 
+
+/* ---------- Meeting details ---------- */
+
+.rsvp-details {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 6rem;
+  gap: 0.75rem;
+  align-items: end;
+}
+
+.rsvp-details-actions {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.rsvp-details [role="status"] {
+  font-size: 0.9rem;
+  color: var(--color-ink-soft);
+}
+
+.rsvp-details [role="alert"] {
+  grid-column: 1 / -1;
+  margin: 0;
+}
+
+.your-rsvp {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+}
+
+.menu-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.menu-list li {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.25rem 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--color-line);
+}
+
+.map {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  max-height: 22rem;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+}
+
+/* ---------- Events page ---------- */
+
+.event-cards {
+  margin: 0 0 2rem;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 1.25rem;
+}
+
+.event-cards > li {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.event-cards > li > a {
+  justify-self: end;
+  font-size: 0.9rem;
+}
+
+.past-meetings ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.past-meetings li {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid var(--color-line);
+}
+
+.past-meetings time {
+  flex: none;
+  font-size: 0.9rem;
+}

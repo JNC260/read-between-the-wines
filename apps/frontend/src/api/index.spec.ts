@@ -24,6 +24,7 @@ const meeting = {
   start: "2030-10-01T23:00:00.000Z",
   end: "2030-10-02T01:00:00.000Z",
   description: null,
+  craft: null,
   venueId: null,
   bookId: null,
   venue: null,
