@@ -7,6 +7,8 @@ import {
 import { type Prisma, UserStatus } from "../../generated/prisma/client";
 import { BadRequestError, ConflictError, NotFoundError } from "../lib/errors";
 import { prisma } from "../lib/prisma";
+import { toProfileImage } from "../lib/images";
+import { deleteImage, saveImage, type UploadedImage } from "../lib/storage";
 
 // The member list. Inactive and banned accounts have left the club, so
 // they're left out, along with their contact details.
@@ -60,6 +62,54 @@ export const updateProfile = async (
   });
 };
 
+const findUser = async (id: string) => {
+  const user = await prisma.user.findUnique({ where: { id } });
+  if (!user) {
+    throw new NotFoundError("User not found");
+  }
+  return user;
+};
+
+// Saves the new image, points User.image at it, then deletes the old one.
+// The order means a failure never leaves User.image pointing at a missing
+// file; the worst case is a stray file on disk:
+//   - not an image: toProfileImage throws a 400 before anything is saved
+//   - the update fails: the new file is deleted, the old photo stays
+//   - deleting the old file fails: deleteImage logs it; the new photo is
+//     already live, so the request still succeeds
+export const updateProfileImage = async (
+  id: string,
+  image: UploadedImage,
+): Promise<UserDTO> => {
+  const user = await findUser(id);
+  const url = await saveImage(await toProfileImage(image.buffer));
+  let updated;
+  try {
+    updated = await prisma.user.update({ where: { id }, data: { image: url } });
+  } catch (err) {
+    await deleteImage(url);
+    throw err;
+  }
+  if (user.image) {
+    await deleteImage(user.image);
+  }
+  return updated;
+};
+
+// Clears User.image and deletes the file, in that order for the same
+// reason. Removing a photo that isn't there is fine: the result is the same.
+export const removeProfileImage = async (id: string): Promise<UserDTO> => {
+  const user = await findUser(id);
+  if (!user.image) {
+    return user;
+  }
+  const updated = await prisma.user.update({
+    where: { id },
+    data: { image: null },
+  });
+  await deleteImage(user.image);
+  return updated;
+};
 // ---------------------------------------------------------------------------
 // Placeholders
 // ---------------------------------------------------------------------------
@@ -67,7 +117,10 @@ export const updateProfile = async (
 // The legacy import's placeholder addresses (placeholderEmail() in
 // scripts/legacy-import/common.ts). .invalid can never be a real domain, so
 // no one who signs up can have one.
-const PLACEHOLDER_EMAIL = { startsWith: "placeholder+", endsWith: "@example.invalid" };
+const PLACEHOLDER_EMAIL = {
+  startsWith: "placeholder+",
+  endsWith: "@example.invalid",
+};
 const isPlaceholderEmail = (email: string) =>
   email.startsWith(PLACEHOLDER_EMAIL.startsWith) &&
   email.endsWith(PLACEHOLDER_EMAIL.endsWith);
@@ -107,7 +160,11 @@ const moveRows = async (
   });
   for (const old of legacyDates) {
     await tx.suggestion.updateMany({
-      where: { userId: toId, bookId: old.bookId, createdAt: { gt: old.createdAt } },
+      where: {
+        userId: toId,
+        bookId: old.bookId,
+        createdAt: { gt: old.createdAt },
+      },
       data: { createdAt: old.createdAt },
     });
   }
@@ -124,7 +181,10 @@ const moveRows = async (
 
   const rsvped = await tx.rsvp.findMany({ where: theirs });
   const rsvps = await tx.rsvp.updateMany({
-    where: { userId: fromId, meetingId: { notIn: rsvped.map((r) => r.meetingId) } },
+    where: {
+      userId: fromId,
+      meetingId: { notIn: rsvped.map((r) => r.meetingId) },
+    },
     data: { userId: toId },
   });
 
@@ -161,7 +221,9 @@ export const mergePlaceholder = (
   memberId: string,
 ): Promise<MergeResultDTO> =>
   prisma.$transaction(async (tx) => {
-    const placeholder = await tx.user.findUnique({ where: { id: placeholderId } });
+    const placeholder = await tx.user.findUnique({
+      where: { id: placeholderId },
+    });
     if (!placeholder || !isPlaceholderEmail(placeholder.email)) {
       throw new NotFoundError("Placeholder not found");
     }

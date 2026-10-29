@@ -4,6 +4,7 @@ import {
   type MergePlaceholderDTO,
   MergeResultSchema,
   PlaceholderSchema,
+  type ProfileImageType,
   type UpdateProfileDTO,
   UserSchema,
 } from "shared";
@@ -14,7 +15,9 @@ import {
   listPlaceholders,
   mergePlaceholder,
   reactivateUser,
+  removeProfileImage,
   updateProfile,
+  updateProfileImage,
 } from "./users.service";
 
 export const userList = async (_req: Request, res: Response) => {
@@ -27,6 +30,22 @@ export const userUpdateSelf = async (
   res: Response,
 ) => {
   const user = await updateProfile(getUser(req).id, req.body);
+  res.json(z.encode(UserSchema, user));
+};
+
+// After uploadImage, which only calls this with a file of an allowed type
+// on req.file, the same way validate() leaves a checked req.body.
+export const userUploadImage = async (req: Request, res: Response) => {
+  const file = req.file as Express.Multer.File;
+  const user = await updateProfileImage(getUser(req).id, {
+    buffer: file.buffer,
+    contentType: file.mimetype as ProfileImageType,
+  });
+  res.json(z.encode(UserSchema, user));
+};
+
+export const userRemoveImage = async (req: Request, res: Response) => {
+  const user = await removeProfileImage(getUser(req).id);
   res.json(z.encode(UserSchema, user));
 };
 

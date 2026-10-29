@@ -5,7 +5,12 @@ import { mockSession, renderRoutes, Route, testUser } from "../test-utils";
 import ProfilePage from "./ProfilePage";
 
 vi.mock("../lib/auth-client", () => ({ authClient: { useSession: vi.fn() } }));
-vi.mock("../api", () => ({ getUsersList: vi.fn(), updateProfile: vi.fn() }));
+vi.mock("../api", () => ({
+  getUsersList: vi.fn(),
+  updateProfile: vi.fn(),
+  uploadProfileImage: vi.fn(),
+  removeProfileImage: vi.fn(),
+}));
 
 const me = testUser();
 

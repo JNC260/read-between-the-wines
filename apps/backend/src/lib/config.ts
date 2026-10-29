@@ -1,3 +1,4 @@
+import path from "node:path";
 import * as z from "zod";
 
 // Every environment variable the server reads, checked once at startup, so a
@@ -37,6 +38,15 @@ const EnvSchema = z
     // Mailpit needs no login, so these are usually empty.
     SMTP_USER: z.string().optional(),
     SMTP_PASS: z.string().optional(),
+    // Where uploaded photos are written. Relative paths are from the
+    // directory the server starts in (the repo root with nx serve); on
+    // Railway it's the volume's mount path. Made absolute here so nothing
+    // later depends on the working directory.
+    UPLOAD_DIR: z
+      .string()
+      .min(1)
+      .default("uploads")
+      .transform((dir) => path.resolve(dir)),
   })
   .superRefine((env, ctx) => {
     if (env.NODE_ENV !== "production") {

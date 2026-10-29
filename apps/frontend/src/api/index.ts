@@ -39,6 +39,7 @@ import {
   UpdateProfileSchema,
   type UpdateVenueDTO,
   UpdateVenueSchema,
+  type UserDTO,
   UserSchema,
   VenueSchema,
 } from "shared";
@@ -76,12 +77,12 @@ const throwApiError = async (response: Response, fallback: string) => {
 
 // Fetches from our API and decodes the response with `schema`, so dates come
 // back as Date objects. Pass `send.schema` and `send.body` to encode a
-// request body the other way.
+// request body the other way, or `send.form` to upload files.
 const apiFetch = async <T extends z.ZodType>(
   url: string,
   schema: T,
   fallback: string,
-  send?: { method: string; schema?: z.ZodType; body?: unknown },
+  send?: { method: string; schema?: z.ZodType; body?: unknown; form?: FormData },
 ): Promise<z.output<T>> => {
   const response = await fetch(
     url,
@@ -91,6 +92,9 @@ const apiFetch = async <T extends z.ZodType>(
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(z.encode(send.schema, send.body)),
       }),
+      // No Content-Type: the browser sets multipart/form-data itself, with
+      // the boundary that separates the parts.
+      ...(send.form && { body: send.form }),
     },
   );
   if (!response.ok) {
@@ -190,6 +194,21 @@ export const updateProfile = (body: UpdateProfileDTO) =>
     body,
   });
 
+// Sent as multipart/form-data with the file in "image", not JSON. Returns
+// the member with the new photo's URL.
+export const uploadProfileImage = (file: File): Promise<UserDTO> => {
+  const form = new FormData();
+  form.append("image", file);
+  return apiFetch(`/api/users/me/image`, UserSchema, "Failed to upload your photo", {
+    method: "PUT",
+    form,
+  });
+};
+
+export const removeProfileImage = (): Promise<UserDTO> =>
+  apiFetch(`/api/users/me/image`, UserSchema, "Failed to remove your photo", {
+    method: "DELETE",
+  });
 // Admin-only: legacy members who haven't joined, and handing one's history
 // to the member who turned out to be them.
 export const getPlaceholders = () =>
@@ -328,7 +347,10 @@ export const updateBook = ({ id, ...body }: UpdateBookDTO & { id: string }) =>
     { method: "PATCH", schema: UpdateBookSchema, body },
   );
 
-export const rateBook = ({ bookId, ...body }: RateBookDTO & { bookId: string }) =>
+export const rateBook = ({
+  bookId,
+  ...body
+}: RateBookDTO & { bookId: string }) =>
   apiFetch(
     `/api/books/${encodeURIComponent(bookId)}/rating`,
     RatingSchema,

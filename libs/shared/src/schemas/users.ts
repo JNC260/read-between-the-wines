@@ -40,6 +40,22 @@ export const UserSchema = z.object({
 
 export type UserDTO = z.output<typeof UserSchema>;
 
+// Profile image uploads. Shared so the file input's accept attribute and
+// size check match what the server takes. No HEIC: iPhones convert to JPEG
+// when the picker doesn't ask for it, and sharp's prebuilt binaries can't
+// read it anyway. The limit fits a full-size phone photo; the server
+// shrinks every upload, so this only bounds what it has to read.
+export const PROFILE_IMAGE_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+] as const;
+export type ProfileImageType = (typeof PROFILE_IMAGE_TYPES)[number];
+export const MAX_PROFILE_IMAGE_BYTES = 10 * 1024 * 1024;
+
+export const isProfileImageType = (type: string): type is ProfileImageType =>
+  (PROFILE_IMAGE_TYPES as readonly string[]).includes(type);
+
 // The messages show next to each field on the profile form.
 const requiredText = z.string().trim().min(1, "Required");
 

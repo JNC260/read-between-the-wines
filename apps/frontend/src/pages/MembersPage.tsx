@@ -1,10 +1,10 @@
 import { type ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { formatPhone, handleUrl, type UserDTO } from "shared";
+import Avatar from "../components/Avatar";
 import SocialIcon, { type SocialSite } from "../components/SocialIcon";
 import { useMembers } from "../hooks";
 import { authClient } from "../lib/auth-client";
-import { initials } from "../lib/initials";
 
 type Social = { site: SocialSite; label: string; href: string; shown: string };
 
@@ -51,27 +51,6 @@ const socials = (m: UserDTO): Social[] =>
   ].filter((s): s is Social => !!s);
 
 const fullName = (m: UserDTO) => `${m.firstName} ${m.lastName}`;
-
-// The photo if they've added one, otherwise initials on one of the theme's
-// colors, picked by position so neighbors differ.
-const Avatar = ({
-  member,
-  index,
-  large = false,
-}: {
-  member: UserDTO;
-  index: number;
-  large?: boolean;
-}) => {
-  const className = `avatar${large ? " avatar-large" : ""}`;
-  return member.image ? (
-    <img className={className} src={member.image} alt="" />
-  ) : (
-    <span className={`${className} avatar-${index % 5}`} aria-hidden="true">
-      {initials(member)}
-    </span>
-  );
-};
 
 const ExternalLink = ({
   href,

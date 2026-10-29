@@ -5,6 +5,7 @@ import {
   requireAuth,
   requireAuthAllowInactive,
 } from "../middleware/auth";
+import { uploadImage } from "../middleware/upload";
 import { validate } from "../middleware/validate";
 import {
   placeholderList,
@@ -13,7 +14,9 @@ import {
   userDeactivateSelf,
   userList,
   userReactivateSelf,
+  userRemoveImage,
   userUpdateSelf,
+  userUploadImage,
 } from "./users.controller";
 
 const router = express.Router();
@@ -23,6 +26,9 @@ router.get("/", requireAuth, userList);
 
 // /me and /placeholders routes come before /:id, or "me" would be read as an id.
 router.patch("/me", requireAuth, validate(UpdateProfileSchema), userUpdateSelf);
+// The image has its own endpoint: it's multipart, not JSON.
+router.put("/me/image", requireAuth, uploadImage, userUploadImage);
+router.delete("/me/image", requireAuth, userRemoveImage);
 router.post("/me/deactivate", requireAuth, userDeactivateSelf);
 router.post("/me/reactivate", requireAuthAllowInactive, userReactivateSelf);
 router.get("/placeholders", requireAuth, requireAdmin, placeholderList);

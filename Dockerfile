@@ -5,6 +5,7 @@
 # Try it locally:
 #   docker build -t rbtw .
 #   docker run --rm -p 3000:3000 -e PORT=3000 --env-file .env rbtw
+# Uploaded photos go in UPLOAD_DIR, a Railway volume in production.
 
 FROM node:24-bookworm-slim AS base
 # Prisma's schema engine, which `prisma migrate deploy` runs, needs OpenSSL.
@@ -35,5 +36,7 @@ COPY package.json ./
 COPY apps/backend/prisma.config.ts apps/backend/
 COPY apps/backend/prisma/schema.prisma apps/backend/prisma/
 COPY apps/backend/prisma/migrations apps/backend/prisma/migrations
-USER node
-CMD ["node", "dist/apps/backend/main.js"]
+# Starts as root only long enough to give the uploads volume to the node
+# user, then runs the server as node (see docker-start.sh).
+COPY --chmod=755 docker-start.sh ./
+CMD ["./docker-start.sh", "node", "dist/apps/backend/main.js"]

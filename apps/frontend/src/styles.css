@@ -3,18 +3,18 @@
    these are element-level base styles, written mobile-first. */
 
 :root {
-  --color-paper: #FFF6F7;
-  --color-surface: #FFFFFF;
-  --color-ink: #241B3A;
-  --color-ink-soft: #5E5470;
-  --color-line: #F0DCE3;
-  --color-accent: #C81D6B;
-  --color-on-accent: #FFFFFF;
-  --color-accent-soft: #FCE4EE;
-  --color-pop: #F29E38;
-  --color-on-pop: #2A1A05;
-  --color-highlight: #FFD3E2;
-  --color-danger: #B42318;
+  --color-paper: #fff6f7;
+  --color-surface: #ffffff;
+  --color-ink: #241b3a;
+  --color-ink-soft: #5e5470;
+  --color-line: #f0dce3;
+  --color-accent: #c81d6b;
+  --color-on-accent: #ffffff;
+  --color-accent-soft: #fce4ee;
+  --color-pop: #f29e38;
+  --color-on-pop: #2a1a05;
+  --color-highlight: #ffd3e2;
+  --color-danger: #b42318;
 
   --font-display: "Fraunces", Georgia, "Times New Roman", serif;
   --font-body: "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -32,18 +32,18 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --color-paper: #1A1426;
-    --color-surface: #251C35;
-    --color-ink: #F8EEF4;
-    --color-ink-soft: #BCAEC6;
-    --color-line: #3A2E4D;
-    --color-accent: #FF6FA8;
-    --color-on-accent: #2A0A1B;
-    --color-accent-soft: #3D1E38;
-    --color-pop: #F5B354;
-    --color-on-pop: #2A1A05;
-    --color-highlight: #5C2347;
-    --color-danger: #FF8A80;
+    --color-paper: #1a1426;
+    --color-surface: #251c35;
+    --color-ink: #f8eef4;
+    --color-ink-soft: #bcaec6;
+    --color-line: #3a2e4d;
+    --color-accent: #ff6fa8;
+    --color-on-accent: #2a0a1b;
+    --color-accent-soft: #3d1e38;
+    --color-pop: #f5b354;
+    --color-on-pop: #2a1a05;
+    --color-highlight: #5c2347;
+    --color-danger: #ff8a80;
   }
 }
 
@@ -1978,104 +1978,28 @@ button:disabled {
   }
 }
 
+/* ---------- Profile photo ---------- */
 
-/* ---------- Meeting details ---------- */
-
-.rsvp-details {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 6rem;
-  gap: 0.75rem;
-  align-items: end;
-}
-
-.rsvp-details-actions {
-  grid-column: 1 / -1;
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.rsvp-details [role="status"] {
-  font-size: 0.9rem;
-  color: var(--color-ink-soft);
-}
-
-.rsvp-details [role="alert"] {
-  grid-column: 1 / -1;
-  margin: 0;
-}
-
-.your-rsvp {
+.profile-photo {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem 1rem;
+  gap: 1rem 1.25rem;
+  margin: 1rem 0 1.5rem;
 }
 
-.menu-list {
+.profile-photo-controls {
+  display: grid;
+  gap: 0.4rem;
+  justify-items: start;
+  min-width: 0;
+  flex: 1 1 14rem;
+}
+
+.profile-photo-controls p {
   margin: 0;
-  padding: 0;
-  list-style: none;
-  display: grid;
-  gap: 0.5rem;
 }
 
-.menu-list li {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: 0.25rem 1rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid var(--color-line);
-}
-
-.map {
-  display: block;
-  width: 100%;
-  aspect-ratio: 4 / 3;
-  max-height: 22rem;
-  border: 1px solid var(--color-line);
-  border-radius: var(--radius-card);
-  background: var(--color-surface);
-}
-
-/* ---------- Events page ---------- */
-
-.event-cards {
-  margin: 0 0 2rem;
-  padding: 0;
-  list-style: none;
-  display: grid;
-  gap: 1.25rem;
-}
-
-.event-cards > li {
-  display: grid;
-  gap: 0.35rem;
-}
-
-.event-cards > li > a {
-  justify-self: end;
-  font-size: 0.9rem;
-}
-
-.past-meetings ul {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.past-meetings li {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 1rem;
-  padding: 0.6rem 0;
-  border-bottom: 1px solid var(--color-line);
-}
-
-.past-meetings time {
-  flex: none;
-  font-size: 0.9rem;
+.profile-photo-controls .muted {
+  font-size: 0.85rem;
 }
