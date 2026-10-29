@@ -94,6 +94,7 @@ export const testMeeting = (
   start: new Date("2099-11-13T19:00:00"),
   end: new Date("2099-11-13T21:00:00"),
   description: null,
+  craft: null,
   venueId: "00000000-0000-4000-8000-000000000040",
   bookId: circe.id,
   venue: {
@@ -108,10 +109,12 @@ export const testMeeting = (
   ...overrides,
 });
 
+// Pass details for what they're bringing and how many guests.
 export const testRsvp = (
   firstName: string,
   status: RsvpDTO["status"],
   n: number,
+  details: Partial<Pick<RsvpDTO, "dish" | "guestCount">> = {},
 ): RsvpDTO => ({
   member: {
     id: `00000000-0000-4000-8000-0000000001${String(n).padStart(2, "0")}`,
@@ -119,6 +122,9 @@ export const testRsvp = (
     lastName: "Reader",
   },
   status,
+  dish: null,
+  guestCount: 0,
+  ...details,
 });
 
 export const testRsvps = (

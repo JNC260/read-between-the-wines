@@ -55,6 +55,7 @@ describe("NewEventPage", () => {
     await screen.findByRole("option", { name: "Ada's house" });
     fill("Venue", VENUE_ID);
     fill("Description", "Bring a snack");
+    fill("Craft", "Bookmarks: bring old magazines");
     submit();
     expect(await screen.findByText("events page")).toBeTruthy();
     expect(vi.mocked(createMeeting).mock.calls[0][0]).toEqual({
@@ -64,10 +65,11 @@ describe("NewEventPage", () => {
       venueId: VENUE_ID,
       bookId: null,
       description: "Bring a snack",
+      craft: "Bookmarks: bring old magazines",
     });
   });
 
-  it("sends no venue or description when they're left blank", async () => {
+  it("sends no venue, description or craft when they're left blank", async () => {
     vi.mocked(createMeeting).mockResolvedValue({} as never);
     renderPage();
     fillForm();
@@ -76,6 +78,7 @@ describe("NewEventPage", () => {
     expect(vi.mocked(createMeeting).mock.calls[0][0]).toMatchObject({
       venueId: null,
       description: null,
+      craft: null,
     });
   });
 

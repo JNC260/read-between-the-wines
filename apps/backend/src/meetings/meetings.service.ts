@@ -3,7 +3,7 @@ import {
   type MeetingDTO,
   type MeetingListQuery,
   type MeetingRsvpsDTO,
-  type RsvpStatus,
+  type SetRsvpDTO,
   type UpdateMeetingDTO,
 } from "shared";
 import { BadRequestError, ConflictError, NotFoundError } from "../lib/errors";
@@ -112,24 +112,38 @@ export const getRsvps = async (
   });
   return {
     myStatus: rsvps.find((r) => r.userId === userId)?.status ?? null,
-    rsvps: rsvps.map((r) => ({ member: r.user, status: r.status })),
+    rsvps: rsvps.map((r) => ({
+      member: r.user,
+      status: r.status,
+      dish: r.dish,
+      guestCount: r.guestCount,
+    })),
   };
 };
 
 // Members can answer, or change their answer, until the meeting ends.
+// Leaving out dish or guestCount keeps what they said before. Someone who
+// can't come isn't bringing food or guests, so NO clears both.
 export const setRsvp = async (
   meetingId: string,
   userId: string,
-  status: RsvpStatus,
+  { status, dish, guestCount }: SetRsvpDTO,
 ): Promise<MeetingRsvpsDTO> => {
   const meeting = await findMeeting(meetingId);
   if (meeting.end < new Date()) {
     throw new BadRequestError("This meeting is over");
   }
+  const details =
+    status === "NO"
+      ? { dish: null, guestCount: 0 }
+      : {
+          ...(dish !== undefined && { dish: dish || null }),
+          ...(guestCount !== undefined && { guestCount }),
+        };
   await prisma.rsvp.upsert({
     where: { userId_meetingId: { userId, meetingId } },
-    create: { userId, meetingId, status },
-    update: { status },
+    create: { userId, meetingId, status, ...details },
+    update: { status, ...details },
   });
   return getRsvps(meetingId, userId);
 };

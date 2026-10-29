@@ -10,11 +10,11 @@ import { toLocalInput } from "../lib/datetime-local";
 const NEW_VENUE = "new";
 
 // What the form sends: every field, so an edit can also clear the venue,
-// book or description (null) rather than leave them as they were.
+// book, description or craft (null) rather than leave them as they were.
 export type EventValues = Required<
   Pick<
     CreateMeetingDTO,
-    "title" | "start" | "end" | "venueId" | "bookId" | "description"
+    "title" | "start" | "end" | "venueId" | "bookId" | "description" | "craft"
   >
 >;
 
@@ -43,6 +43,7 @@ const EventForm = ({
   const [venueId, setVenueId] = useState(event?.venueId ?? "");
   const [bookId, setBookId] = useState(event?.bookId ?? "");
   const [description, setDescription] = useState(event?.description ?? "");
+  const [craft, setCraft] = useState(event?.craft ?? "");
   const [invalid, setInvalid] = useState<string | null>(null);
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
@@ -60,6 +61,7 @@ const EventForm = ({
       venueId: venueId || null,
       bookId: bookId || null,
       description: description || null,
+      craft: craft || null,
     };
     // Check here too: the API only says "Invalid request", and this gives
     // the real reason, like the end being before the start. safeEncode, not
@@ -159,6 +161,19 @@ const EventForm = ({
           id="description"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
+        />
+      </div>
+      <div>
+        <label htmlFor="craft">Craft</label>
+        <p className="muted" id="craft-hint">
+          Optional. What you're making, and anything members should bring for
+          it.
+        </p>
+        <textarea
+          id="craft"
+          aria-describedby="craft-hint"
+          value={craft}
+          onChange={(e) => setCraft(e.target.value)}
         />
       </div>
       {invalid && <p role="alert">{invalid}</p>}

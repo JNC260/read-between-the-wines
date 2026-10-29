@@ -181,6 +181,7 @@ model Meeting {
   start       DateTime
   end         DateTime
   description String?
+  craft       String? // what we're making, and anything to bring for it
   venueId     String? // null until a venue is picked
   bookId      String?  @unique // one book per meeting; null until a book is assigned
 
