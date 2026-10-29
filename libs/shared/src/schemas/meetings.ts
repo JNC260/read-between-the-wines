@@ -12,6 +12,7 @@ export const MeetingSchema = z.object({
   start: isoDate,
   end: isoDate,
   description: z.string().nullable(),
+  craft: z.string().nullable(),
   venueId: z.uuidv4().nullable(),
   bookId: z.uuidv4().nullable(),
   venue: VenueSchema.nullable(),
@@ -25,6 +26,7 @@ const MeetingFieldsSchema = z.object({
   start: isoDate,
   end: isoDate,
   description: z.string().trim().nullish(),
+  craft: z.string().trim().nullish(),
   venueId: z.uuidv4().nullish(),
   bookId: z.uuidv4().nullish(),
 });
@@ -56,9 +58,22 @@ export const RsvpStatusSchema = z.enum(["YES", "MAYBE", "NO"]);
 
 export type RsvpStatus = z.infer<typeof RsvpStatusSchema>;
 
-// PUT /meetings/:id/rsvp. Answering again replaces the member's answer.
+// Enough for a big family, few enough to catch a typo like 22.
+export const MAX_GUESTS = 10;
+
+// PUT /meetings/:id/rsvp. Answering again replaces the member's status;
+// dish and guestCount are kept unless sent, so the RSVP buttons can send
+// just the status. Answering NO clears both.
 export const SetRsvpSchema = z.object({
   status: RsvpStatusSchema,
+  // What they're bringing to share. The service stores empty as null.
+  dish: z.string().trim().max(100, "Keep it under 100 characters").nullish(),
+  // People coming with them, not counting themselves.
+  guestCount: z
+    .int("Enter a whole number")
+    .min(0, "Can't be negative")
+    .max(MAX_GUESTS, `At most ${MAX_GUESTS} guests`)
+    .optional(),
 });
 
 export type SetRsvpDTO = z.infer<typeof SetRsvpSchema>;
@@ -66,6 +81,8 @@ export type SetRsvpDTO = z.infer<typeof SetRsvpSchema>;
 export const RsvpSchema = z.object({
   member: SuggesterSchema,
   status: RsvpStatusSchema,
+  dish: z.string().nullable(),
+  guestCount: z.int(),
 });
 
 export type RsvpDTO = z.output<typeof RsvpSchema>;

@@ -1,7 +1,8 @@
+import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { type RsvpDTO, type RsvpStatus } from "shared";
+import { type RsvpDTO, type RsvpStatus, type VenueDTO } from "shared";
 import BookCover from "../components/BookCover";
-import { RsvpButtons } from "../components/RsvpButtons";
+import { plural, RsvpButtons, RsvpDetails } from "../components/RsvpButtons";
 import { useMeeting, useMeetingRsvps } from "../hooks";
 import { authClient } from "../lib/auth-client";
 
@@ -26,7 +27,8 @@ const GROUPS: { status: RsvpStatus; heading: string }[] = [
 
 const fullName = (r: RsvpDTO) => `${r.member.firstName} ${r.member.lastName}`;
 
-// Empty groups are left out.
+// The head count includes guests, so whoever's hosting knows how many
+// chairs to find. Empty groups are left out.
 const WhoIsComing = ({ meetingId }: { meetingId: string }) => {
   const { data } = useMeetingRsvps(meetingId);
   if (!data) {
@@ -39,15 +41,21 @@ const WhoIsComing = ({ meetingId }: { meetingId: string }) => {
     <div className="rsvp-groups">
       {GROUPS.map(({ status, heading }) => {
         const members = data.rsvps.filter((r) => r.status === status);
+        const people = members.reduce((sum, r) => sum + 1 + r.guestCount, 0);
         return (
           members.length > 0 && (
             <div key={status}>
               <h3>
-                {heading} <span className="muted">{members.length}</span>
+                {heading} <span className="muted">{people}</span>
               </h3>
               <ul>
                 {members.map((r) => (
-                  <li key={r.member.id}>{fullName(r)}</li>
+                  <li key={r.member.id}>
+                    {fullName(r)}
+                    {r.guestCount > 0 && (
+                      <span className="muted"> +{plural(r.guestCount, "guest")}</span>
+                    )}
+                  </li>
                 ))}
               </ul>
             </div>
@@ -55,6 +63,128 @@ const WhoIsComing = ({ meetingId }: { meetingId: string }) => {
         );
       })}
     </div>
+  );
+};
+
+const YOUR_ANSWER: Record<RsvpStatus, string> = {
+  YES: "You're going",
+  MAYBE: "You might come",
+  NO: "You can't make it",
+};
+
+// Someone who already answered sees one line instead of the buttons and
+// form, with a button to change it. Open from the start for anyone who
+// hasn't, and it stays open after their first tap so they can add food and
+// guests.
+const YourRsvpPanel = ({
+  meetingId,
+  myStatus,
+  mine,
+}: {
+  meetingId: string;
+  myStatus: RsvpStatus | null;
+  mine: RsvpDTO | undefined;
+}) => {
+  const [open, setOpen] = useState(myStatus === null);
+
+  if (!open && myStatus) {
+    const details = [
+      myStatus !== "NO" && mine?.dish && `bringing ${mine.dish}`,
+      myStatus !== "NO" && !!mine?.guestCount && `+${plural(mine.guestCount, "guest")}`,
+    ].filter(Boolean);
+    return (
+      <div className="your-rsvp">
+        <p>
+          <strong>{YOUR_ANSWER[myStatus]}</strong>
+          {details.length > 0 && ` · ${details.join(" · ")}`}
+        </p>
+        <button type="button" onClick={() => setOpen(true)}>
+          Change
+        </button>
+      </div>
+    );
+  }
+  return (
+    <>
+      <RsvpButtons meetingId={meetingId} />
+      <RsvpDetails meetingId={meetingId} />
+      {myStatus && (
+        <button type="button" onClick={() => setOpen(false)}>
+          Done
+        </button>
+      )}
+    </>
+  );
+};
+
+const YourRsvp = ({ meetingId }: { meetingId: string }) => {
+  const { data: session } = authClient.useSession();
+  const { data } = useMeetingRsvps(meetingId);
+  if (!data) {
+    return null;
+  }
+  return (
+    <YourRsvpPanel
+      meetingId={meetingId}
+      myStatus={data.myStatus}
+      mine={data.rsvps.find((r) => r.member.id === session?.user.id)}
+    />
+  );
+};
+
+// So two people don't both bring dessert. Only from people who might come.
+const OnTheMenu = ({ meetingId }: { meetingId: string }) => {
+  const { data } = useMeetingRsvps(meetingId);
+  const dishes = data?.rsvps.filter((r) => r.dish && r.status !== "NO") ?? [];
+  if (dishes.length === 0) {
+    return null;
+  }
+  return (
+    <section aria-labelledby="menu-title">
+      <h2 id="menu-title">On the menu</h2>
+      <ul className="menu-list">
+        {dishes.map((r) => (
+          <li key={r.member.id}>
+            <span>{r.dish}</span>
+            <span className="muted">
+              {fullName(r)}
+              {r.status === "MAYBE" && " (maybe)"}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+};
+
+const address = (v: VenueDTO) =>
+  `${v.streetAddress}, ${v.city}, ${v.state} ${v.zip}`;
+
+// The embed is Google's keyless ?output=embed URL: free and needs no setup,
+// but it isn't an official API, so the directions link (Google's documented
+// Maps URLs) is there either way.
+const Directions = ({ venue }: { venue: VenueDTO }) => {
+  const query = encodeURIComponent(`${venue.name}, ${address(venue)}`);
+  return (
+    <section aria-labelledby="directions-title">
+      <h2 id="directions-title">Getting there</h2>
+      <iframe
+        className="map"
+        title={`Map of ${venue.name}`}
+        src={`https://maps.google.com/maps?q=${query}&output=embed`}
+        loading="lazy"
+        referrerPolicy="no-referrer-when-downgrade"
+      />
+      <p>
+        <a
+          href={`https://www.google.com/maps/dir/?api=1&destination=${query}`}
+          target="_blank"
+          rel="noreferrer"
+        >
+          Get directions
+        </a>
+      </p>
+    </section>
   );
 };
 
@@ -106,7 +236,7 @@ const MeetingPage = () => {
               <>
                 {venue.name}
                 <br />
-                {venue.streetAddress}, {venue.city}, {venue.state} {venue.zip}
+                {address(venue)}
               </>
             ) : (
               "To be announced"
@@ -128,10 +258,21 @@ const MeetingPage = () => {
         {isOver ? (
           <p className="muted">This meeting is over.</p>
         ) : (
-          <RsvpButtons meetingId={meeting.id} />
+          <YourRsvp meetingId={meeting.id} />
         )}
         <WhoIsComing meetingId={meeting.id} />
       </section>
+
+      <OnTheMenu meetingId={meeting.id} />
+
+      {meeting.craft && (
+        <section aria-labelledby="craft-title">
+          <h2 id="craft-title">Craft</h2>
+          {paragraphs(meeting.craft).map((p, i) => (
+            <p key={i}>{p}</p>
+          ))}
+        </section>
+      )}
 
       {book?.synopsis && (
         <section aria-labelledby="about-title">
@@ -141,6 +282,8 @@ const MeetingPage = () => {
           ))}
         </section>
       )}
+
+      {venue && <Directions venue={venue} />}
     </article>
   );
 };

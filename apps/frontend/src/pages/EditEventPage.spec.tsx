@@ -61,6 +61,7 @@ const meeting: MeetingDTO = {
   start: new Date("2030-11-04T19:00"),
   end: new Date("2030-11-04T21:00"),
   description: "Bring a snack",
+  craft: "Bookmarks",
   venueId: VENUE_ID,
   bookId: null,
   venue,
@@ -121,6 +122,7 @@ describe("EditEventPage", () => {
       venueId: VENUE_ID,
       bookId: null,
       description: "Bring a snack",
+      craft: "Bookmarks",
     });
   });
 
@@ -155,16 +157,18 @@ describe("EditEventPage", () => {
     });
   });
 
-  it("clears the venue and description when they're emptied", async () => {
+  it("clears the venue, description and craft when they're emptied", async () => {
     vi.mocked(updateMeeting).mockResolvedValue(meeting);
     await loaded();
     fill("Venue", "");
     fill("Description", "");
+    fill("Craft", "");
     fireEvent.click(screen.getByRole("button", { name: "Save changes" }));
     await screen.findByText("events page");
     expect(vi.mocked(updateMeeting).mock.calls[0][0]).toMatchObject({
       venueId: null,
       description: null,
+      craft: null,
     });
   });
 

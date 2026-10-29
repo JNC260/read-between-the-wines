@@ -50,7 +50,12 @@
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..700&family=Figtree:ital,wght@0,400..700;1,400..700&family=DM+Mono:wght@500&display=swap"
     />
-    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <!-- The open-book logo. Browsers that take SVG use it (and its dark-mode
+         colors); the .ico is for the rest. iPhones use the PNG when the
+         site is saved to the home screen. -->
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="stylesheet" href="/src/styles.css" />
   </head>
   <body>

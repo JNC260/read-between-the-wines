@@ -58,7 +58,7 @@ export const setRsvp = async (
   const rsvps = await service.setRsvp(
     req.params.id,
     getUser(req).id,
-    req.body.status,
+    req.body,
   );
   res.json(z.encode(MeetingRsvpsSchema, rsvps));
 };
