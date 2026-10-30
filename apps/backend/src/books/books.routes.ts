@@ -1,12 +1,14 @@
 import express from "express";
 import {
   CreateBookSuggestionSchema,
+  ManualBookSuggestionSchema,
   RateBookSchema,
   UpdateBookSchema,
 } from "shared";
 import { requireAuth } from "../middleware/auth";
 import { validate } from "../middleware/validate";
 import {
+  createManualSuggestion,
   createSuggestion,
   getBook,
   listReadBooks,
@@ -32,6 +34,12 @@ router.post(
   "/suggestions",
   validate(CreateBookSuggestionSchema),
   createSuggestion,
+);
+// For a book the search can't find.
+router.post(
+  "/suggestions/manual",
+  validate(ManualBookSuggestionSchema),
+  createManualSuggestion,
 );
 // After the fixed paths above, so "/suggestions" isn't read as an id.
 // Suggesters and admins can edit; the service checks which.

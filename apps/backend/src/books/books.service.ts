@@ -3,6 +3,7 @@ import {
   type BookDetailDTO,
   type BookDTO,
   type CreateBookSuggestionDTO,
+  type ManualBookSuggestionDTO,
   normalizeTitle,
   type RatingDTO,
   type ReadBookDTO,
@@ -136,18 +137,31 @@ export const createSuggestion = async (
     },
   });
 
-  try {
-    await prisma.suggestion.create({
-      data: { userId, bookId: book.id },
-    });
-  } catch (e) {
-    if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002") {
-      throw new ConflictError();
-    }
+  await addSuggestion(userId, book.id);
+  return book;
+};
 
-    throw e;
-  }
+// For a book Open Library doesn't have, typed in by the member. There's no
+// work id to match on, so the same book is spotted by its normalized title
+// and author, any case. A match keeps its own details: this only adds the
+// member's suggestion to it.
+export const createManualSuggestion = async (
+  userId: string,
+  data: ManualBookSuggestionDTO,
+): Promise<BookDTO> => {
+  const normalizedTitle = normalizeTitle(data.title);
+  const existing = await prisma.book.findFirst({
+    where: {
+      normalizedTitle,
+      author: { equals: data.author, mode: "insensitive" },
+    },
+    orderBy: { createdAt: "asc" },
+  });
+  const book =
+    existing ??
+    (await prisma.book.create({ data: { ...data, normalizedTitle } }));
 
+  await addSuggestion(userId, book.id);
   return book;
 };
 
@@ -308,4 +322,20 @@ const toCandidate = (
   };
 
   return bookCandidate;
+};
+
+// ---------------------------------------------------------------------------
+// Saving
+// ---------------------------------------------------------------------------
+
+// The member's suggestion of a book. A member can only suggest a book once.
+const addSuggestion = async (userId: string, bookId: string) => {
+  try {
+    await prisma.suggestion.create({ data: { userId, bookId } });
+  } catch (e) {
+    if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002") {
+      throw new ConflictError();
+    }
+    throw e;
+  }
 };

@@ -221,6 +221,102 @@ describe("POST /books/suggestions", () => {
   });
 });
 
+describe("POST /books/suggestions/manual", () => {
+  const suggest = (body: unknown, as: User = ada) =>
+    api.request("POST", "/books/suggestions/manual", { as, body });
+
+  const piranesi = {
+    title: "Piranesi",
+    author: "Susanna Clarke",
+    yearPublished: 2020,
+    pageCount: 272,
+    synopsis: "A house of endless halls.",
+    goodreadsUrl: "https://www.goodreads.com/book/show/50202953-piranesi",
+  };
+
+  it("saves the typed-in book and this member's suggestion, without Open Library", async () => {
+    const res = await suggest(piranesi);
+
+    expect(res.status).toBe(201);
+    expect(res.body).toMatchObject({
+      ...piranesi,
+      genres: [],
+      coverUrl: null,
+      openLibraryWorkId: null,
+    });
+    const saved = await prisma.book.findUniqueOrThrow({
+      where: { id: res.body.id },
+      include: { suggestions: true },
+    });
+    expect(saved.normalizedTitle).toBe("piranesi");
+    expect(saved.suggestions.map((s) => s.userId)).toEqual([ada.id]);
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("needs only a title and author", async () => {
+    const res = await suggest({ title: "Piranesi", author: "Susanna Clarke" });
+    expect(res.status).toBe(201);
+    expect(res.body).toMatchObject({ yearPublished: null, synopsis: null });
+  });
+
+  it("adds a second member's suggestion to the same book, ignoring case and a leading article", async () => {
+    const first = await suggest({ title: "The Secret History", author: "Donna Tartt" });
+    const second = await suggest(
+      { title: "secret history", author: "DONNA TARTT", pageCount: 1 },
+      ben,
+    );
+
+    expect(second.status).toBe(201);
+    expect(second.body.id).toBe(first.body.id);
+    // The first member's details stay.
+    expect(second.body.title).toBe("The Secret History");
+    expect(second.body.pageCount).toBeNull();
+    expect(await prisma.book.count()).toBe(1);
+    expect(await prisma.suggestion.count()).toBe(2);
+  });
+
+  it("matches a book that came from Open Library too", async () => {
+    const book = await createBook({ title: "Circe", suggestedBy: ben.id });
+    const res = await suggest({ title: "Circe", author: book.author });
+    expect(res.body.id).toBe(book.id);
+    expect(await prisma.book.count()).toBe(1);
+  });
+
+  it("adds a new book when only the title matches", async () => {
+    await suggest({ title: "Beloved", author: "Toni Morrison" });
+    const res = await suggest({ title: "Beloved", author: "Someone Else" }, ben);
+    expect(res.status).toBe(201);
+    expect(await prisma.book.count()).toBe(2);
+  });
+
+  it("returns 409 when this member already suggested the book", async () => {
+    await suggest(piranesi);
+    const res = await suggest({ title: "piranesi", author: "Susanna Clarke" });
+    expect(res.status).toBe(409);
+    expect(errorCode(res)).toBe("CONFLICT");
+    expect(await prisma.suggestion.count()).toBe(1);
+  });
+
+  it.each([
+    ["no title", { author: "Susanna Clarke" }],
+    ["a blank author", { title: "Piranesi", author: "  " }],
+    ["a link that isn't Goodreads", { ...piranesi, goodreadsUrl: "https://example.com/piranesi" }],
+    ["a page count that isn't a whole number", { ...piranesi, pageCount: 27.5 }],
+  ])("rejects a body with %s with 400, and saves nothing", async (_, body) => {
+    const res = await suggest(body);
+    expect(res.status).toBe(400);
+    expect(errorCode(res)).toBe("BAD_REQUEST");
+    expect(await prisma.book.count()).toBe(0);
+  });
+
+  it("returns 401 when signed out", async () => {
+    const res = await api.request("POST", "/books/suggestions/manual", {
+      body: piranesi,
+    });
+    expect(res.status).toBe(401);
+  });
+});
+
 describe("GET /books/suggestions", () => {
   const list = (as: User = ada) =>
     api.request("GET", "/books/suggestions", { as });
