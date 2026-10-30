@@ -1,14 +1,30 @@
 import { fireEvent, screen, within } from "@testing-library/react";
-import { ApiError, castVotes, getPoll } from "../api";
-import { beloved, circe, piranesi, testPoll } from "../test/fixtures";
-import { renderRoutes, Route } from "../test-utils";
+import {
+  ApiError,
+  castVotes,
+  closePoll,
+  getMeetings,
+  getPoll,
+  updateMeeting,
+} from "../api";
+import { beloved, circe, piranesi, testMeeting, testPoll } from "../test/fixtures";
+import { mockSession, renderRoutes, Route, testUser } from "../test-utils";
 import PollPage, { goodreadsLink } from "./PollPage";
 
 vi.mock("../api", async (importOriginal) => ({
   ApiError: (await importOriginal<typeof import("../api")>()).ApiError,
   castVotes: vi.fn(),
+  closePoll: vi.fn(),
+  getMeetings: vi.fn(),
   getPoll: vi.fn(),
+  updateMeeting: vi.fn(),
 }));
+vi.mock("../lib/auth-client", () => ({ authClient: { useSession: vi.fn() } }));
+
+beforeEach(() => {
+  mockSession(testUser());
+  vi.mocked(getMeetings).mockResolvedValue([]);
+});
 
 const ID = testPoll().id;
 
@@ -167,5 +183,121 @@ describe("PollPage", () => {
     vi.mocked(getPoll).mockRejectedValue(new ApiError(404, "Poll not found"));
     renderPage();
     expect((await screen.findByRole("alert")).textContent).toBe("Poll not found");
+  });
+
+  describe("for admins", () => {
+    beforeEach(() => mockSession(testUser({ isAdmin: true })));
+
+    it("doesn't offer members the admin tools", async () => {
+      mockSession(testUser());
+      vi.mocked(getPoll).mockResolvedValue(testPoll());
+      renderPage();
+      await loaded();
+      expect(screen.queryByRole("link", { name: "Edit poll" })).toBeNull();
+      expect(screen.queryByRole("button", { name: "Close voting now" })).toBeNull();
+    });
+
+    it("links an open poll to its edit page", async () => {
+      vi.mocked(getPoll).mockResolvedValue(testPoll());
+      renderPage();
+      await loaded();
+      expect(screen.getByRole("link", { name: "Edit poll" }).getAttribute("href")).toBe(
+        `/polls/${ID}/edit`,
+      );
+    });
+
+    it("asks before closing voting early, and can back out", async () => {
+      vi.mocked(getPoll).mockResolvedValue(testPoll());
+      vi.mocked(closePoll).mockResolvedValue(testPoll({ isOpen: false, results: [] }));
+      renderPage();
+      await loaded();
+
+      fireEvent.click(screen.getByRole("button", { name: "Close voting now" }));
+      fireEvent.click(screen.getByRole("button", { name: "Keep it open" }));
+      expect(closePoll).not.toHaveBeenCalled();
+
+      fireEvent.click(screen.getByRole("button", { name: "Close voting now" }));
+      fireEvent.click(screen.getByRole("button", { name: "Close voting" }));
+      await vi.waitFor(() => expect(vi.mocked(closePoll).mock.calls[0][0]).toBe(ID));
+      expect(await screen.findByRole("list", { name: "Results" })).toBeTruthy();
+    });
+
+    describe("assigning books after the poll closes", () => {
+      const closed = testPoll({
+        isOpen: false,
+        results: [
+          { bookId: piranesi.id, votes: 2 },
+          { bookId: circe.id, votes: 1 },
+          { bookId: beloved.id, votes: 0 },
+        ],
+      });
+      const decMeeting = testMeeting({
+        id: "00000000-0000-4000-8000-000000000031",
+        title: "December meeting",
+        start: new Date("2099-12-11T19:00:00"),
+        bookId: null,
+      });
+      const row = (title: string) =>
+        screen.getByRole("heading", { name: title }).closest("li") as HTMLElement;
+
+      it("offers the upcoming meetings that still need a book", async () => {
+        vi.mocked(getPoll).mockResolvedValue(closed);
+        vi.mocked(getMeetings).mockResolvedValue([testMeeting(), decMeeting]);
+        vi.mocked(updateMeeting).mockResolvedValue({ ...decMeeting, bookId: piranesi.id });
+        renderPage();
+        await screen.findByRole("list", { name: "Results" });
+
+        const select = await within(row("Piranesi")).findByLabelText("Meeting for Piranesi");
+        // November already has a book, so only December is offered.
+        expect(within(select).getAllByRole("option").map((o) => o.textContent)).toEqual([
+          "Fri, Dec 11 · December meeting",
+        ]);
+        fireEvent.click(within(row("Piranesi")).getByRole("button", { name: "Assign Piranesi" }));
+        await vi.waitFor(() =>
+          expect(vi.mocked(updateMeeting).mock.calls[0][0]).toEqual({
+            id: decMeeting.id,
+            bookId: piranesi.id,
+          }),
+        );
+      });
+
+      it("shows which meeting an assigned book is on, to everyone", async () => {
+        mockSession(testUser());
+        vi.mocked(getPoll).mockResolvedValue({
+          ...closed,
+          books: closed.books.map((b) =>
+            b.id === piranesi.id ? { ...b, meetingId: decMeeting.id } : b,
+          ),
+        });
+        vi.mocked(getMeetings).mockResolvedValue([{ ...decMeeting, bookId: piranesi.id }]);
+        renderPage();
+        await screen.findByRole("list", { name: "Results" });
+        expect(
+          await within(row("Piranesi")).findByText(/Chosen for Fri, Dec 11 · December meeting/),
+        ).toBeTruthy();
+        // Members get no assign controls.
+        expect(screen.queryByRole("button", { name: /^Assign/ })).toBeNull();
+      });
+
+      it("points admins to a new meeting when none needs a book", async () => {
+        vi.mocked(getPoll).mockResolvedValue(closed);
+        vi.mocked(getMeetings).mockResolvedValue([testMeeting()]);
+        renderPage();
+        expect((await screen.findAllByText(/No upcoming meeting needs a book/)).length).toBe(3);
+        expect(
+          within(row("Piranesi"))
+            .getByRole("link", { name: "New meeting for this book" })
+            .getAttribute("href"),
+        ).toBe(`/meetings/new?poll=${ID}&book=${piranesi.id}`);
+      });
+
+      it("offers to reopen voting", async () => {
+        vi.mocked(getPoll).mockResolvedValue(closed);
+        renderPage();
+        expect(
+          (await screen.findByRole("link", { name: "Reopen voting" })).getAttribute("href"),
+        ).toBe(`/polls/${ID}/edit`);
+      });
+    });
   });
 });

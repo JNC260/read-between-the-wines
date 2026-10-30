@@ -2,7 +2,7 @@ import { fireEvent, screen } from "@testing-library/react";
 import { useLocation } from "react-router-dom";
 import {
   getBookSuggestions,
-  getCurrentPoll,
+  getLatestPoll,
   getMeetingRsvps,
   getMeetings,
   getReadBooks,
@@ -23,7 +23,7 @@ import LandingPage from "./LandingPage";
 vi.mock("../lib/auth-client", () => ({ authClient: { useSession: vi.fn() } }));
 vi.mock("../api", () => ({
   getBookSuggestions: vi.fn(),
-  getCurrentPoll: vi.fn(),
+  getLatestPoll: vi.fn(),
   getMeetingRsvps: vi.fn(),
   getMeetings: vi.fn(),
   getReadBooks: vi.fn(),
@@ -45,7 +45,7 @@ const linkTo = (name: string | RegExp) =>
 describe("LandingPage", () => {
   beforeEach(() => {
     vi.mocked(getMeetings).mockResolvedValue([]);
-    vi.mocked(getCurrentPoll).mockResolvedValue(null);
+    vi.mocked(getLatestPoll).mockResolvedValue(null);
     vi.mocked(getBookSuggestions).mockResolvedValue([]);
     vi.mocked(getReadBooks).mockResolvedValue([]);
     vi.mocked(getMeetingRsvps).mockResolvedValue(testRsvps());
@@ -80,7 +80,7 @@ describe("LandingPage", () => {
     mockSession(null);
     renderLanding();
     expect(getMeetings).not.toHaveBeenCalled();
-    expect(getCurrentPoll).not.toHaveBeenCalled();
+    expect(getLatestPoll).not.toHaveBeenCalled();
   });
 
   describe("signed in", () => {
@@ -151,7 +151,7 @@ describe("LandingPage", () => {
 
     describe("open poll", () => {
       it("shows the ballot and asks members who haven't voted to vote", async () => {
-        vi.mocked(getCurrentPoll).mockResolvedValue(testPoll());
+        vi.mocked(getLatestPoll).mockResolvedValue(testPoll());
         renderLanding();
         expect(await screen.findByText("What should we read next?")).toBeTruthy();
         expect(screen.getByText("Piranesi")).toBeTruthy();
@@ -159,7 +159,7 @@ describe("LandingPage", () => {
       });
 
       it("marks the member's votes and lets them change them", async () => {
-        vi.mocked(getCurrentPoll).mockResolvedValue(
+        vi.mocked(getLatestPoll).mockResolvedValue(
           testPoll({ myVotes: [circe.id], voterCount: 1, theme: "Winter reads" }),
         );
         renderLanding();
@@ -169,10 +169,60 @@ describe("LandingPage", () => {
         expect(linkTo("Change your votes")).toBe(`/polls/${testPoll().id}`);
       });
 
-      it("shows nothing when no poll is open", async () => {
+      it("shows nothing before the first poll", async () => {
         renderLanding();
-        await vi.waitFor(() => expect(getCurrentPoll).toHaveBeenCalled());
+        await vi.waitFor(() => expect(getLatestPoll).toHaveBeenCalled());
         expect(screen.queryByRole("link", { name: "Vote now" })).toBeNull();
+      });
+    });
+
+    describe("closed poll", () => {
+      const closed = (overrides: Parameters<typeof testPoll>[0] = {}) =>
+        testPoll({
+          isOpen: false,
+          closesAt: new Date(Date.now() - 24 * 60 * 60 * 1000),
+          voterCount: 3,
+          results: [
+            { bookId: piranesi.id, votes: 3 },
+            { bookId: circe.id, votes: 1 },
+          ],
+          ...overrides,
+        });
+
+      it("shows members who won", async () => {
+        vi.mocked(getLatestPoll).mockResolvedValue(closed());
+        renderLanding();
+        expect(await screen.findByText("Piranesi won with 3 votes.")).toBeTruthy();
+        expect(linkTo("See the results")).toBe(`/polls/${testPoll().id}`);
+      });
+
+      it("says when books tied", async () => {
+        vi.mocked(getLatestPoll).mockResolvedValue(
+          closed({
+            results: [
+              { bookId: circe.id, votes: 2 },
+              { bookId: piranesi.id, votes: 2 },
+            ],
+          }),
+        );
+        renderLanding();
+        expect(await screen.findByText("Circe and Piranesi tied with 2 votes.")).toBeTruthy();
+      });
+
+      it("asks admins to assign the winner", async () => {
+        mockSession(testUser({ isAdmin: true }));
+        vi.mocked(getLatestPoll).mockResolvedValue(closed());
+        renderLanding();
+        expect(await screen.findByRole("link", { name: "Assign to a meeting" })).toBeTruthy();
+      });
+
+      it("goes away once a book from it is on a meeting", async () => {
+        const poll = closed();
+        poll.books[1] = { ...poll.books[1], meetingId: "00000000-0000-4000-8000-000000000020" };
+        vi.mocked(getLatestPoll).mockResolvedValue(poll);
+        renderLanding();
+        await vi.waitFor(() => expect(getLatestPoll).toHaveBeenCalled());
+        expect(screen.queryByText(/won with/)).toBeNull();
       });
     });
 

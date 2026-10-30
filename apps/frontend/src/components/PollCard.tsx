@@ -41,4 +41,46 @@ const PollCard = ({ poll }: { poll: PollDTO }) => {
   );
 };
 
+// "Circe", "Circe and Piranesi", "Circe, Piranesi and Beloved"
+const joinTitles = (titles: string[]) =>
+  titles.length < 2
+    ? titles.join("")
+    : `${titles.slice(0, -1).join(", ")} and ${titles.at(-1)}`;
+
+// A closed poll's outcome, until its books are on meetings. Admins get a
+// nudge to assign the winner; members just see who won.
+export const PollResultsCard = ({
+  poll,
+  isAdmin,
+}: {
+  poll: PollDTO;
+  isAdmin: boolean;
+}) => {
+  const results = poll.results ?? [];
+  const most = Math.max(0, ...results.map((r) => r.votes));
+  const winners = poll.books.filter((b) =>
+    results.some((r) => r.bookId === b.id && r.votes === most),
+  );
+  const headline =
+    most === 0
+      ? "Nobody voted this time."
+      : `${joinTitles(winners.map((b) => b.title))} ${
+          winners.length === 1 ? "won" : "tied"
+        } with ${plural(most, "vote")}.`;
+
+  return (
+    <section className="card poll-card" aria-labelledby="poll-card-title">
+      <p className="eyebrow">Poll closed · {closesOn.format(poll.closesAt)}</p>
+      <h2 id="poll-card-title">{poll.theme ?? "The votes are in"}</h2>
+      <p>{headline}</p>
+      <div className="card-foot">
+        <span className="muted">{plural(poll.voterCount, "member")} voted</span>
+        <Link to={`/polls/${poll.id}`} className="button-link stretched-link">
+          {isAdmin ? "Assign to a meeting" : "See the results"}
+        </Link>
+      </div>
+    </section>
+  );
+};
+
 export default PollCard;

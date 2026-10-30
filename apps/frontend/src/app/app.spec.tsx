@@ -8,6 +8,7 @@ vi.mock('../api', async (importOriginal) => ({
   ...(await importOriginal<typeof import('../api')>()),
   getMeetings: vi.fn().mockResolvedValue([]),
   getCurrentPoll: vi.fn().mockResolvedValue(null),
+  getLatestPoll: vi.fn().mockResolvedValue(null),
   getBookSuggestions: vi.fn().mockResolvedValue([]),
   getReadBooks: vi.fn().mockResolvedValue([]),
 }));

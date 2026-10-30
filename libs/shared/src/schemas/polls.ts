@@ -34,6 +34,26 @@ export const CreatePollSchema = z
 
 export type CreatePollDTO = z.output<typeof CreatePollSchema>;
 
+// PATCH /polls/:id (admins). Never changes anyone's votes: books can be added
+// but not taken off, and votes per member can't drop below what a member has
+// already used (the server checks that). A closing time in the future keeps
+// the poll open longer, or reopens a closed one. Closing early is
+// POST /polls/:id/close.
+export const UpdatePollSchema = z
+  .object({
+    theme: z.string().trim().min(1).max(100).nullable(),
+    closesAt: isoDate,
+    votesPerMember: z.int().min(1, "Members need at least one vote"),
+    addBookIds: distinctBookIds,
+  })
+  .partial()
+  .refine((p) => p.closesAt === undefined || p.closesAt > new Date(), {
+    message: "Closing time must be in the future",
+    path: ["closesAt"],
+  });
+
+export type UpdatePollDTO = z.output<typeof UpdatePollSchema>;
+
 // PUT /polls/:id/votes. Replaces all of this member's votes on the poll. The
 // poll's own limit (votesPerMember) is checked by the server.
 export const CastVotesSchema = z.object({
@@ -69,7 +89,8 @@ export const PollSchema = z.object({
   // opensAt <= now < closesAt
   isOpen: z.boolean(),
   // The ballot, with synopses so members can decide without clicking away.
-  books: z.array(BookSchema),
+  // meetingId is set once an admin assigns the book to a meeting.
+  books: z.array(BookSchema.extend({ meetingId: z.uuidv4().nullable() })),
   // Book ids this member voted for; [] if they haven't voted.
   myVotes: z.array(z.uuidv4()),
   // How many members have voted (not how many votes were cast).

@@ -242,6 +242,7 @@ describe("SuggestionsPage", () => {
       books: bookIds.map((id) => ({
         ...book({ id }),
         synopsis: null,
+        meetingId: null,
       })),
       myVotes: [],
       voterCount: 0,

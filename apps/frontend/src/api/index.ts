@@ -12,6 +12,8 @@ import {
   CreateMeetingSchema,
   type CreatePollDTO,
   CreatePollSchema,
+  type UpdatePollDTO,
+  UpdatePollSchema,
   type CreateVenueDTO,
   CreateVenueSchema,
   CurrentPollSchema,
@@ -384,6 +386,26 @@ export const createPoll = (body: CreatePollDTO) =>
     schema: CreatePollSchema,
     body,
   });
+
+// The newest poll, open or closed, or null before the first one.
+export const getLatestPoll = () =>
+  apiFetch(`/api/polls/latest`, CurrentPollSchema, "Failed to fetch the poll");
+
+export const updatePoll = ({ id, ...body }: UpdatePollDTO & { id: string }) =>
+  apiFetch(
+    `/api/polls/${encodeURIComponent(id)}`,
+    PollSchema,
+    "Failed to save the poll",
+    { method: "PATCH", schema: UpdatePollSchema, body },
+  );
+
+export const closePoll = (id: string) =>
+  apiFetch(
+    `/api/polls/${encodeURIComponent(id)}/close`,
+    PollSchema,
+    "Failed to close the poll",
+    { method: "POST" },
+  );
 
 export const castVotes = ({
   pollId,

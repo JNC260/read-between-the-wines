@@ -457,3 +457,157 @@ describe("PUT /polls/:id/votes", () => {
     expect(await prisma.vote.count()).toBe(0);
   });
 });
+
+describe("GET /polls/latest", () => {
+  it("returns null before the first poll", async () => {
+    const res = await api.request("GET", "/polls/latest", { as: ada });
+    expect(res.status).toBe(200);
+    expect(res.body).toBeNull();
+  });
+
+  it("returns the newest poll even once it's closed, with its results", async () => {
+    const old = await createClosedPollRow({ bookIds: [circe.id, piranesi.id] });
+    await prisma.poll.update({ where: { id: old.id }, data: { createdAt: inDays(-30) } });
+    const latest = await createClosedPollRow({ bookIds: [circe.id, beloved.id], votesPerMember: 1 });
+    await createVotes(latest.id, ada.id, [beloved.id]);
+
+    const res = await api.request("GET", "/polls/latest", { as: ada });
+    expect(res.body.id).toBe(latest.id);
+    expect(res.body.isOpen).toBe(false);
+    expect(res.body.results[0]).toEqual({ bookId: beloved.id, votes: 1 });
+  });
+
+  it("says which meeting a ballot book has been assigned to", async () => {
+    const poll = await createClosedPollRow({ bookIds: [circe.id, piranesi.id], votesPerMember: 1 });
+    const meeting = await createMeeting({ bookId: circe.id });
+    const res = await api.request("GET", `/polls/${poll.id}`, { as: ada });
+    const meetingIds = Object.fromEntries(
+      res.body.books.map((b: { id: string; meetingId: string | null }) => [b.id, b.meetingId]),
+    );
+    expect(meetingIds).toEqual({ [circe.id]: meeting.id, [piranesi.id]: null });
+  });
+});
+
+describe("PATCH /polls/:id", () => {
+  let fourth: Book;
+  beforeEach(async () => {
+    fourth = await createBook({ title: "Rebecca", suggestedBy: ben.id });
+  });
+
+  const edit = (pollId: string, body: unknown, as: User = admin) =>
+    api.request("PATCH", `/polls/${pollId}`, { as, body });
+
+  const openPoll = () =>
+    createPollRow({ bookIds: [circe.id, piranesi.id, beloved.id], votesPerMember: 2 });
+
+  it("changes the theme, closing time and votes per member", async () => {
+    const poll = await openPoll();
+    const closesAt = inDays(10).toISOString();
+    const res = await edit(poll.id, { theme: "Gothic", closesAt, votesPerMember: 1 });
+
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({ theme: "Gothic", closesAt, votesPerMember: 1, isOpen: true });
+  });
+
+  it("clears the theme with null and leaves left-out fields alone", async () => {
+    const poll = await openPoll();
+    await edit(poll.id, { theme: "Gothic" });
+    const res = await edit(poll.id, { theme: null });
+    expect(res.body).toMatchObject({ theme: null, votesPerMember: 2 });
+  });
+
+  it("adds books to the ballot without touching anyone's votes", async () => {
+    const poll = await openPoll();
+    await createVotes(poll.id, ada.id, [circe.id, piranesi.id]);
+    const res = await edit(poll.id, { addBookIds: [fourth.id] });
+
+    expect(res.status).toBe(200);
+    expect(sorted(res.body.books.map((b: { id: string }) => b.id))).toEqual(
+      sorted([circe.id, piranesi.id, beloved.id, fourth.id]),
+    );
+    const votes = await prisma.vote.findMany({ where: { pollId: poll.id } });
+    expect(sorted(votes.map((v) => v.bookId))).toEqual(sorted([circe.id, piranesi.id]));
+  });
+
+  it("reopens a closed poll with a later closing time", async () => {
+    const poll = await createClosedPollRow({ bookIds: [circe.id, piranesi.id], votesPerMember: 1 });
+    const res = await edit(poll.id, { closesAt: inDays(3).toISOString() });
+    expect(res.status).toBe(200);
+    expect(res.body.isOpen).toBe(true);
+    expect(res.body.results).toBeNull();
+  });
+
+  it("won't reopen a poll while another one is open", async () => {
+    const closed = await createClosedPollRow({ bookIds: [circe.id, piranesi.id], votesPerMember: 1 });
+    await createPollRow({ bookIds: [beloved.id, fourth.id], votesPerMember: 1 });
+    const res = await edit(closed.id, { closesAt: inDays(3).toISOString() });
+    expect(res.status).toBe(409);
+  });
+
+  it("won't change the ballot of a closed poll without reopening it", async () => {
+    const poll = await createClosedPollRow({ bookIds: [circe.id, piranesi.id], votesPerMember: 1 });
+    const res = await edit(poll.id, { addBookIds: [fourth.id] });
+    expect(res.status).toBe(400);
+    // The theme isn't part of voting, so it can still change.
+    expect((await edit(poll.id, { theme: "Gothic" })).status).toBe(200);
+  });
+
+  it("won't drop votes per member below what a member has already used", async () => {
+    const poll = await openPoll();
+    await createVotes(poll.id, ada.id, [circe.id, piranesi.id]);
+    const res = await edit(poll.id, { votesPerMember: 1 });
+    expect(res.status).toBe(400);
+    expect(res.body.error.message).toMatch(/already used 2 votes/);
+    expect((await prisma.poll.findUniqueOrThrow({ where: { id: poll.id } })).votesPerMember).toBe(2);
+  });
+
+  it.each([
+    ["a book already on the ballot", () => ({ addBookIds: [circe.id] }), 409],
+    ["more votes than books allow", () => ({ votesPerMember: 3 }), 400],
+    ["a closing time in the past", () => ({ closesAt: inDays(-1).toISOString() }), 400],
+  ])("rejects %s", async (_, body, status) => {
+    const poll = await openPoll();
+    const res = await edit(poll.id, body());
+    expect(res.status).toBe(status);
+  });
+
+  it("rejects a book that's already on a meeting", async () => {
+    const poll = await openPoll();
+    await createMeeting({ bookId: fourth.id });
+    const res = await edit(poll.id, { addBookIds: [fourth.id] });
+    expect(res.status).toBe(400);
+  });
+
+  it("returns 403 for members and 404 for an unknown poll", async () => {
+    const poll = await openPoll();
+    expect((await edit(poll.id, { theme: "Mine" }, ada)).status).toBe(403);
+    expect((await edit(randomUUID(), { theme: "Gothic" })).status).toBe(404);
+  });
+});
+
+describe("POST /polls/:id/close", () => {
+  const close = (pollId: string, as: User = admin) =>
+    api.request("POST", `/polls/${pollId}/close`, { as });
+
+  it("ends voting now and shows the results", async () => {
+    const poll = await createPollRow({ bookIds: [circe.id, piranesi.id], votesPerMember: 1 });
+    await createVotes(poll.id, ada.id, [piranesi.id]);
+    const res = await close(poll.id);
+
+    expect(res.status).toBe(200);
+    expect(res.body.isOpen).toBe(false);
+    expect(res.body.results[0]).toEqual({ bookId: piranesi.id, votes: 1 });
+    expect((await vote(poll.id, [circe.id], ben)).status).toBe(403);
+  });
+
+  it("returns 409 for a poll that's already closed", async () => {
+    const poll = await createClosedPollRow({ bookIds: [circe.id, piranesi.id], votesPerMember: 1 });
+    expect((await close(poll.id)).status).toBe(409);
+  });
+
+  it("returns 403 for members and 404 for an unknown poll", async () => {
+    const poll = await createPollRow({ bookIds: [circe.id, piranesi.id], votesPerMember: 1 });
+    expect((await close(poll.id, ada)).status).toBe(403);
+    expect((await close(randomUUID())).status).toBe(404);
+  });
+});

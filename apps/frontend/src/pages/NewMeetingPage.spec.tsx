@@ -1,5 +1,12 @@
 import { fireEvent, screen, within } from "@testing-library/react";
-import { createMeeting, createVenue, getBookSuggestions, getVenues } from "../api";
+import {
+  createMeeting,
+  createVenue,
+  getBookSuggestions,
+  getPoll,
+  getVenues,
+} from "../api";
+import { beloved, circe, piranesi, testPoll } from "../test/fixtures";
 import { renderRoutes, Route } from "../test-utils";
 import NewMeetingPage from "./NewMeetingPage";
 
@@ -7,17 +14,19 @@ vi.mock("../api", () => ({
   createMeeting: vi.fn(),
   createVenue: vi.fn(),
   getBookSuggestions: vi.fn(),
+  getPoll: vi.fn(),
   getVenues: vi.fn(),
 }));
 
 const VENUE_ID = "00000000-0000-4000-8000-000000000003";
 
-const renderPage = () =>
+const renderPage = (at = "/meetings/new") =>
   renderRoutes(
-    "/meetings/new",
+    at,
     <>
       <Route path="/meetings/new" element={<NewMeetingPage />} />
       <Route path="/meetings" element="meetings page" />
+      <Route path="/polls/:id" element="poll page" />
     </>,
   );
 
@@ -187,6 +196,58 @@ describe("NewMeetingPage", () => {
         "Save or cancel the new venue first.",
       );
       expect(createMeeting).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("from a poll's results", () => {
+    // Piranesi won, Beloved came second, and Circe is already on a meeting.
+    const closed = testPoll({
+      isOpen: false,
+      books: [
+        { ...circe, meetingId: "00000000-0000-4000-8000-000000000020" },
+        { ...piranesi, meetingId: null },
+        { ...beloved, meetingId: null },
+      ],
+      results: [
+        { bookId: circe.id, votes: 4 },
+        { bookId: piranesi.id, votes: 3 },
+        { bookId: beloved.id, votes: 1 },
+      ],
+    });
+    const fromPoll = `/meetings/new?poll=${closed.id}&book=${beloved.id}`;
+    const bookOptions = () =>
+      within(screen.getByLabelText("Book"))
+        .getAllByRole("option")
+        .map((o) => o.textContent);
+
+    it("offers only the poll's unassigned books, with the clicked one picked", async () => {
+      vi.mocked(getPoll).mockResolvedValue(closed);
+      renderPage(fromPoll);
+      await screen.findByText("From the poll's results, most votes first.");
+      expect(bookOptions()).toEqual([
+        "Not decided yet",
+        "Piranesi by Susanna Clarke",
+        "Beloved by Toni Morrison",
+      ]);
+      expect((screen.getByLabelText("Book") as HTMLSelectElement).value).toBe(beloved.id);
+    });
+
+    it("goes back to the poll once the meeting is saved", async () => {
+      vi.mocked(getPoll).mockResolvedValue(closed);
+      vi.mocked(createMeeting).mockResolvedValue({} as never);
+      renderPage(fromPoll);
+      await screen.findByText("From the poll's results, most votes first.");
+      fillForm();
+      submit();
+      expect(await screen.findByText("poll page")).toBeTruthy();
+      expect(vi.mocked(createMeeting).mock.calls[0][0]).toMatchObject({ bookId: beloved.id });
+    });
+
+    it("falls back to every suggestion when the poll won't load", async () => {
+      vi.mocked(getPoll).mockRejectedValue(new Error("Poll not found"));
+      renderPage(fromPoll);
+      await screen.findByLabelText("Book");
+      expect(screen.queryByText("From the poll's results, most votes first.")).toBeNull();
     });
   });
 });
