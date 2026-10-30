@@ -69,11 +69,9 @@ export const validateVote = async (pollId: string, bookIds: string[]) => {
     );
   }
   if (Date.now() < poll.opensAt.getTime()) {
-    console.log("TOO EARLY NOW", Date.now(), "OPEN", poll.opensAt.getTime());
     throw new ForbiddenError("Poll is not open yet.");
   }
   if (Date.now() > poll.closesAt.getTime()) {
-    console.log("TOO LATE NOW", Date.now(), "CLOSE", poll.closesAt.getTime());
     throw new ForbiddenError("Poll is now closed.");
   }
   const pollBookSet = new Set();
