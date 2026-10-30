@@ -16,6 +16,8 @@ import {
   CreateVenueSchema,
   CurrentPollSchema,
   InviteLookupSchema,
+  type ManualBookSuggestionDTO,
+  ManualBookSuggestionSchema,
   type MeetingListQuery,
   MeetingRsvpsSchema,
   type MergePlaceholderDTO,
@@ -320,6 +322,14 @@ export const createBookSuggestion = (body: CreateBookSuggestionDTO) =>
     schema: CreateBookSuggestionSchema,
     body,
   });
+
+export const createManualBookSuggestion = (body: ManualBookSuggestionDTO) =>
+  apiFetch(
+    `/api/books/suggestions/manual`,
+    BookSchema,
+    "Failed to suggest book",
+    { method: "POST", schema: ManualBookSuggestionSchema, body },
+  );
 
 export const getBookSuggestions = () =>
   apiFetch(

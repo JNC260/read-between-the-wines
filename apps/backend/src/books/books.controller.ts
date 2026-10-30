@@ -6,6 +6,7 @@ import {
   BookSchema,
   BookSearchQuerySchema,
   type CreateBookSuggestionDTO,
+  type ManualBookSuggestionDTO,
   type RateBookDTO,
   RatingSchema,
   ReadBookSchema,
@@ -31,6 +32,14 @@ export const createSuggestion = async (
   res: Response,
 ) => {
   const book = await service.createSuggestion(getUser(req).id, req.body);
+  res.status(201).json(z.encode(BookSchema, book));
+};
+
+export const createManualSuggestion = async (
+  req: Request<Record<string, string>, unknown, ManualBookSuggestionDTO>,
+  res: Response,
+) => {
+  const book = await service.createManualSuggestion(getUser(req).id, req.body);
   res.status(201).json(z.encode(BookSchema, book));
 };
 

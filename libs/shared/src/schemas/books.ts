@@ -96,6 +96,18 @@ export type CreateBookSuggestionDTO = z.infer<
   typeof CreateBookSuggestionSchema
 >;
 
+// POST /books/suggestions/manual, for a book Open Library doesn't have. The
+// same fields as an edit, but title and author are required. A book with the
+// same title and author is suggested again rather than added twice.
+export const ManualBookSuggestionSchema = UpdateBookSchema.required({
+  title: true,
+  author: true,
+});
+
+export type ManualBookSuggestionDTO = z.output<
+  typeof ManualBookSuggestionSchema
+>;
+
 // Just enough to name and picture a member next to a book or an RSVP; no
 // email.
 export const SuggesterSchema = z.object({

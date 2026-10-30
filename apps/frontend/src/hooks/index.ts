@@ -15,6 +15,7 @@ import {
 import {
   castVotes,
   createBookSuggestion,
+  createManualBookSuggestion,
   createPoll,
   createInvite,
   createMeeting,
@@ -334,6 +335,15 @@ export const useCreateBookSuggestion = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: createBookSuggestion,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["books"] }),
+  });
+};
+
+// For a book the search can't find. Refreshes the same lists as above.
+export const useCreateManualBookSuggestion = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: createManualBookSuggestion,
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["books"] }),
   });
 };

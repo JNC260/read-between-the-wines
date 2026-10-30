@@ -993,6 +993,150 @@ li:has(> :is(h2, h3)) > :last-child {
   color: var(--color-accent);
 }
 
+/* ---------- Suggest a book ---------- */
+
+.back-link {
+  margin: 1.25rem 0 0;
+  font-size: 0.9rem;
+}
+
+.suggest-search {
+  display: grid;
+  gap: 0.4rem;
+  margin-bottom: 1.25rem;
+}
+
+.suggest-hint {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--color-ink-soft);
+}
+
+.suggest-hint.is-error {
+  color: var(--color-danger);
+}
+
+.candidate-list {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Cover, the book, then its Suggest button on the right. */
+.candidate {
+  display: grid;
+  grid-template-columns: 3.5rem minmax(0, 1fr) auto;
+  gap: 0.85rem;
+  align-items: center;
+}
+
+.candidate h2 {
+  margin: 0;
+  font-size: 1.05rem;
+  line-height: 1.2;
+}
+
+.candidate .byline {
+  margin: 0.1rem 0 0.15rem;
+}
+
+.candidate-meta,
+.candidate-note {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--color-ink-soft);
+  font-variant-numeric: tabular-nums;
+}
+
+.candidate-note {
+  margin-top: 0.3rem;
+  font-weight: 600;
+  color: var(--color-accent);
+}
+
+.candidate-pick {
+  min-height: 2.25rem;
+  padding: 0 1rem;
+  font-size: 0.88rem;
+}
+
+.suggest-manual {
+  margin: 1.25rem 0 0;
+  text-align: center;
+  color: var(--color-ink-soft);
+  font-size: 0.92rem;
+}
+
+/* Reads as a link, but does something on the page rather than going
+   somewhere. */
+.text-button {
+  min-height: 0;
+  padding: 0;
+  background: none;
+  border: 0;
+  color: var(--color-accent);
+  font-size: inherit;
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+.manual-book {
+  margin-top: 0;
+}
+
+.manual-book-head h2 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.manual-book-head p {
+  margin: 0.25rem 0 0;
+}
+
+/* Year and pages are short, so they share a row. */
+.manual-book-pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.manual-book-pair > div {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.manual-book-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.manual-book-actions button {
+  flex: 1 1 auto;
+}
+
+.suggest-done {
+  display: grid;
+  grid-template-columns: 5rem minmax(0, 1fr);
+  gap: 1.1rem;
+  align-items: start;
+  margin-top: 1.5rem;
+}
+
+.suggest-done h1 {
+  margin: 0 0 0.4rem;
+  font-size: 1.6rem;
+}
+
+.suggest-done-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 1rem;
+}
+
 /* ---------- Poll page ---------- */
 
 .poll-intro {
