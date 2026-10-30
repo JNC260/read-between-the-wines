@@ -105,7 +105,11 @@ const apiFetch = async <T extends z.ZodType>(
   if (!response.ok) {
     await throwApiError(response, fallback);
   }
-  return z.decode(schema, await response.json());
+  // 204 No Content has no body to parse; pass z.undefined() for those.
+  return z.decode(
+    schema,
+    response.status === 204 ? undefined : await response.json(),
+  );
 };
 
 export const getUsersList = () =>

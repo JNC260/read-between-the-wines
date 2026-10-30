@@ -4,6 +4,7 @@ import {
   createMeeting,
   getInvite,
   getMeetings,
+  revokeInvite,
   searchBooks,
   updateVenue,
 } from ".";
@@ -143,5 +144,15 @@ describe("books API", () => {
     expect(init.method).toBe("POST");
     expect(JSON.parse(init.body)).toEqual({ openLibraryWorkId: "OL27482W" });
     expect(book.createdAt).toEqual(new Date("2026-10-22T12:00:00.000Z"));
+  });
+});
+
+describe("responses with no body", () => {
+  beforeEach(() => fetchMock.mockReset());
+
+  it("resolves to undefined for 204 No Content", async () => {
+    fetchMock.mockResolvedValueOnce(new Response(null, { status: 204 }));
+    await expect(revokeInvite("00000000-0000-4000-8000-000000000020")).resolves.toBeUndefined();
+    expect(fetchMock.mock.calls[0][1].method).toBe("DELETE");
   });
 });
