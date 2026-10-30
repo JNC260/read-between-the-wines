@@ -18,6 +18,10 @@ import {
 import { type ApiResponse, startApi } from "../test/http";
 
 vi.mock("../middleware/auth", () => import("../test/mock-auth"));
+// Creating a poll emails members; notifications.db.spec.ts covers that.
+vi.mock("../notifications/notifications.service", () => ({
+  notifyNewPoll: vi.fn().mockResolvedValue(0),
+}));
 
 let api: Awaited<ReturnType<typeof startApi>>;
 

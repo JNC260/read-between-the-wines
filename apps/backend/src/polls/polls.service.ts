@@ -7,6 +7,7 @@ import {
 } from "shared";
 import { BadRequestError, ConflictError, NotFoundError } from "../lib/errors";
 import { prisma } from "../lib/prisma";
+import { notifyNewPoll } from "../notifications/notifications.service";
 
 import {
   validateBooks,
@@ -32,6 +33,11 @@ export const createPoll = async (data: CreatePollDTO): Promise<PollDTO> => {
     },
     include: pollInclude,
   });
+  // Emailed to members in the background, so creating the poll doesn't
+  // wait on dozens of sends.
+  notifyNewPoll(newPoll.id).catch((e) =>
+    console.error("Emailing the new poll failed", e),
+  );
   // A brand-new poll: nobody has voted, so the creator's view is everyone's.
   return buildPollDTO(newPoll, "");
 };

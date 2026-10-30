@@ -1,4 +1,5 @@
 import {
+  type EmailSettingsDTO,
   type MergeResultDTO,
   type PlaceholderDTO,
   type UpdateProfileDTO,
@@ -79,6 +80,15 @@ export const banUser = async (adminId: string, id: string): Promise<UserDTO> => 
 // Lifting a ban makes the account active again, so they can sign straight in.
 export const unbanUser = (id: string): Promise<UserDTO> =>
   changeStatus(id, UserStatus.BANNED, UserStatus.ACTIVE);
+
+export const getEmailSettings = async (id: string): Promise<EmailSettingsDTO> =>
+  prisma.user.findUniqueOrThrow({ where: { id }, select: { emailOptOuts: true } });
+
+export const updateEmailSettings = (
+  id: string,
+  { emailOptOuts }: EmailSettingsDTO,
+): Promise<EmailSettingsDTO> =>
+  prisma.user.update({ where: { id }, data: { emailOptOuts }, select: { emailOptOuts: true } });
 
 // name is Better Auth's display name. Sign-up sets it to "First Last", so it
 // follows any change to either half.

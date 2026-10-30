@@ -2,6 +2,7 @@ import { type FormEvent, useState } from "react";
 import { Link } from "react-router-dom";
 import { type MeetingDTO, type PollDTO } from "shared";
 import { useClosePoll, useUpdateMeeting } from "../hooks";
+import ShareToWhatsApp from "./ShareToWhatsApp";
 
 const meetingDay = new Intl.DateTimeFormat(undefined, {
   weekday: "short",
@@ -10,6 +11,24 @@ const meetingDay = new Intl.DateTimeFormat(undefined, {
 });
 
 const meetingLabel = (m: MeetingDTO) => `${meetingDay.format(m.start)} · ${m.title}`;
+
+const closing = new Intl.DateTimeFormat(undefined, {
+  weekday: "long",
+  month: "short",
+  day: "numeric",
+  hour: "numeric",
+  minute: "2-digit",
+});
+
+// The reminder an admin posts in the club's group chat. *bold* is WhatsApp's
+// formatting; the link gets the poll's own preview card.
+const voteReminder = (poll: PollDTO) =>
+  [
+    "*📚 Vote for what we read next!*",
+    `Voting closes ${closing.format(poll.closesAt)}.`,
+    "",
+    `👉 ${window.location.origin}/polls/${poll.id}`,
+  ].join("\n");
 
 // The admin's tools at the top of a poll: edit or close it while it's open,
 // reopen it once it's closed. Closing asks once first, right here, since
@@ -59,6 +78,7 @@ export const PollAdminActions = ({ poll }: { poll: PollDTO }) => {
           <button type="button" className="button-quiet" onClick={() => setConfirming(true)}>
             Close voting now
           </button>
+          <ShareToWhatsApp text={voteReminder(poll)} label="Remind on WhatsApp" />
         </>
       )}
     </div>

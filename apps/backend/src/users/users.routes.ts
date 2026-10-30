@@ -1,5 +1,9 @@
 import express from "express";
-import { MergePlaceholderSchema, UpdateProfileSchema } from "shared";
+import {
+  EmailSettingsSchema,
+  MergePlaceholderSchema,
+  UpdateProfileSchema,
+} from "shared";
 import {
   requireAdmin,
   requireAuth,
@@ -9,6 +13,8 @@ import { uploadImage } from "../middleware/upload";
 import { validate } from "../middleware/validate";
 import {
   accountList,
+  emailSettingsGet,
+  emailSettingsUpdate,
   placeholderList,
   placeholderMerge,
   userBan,
@@ -32,6 +38,14 @@ router.patch("/me", requireAuth, validate(UpdateProfileSchema), userUpdateSelf);
 // The image has its own endpoint: it's multipart, not JSON.
 router.put("/me/image", requireAuth, uploadImage, userUploadImage);
 router.delete("/me/image", requireAuth, userRemoveImage);
+// Only this member's own, unlike the profile fields, which every member sees.
+router.get("/me/notifications", requireAuth, emailSettingsGet);
+router.put(
+  "/me/notifications",
+  requireAuth,
+  validate(EmailSettingsSchema),
+  emailSettingsUpdate,
+);
 router.post("/me/deactivate", requireAuth, userDeactivateSelf);
 router.post("/me/reactivate", requireAuthAllowInactive, userReactivateSelf);
 // Every account whatever its status, for the manage members page.

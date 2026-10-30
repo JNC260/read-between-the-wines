@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import express, { type RequestHandler } from "express";
@@ -7,6 +8,8 @@ import { config, isProduction } from "./lib/config";
 import { NotFoundError } from "./lib/errors";
 import { UPLOADS_URL_PATH } from "./lib/storage";
 import { errorHandler } from "./middleware/error-handler";
+import { withPreview } from "./previews/previews.html";
+import { previewFor } from "./previews/previews.service";
 import rootRoutes from "./root.routes";
 
 export const app = express();
@@ -69,14 +72,22 @@ if (isProduction) {
 
   // Client-side routes like /books/read have no file of their own, so any
   // other GET gets index.html and React Router takes it from there.
-  const spaFallback: RequestHandler = (req, res, next) => {
+  // Read once: it only changes with a deploy, which restarts the server.
+  const indexSource = readFileSync(indexHtml, "utf8");
+  const spaFallback: RequestHandler = async (req, res, next) => {
     if (req.method !== "GET" && req.method !== "HEAD") {
       next();
       return;
     }
     // Always revalidate, so a deploy's new asset names are picked up.
     res.setHeader("Cache-Control", "no-cache");
-    res.sendFile(indexHtml);
+    // Meeting and poll links get their own preview card. A lookup that
+    // fails just means the site's usual card.
+    const preview = await previewFor(req.path).catch((e) => {
+      console.error("Building a link preview failed", e);
+      return null;
+    });
+    res.type("html").send(preview ? withPreview(indexSource, preview) : indexSource);
   };
   app.use(spaFallback);
 }

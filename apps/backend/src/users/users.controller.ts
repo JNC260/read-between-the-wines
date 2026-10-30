@@ -1,6 +1,8 @@
 import { type Request, type Response } from "express";
 import * as z from "zod";
 import {
+  type EmailSettingsDTO,
+  EmailSettingsSchema,
   type MergePlaceholderDTO,
   MergeResultSchema,
   PlaceholderSchema,
@@ -13,12 +15,14 @@ import {
   banUser,
   deactivateUser,
   getActiveUsers,
+  getEmailSettings,
   listAccounts,
   listPlaceholders,
   mergePlaceholder,
   reactivateUser,
   removeProfileImage,
   unbanUser,
+  updateEmailSettings,
   updateProfile,
   updateProfileImage,
 } from "./users.service";
@@ -68,6 +72,21 @@ export const userDeactivate = async (
 ) => {
   const user = await deactivateUser(req.params.id);
   res.json(z.encode(UserSchema, user));
+};
+
+// GET /users/me/notifications -> the emails this member has turned off
+export const emailSettingsGet = async (req: Request, res: Response) => {
+  const settings = await getEmailSettings(getUser(req).id);
+  res.json(z.encode(EmailSettingsSchema, settings));
+};
+
+// PUT /users/me/notifications
+export const emailSettingsUpdate = async (
+  req: Request<Record<string, string>, unknown, EmailSettingsDTO>,
+  res: Response,
+) => {
+  const settings = await updateEmailSettings(getUser(req).id, req.body);
+  res.json(z.encode(EmailSettingsSchema, settings));
 };
 
 // GET /users/accounts (admins) -> every real account, with its status

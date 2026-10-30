@@ -42,6 +42,14 @@ describe("sendEmail in production", () => {
     });
   });
 
+  it("passes extra headers along, like List-Unsubscribe", async () => {
+    fetchMock.mockResolvedValue(new Response(JSON.stringify({ id: "abc" }), { status: 200 }));
+    await sendEmail({ ...email, headers: { "List-Unsubscribe": "<https://example.org/u>" } });
+    expect(JSON.parse(fetchMock.mock.calls[0][1].body).headers).toEqual({
+      "List-Unsubscribe": "<https://example.org/u>",
+    });
+  });
+
   it("throws with Resend's reason when it refuses", async () => {
     fetchMock.mockResolvedValue(
       new Response(

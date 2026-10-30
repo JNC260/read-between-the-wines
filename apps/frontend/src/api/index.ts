@@ -8,11 +8,14 @@ import {
   type CreateBookSuggestionDTO,
   CreateBookSuggestionSchema,
   CreatedInviteSchema,
+  type EmailSettingsDTO,
+  EmailSettingsSchema,
   OpenInviteSchema,
   type CreateMeetingDTO,
   CreateMeetingSchema,
   type CreatePollDTO,
   CreatePollSchema,
+  type UnsubscribeQuery,
   type UpdatePollDTO,
   UpdatePollSchema,
   type CreateVenueDTO,
@@ -162,6 +165,26 @@ export const unbanUser = (id: string) =>
     `/api/users/${encodeURIComponent(id)}/unban`,
     UserSchema,
     "Failed to lift the ban",
+    { method: "POST" },
+  );
+
+// This member's email settings: the notification emails they've turned off.
+export const getEmailSettings = () =>
+  apiFetch(`/api/users/me/notifications`, EmailSettingsSchema, "Failed to load your email settings");
+
+export const updateEmailSettings = (body: EmailSettingsDTO) =>
+  apiFetch(`/api/users/me/notifications`, EmailSettingsSchema, "Failed to save your email settings", {
+    method: "PUT",
+    schema: EmailSettingsSchema,
+    body,
+  });
+
+// From an email's unsubscribe link; works signed out.
+export const unsubscribe = (query: UnsubscribeQuery) =>
+  apiFetch(
+    `/api/notifications/unsubscribe?${new URLSearchParams(query)}`,
+    z.undefined(),
+    "Failed to unsubscribe",
     { method: "POST" },
   );
 

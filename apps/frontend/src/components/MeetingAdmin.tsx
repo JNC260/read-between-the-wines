@@ -2,6 +2,27 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { type MeetingDTO } from "shared";
 import { useCancelMeeting, useRestoreMeeting } from "../hooks";
+import ShareToWhatsApp from "./ShareToWhatsApp";
+
+const day = new Intl.DateTimeFormat(undefined, {
+  weekday: "long",
+  month: "short",
+  day: "numeric",
+});
+const time = new Intl.DateTimeFormat(undefined, { hour: "numeric", minute: "2-digit" });
+
+// The RSVP reminder an admin posts in the club's group chat. *bold* and
+// _italic_ are WhatsApp's formatting; the link gets the meeting's own
+// preview card.
+const rsvpReminder = (m: MeetingDTO) =>
+  [
+    "*📅 RSVP to the next meeting!*",
+    m.book ? `*${m.book.title}* by _${m.book.author}_` : `*${m.title}*`,
+    `${day.format(m.start)} · ${time.format(m.start)}`,
+    ...(m.venue ? [m.venue.name] : []),
+    "",
+    `👉 ${window.location.origin}/meetings/${m.id}`,
+  ].join("\n");
 
 // The admin's tools on a meeting page: edit or cancel it, or restore it once
 // cancelled. Cancelling asks once first, right here.
@@ -62,9 +83,12 @@ const MeetingAdminActions = ({ meeting }: { meeting: MeetingDTO }) => {
         Edit meeting
       </Link>
       {!isOver && (
-        <button type="button" className="button-quiet" onClick={() => setConfirming(true)}>
-          Cancel meeting
-        </button>
+        <>
+          <button type="button" className="button-quiet" onClick={() => setConfirming(true)}>
+            Cancel meeting
+          </button>
+          <ShareToWhatsApp text={rsvpReminder(meeting)} label="Remind on WhatsApp" />
+        </>
       )}
     </div>
   );

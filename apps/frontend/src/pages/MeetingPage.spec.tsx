@@ -314,6 +314,32 @@ describe("MeetingPage", () => {
     });
   });
 
+  it("offers admins a WhatsApp RSVP reminder", async () => {
+    mockSession(testUser({ isAdmin: true }));
+    renderPage();
+    const href =
+      (await screen.findByRole("link", { name: "Remind on WhatsApp" })).getAttribute("href") ?? "";
+    const text = decodeURIComponent(href.slice("https://wa.me/?text=".length));
+    expect(text.split("\n")).toEqual([
+      "*📅 RSVP to the next meeting!*",
+      "*Circe* by _Madeline Miller_",
+      expect.stringMatching(/^\w+day, Nov 13 · 7:00\sPM$/),
+      "Priya's place",
+      "",
+      `👉 ${window.location.origin}/meetings/${meeting.id}`,
+    ]);
+  });
+
+  it("copies the reminder for pasting, since WhatsApp Desktop can drop the text", async () => {
+    mockSession(testUser({ isAdmin: true }));
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.assign(navigator, { clipboard: { writeText } });
+    renderPage();
+    fireEvent.click(await screen.findByRole("button", { name: "Copy message" }));
+    await vi.waitFor(() => expect(writeText.mock.calls[0][0]).toMatch(/^\*📅 RSVP to the next meeting!\*/));
+    expect(await screen.findByRole("button", { name: "Copied!" })).toBeTruthy();
+  });
+
   describe("adding to a calendar", () => {
     it("links to Google Calendar with the meeting's details", async () => {
       renderPage();

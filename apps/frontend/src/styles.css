@@ -2060,6 +2060,45 @@ li:has(> :is(h2, h3)) > :last-child {
   color: inherit;
 }
 
+/* ---------- Email settings and unsubscribing ---------- */
+
+.email-settings {
+  margin-top: 1.5rem;
+}
+
+.email-settings h2 {
+  margin: 0 0 0.75rem;
+  font-size: 1.15rem;
+}
+
+.email-settings ul {
+  display: grid;
+  gap: 0.6rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.email-settings label {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-weight: 400;
+  font-size: 0.95rem;
+}
+
+.email-settings > p:last-child {
+  margin: 0.75rem 0 0;
+}
+
+.unsubscribe-page {
+  display: grid;
+  justify-items: start;
+  gap: 0.25rem;
+  max-width: 32rem;
+  margin-top: 1.5rem;
+}
+
 /* ---------- Manage members (admins) ---------- */
 
 .page-head-actions {
