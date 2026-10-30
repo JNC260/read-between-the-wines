@@ -379,13 +379,13 @@ describe("GET /meetings/:id/rsvps", () => {
       myStatus: "YES",
       rsvps: [
         {
-          member: { id: admin.id, firstName: "Admin", lastName: "Reader" },
+          member: { id: admin.id, firstName: "Admin", lastName: "Reader", image: null },
           status: "MAYBE",
           dish: null,
           guestCount: 0,
         },
         {
-          member: { id: ada.id, firstName: "Ada", lastName: "Reader" },
+          member: { id: ada.id, firstName: "Ada", lastName: "Reader", image: null },
           status: "YES",
           dish: "Lemon bars",
           guestCount: 1,

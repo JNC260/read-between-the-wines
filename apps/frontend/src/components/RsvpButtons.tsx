@@ -2,7 +2,7 @@ import { type FormEvent, useState } from "react";
 import { MAX_GUESTS, type RsvpDTO, type RsvpStatus } from "shared";
 import { useMeetingRsvps, useSetRsvp } from "../hooks";
 import { authClient } from "../lib/auth-client";
-import { initials } from "../lib/initials";
+import Avatar from "./Avatar";
 
 const CHOICES: { status: RsvpStatus; label: string }[] = [
   { status: "YES", label: "I'm in" },
@@ -159,9 +159,7 @@ export const WhoIsGoing = ({ meetingId }: { meetingId: string }) => {
       {going.length > 0 && (
         <span className="faces" aria-hidden="true">
           {going.slice(0, MAX_FACES).map((r) => (
-            <span key={r.member.id} className="face">
-              {initials(r.member)}
-            </span>
+            <Avatar key={r.member.id} member={r.member} size="small" />
           ))}
         </span>
       )}

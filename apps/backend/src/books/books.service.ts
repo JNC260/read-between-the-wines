@@ -162,7 +162,7 @@ export const listSuggestions = async (
       suggestions: {
         orderBy: { createdAt: "asc" },
         include: {
-          user: { select: { id: true, firstName: true, lastName: true } },
+          user: { select: { id: true, firstName: true, lastName: true, image: true } },
         },
       },
     },

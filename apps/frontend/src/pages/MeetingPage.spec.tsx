@@ -150,7 +150,7 @@ describe("MeetingPage", () => {
         rsvps: [
           {
             ...testRsvp("Ada", "YES", 1, { dish: "Lemon bars", guestCount: 1 }),
-            member: { id: testUser().id, firstName: "Ada", lastName: "Reader" },
+            member: { id: testUser().id, firstName: "Ada", lastName: "Reader", image: null },
           },
         ],
       }),
@@ -183,7 +183,7 @@ describe("MeetingPage", () => {
         rsvps: [
           {
             ...testRsvp("Ada", "YES", 1, { dish: "Lemon bars", guestCount: 1 }),
-            member: { id: testUser().id, firstName: "Ada", lastName: "Reader" },
+            member: { id: testUser().id, firstName: "Ada", lastName: "Reader", image: null },
           },
         ],
       }),

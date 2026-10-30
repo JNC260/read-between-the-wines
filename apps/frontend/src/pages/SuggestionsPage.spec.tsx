@@ -15,11 +15,13 @@ const ada = {
   id: "00000000-0000-4000-8000-000000000001",
   firstName: "Ada",
   lastName: "Lovelace",
+  image: null,
 };
 const ben = {
   id: "00000000-0000-4000-8000-000000000002",
   firstName: "Ben",
   lastName: "Okri",
+  image: null,
 };
 
 const book = (overrides: Partial<SuggestedBookDTO> = {}): SuggestedBookDTO => ({
@@ -100,6 +102,18 @@ describe("SuggestionsPage", () => {
     expect(screen.getByText("Madeline Miller")).toBeTruthy();
     expect(screen.getByText("2018 · 404 pages")).toBeTruthy();
     expect(screen.getByText("You suggested this")).toBeTruthy();
+  });
+
+  it("shows a suggester's photo, and initials for one without", async () => {
+    const photo = "/api/uploads/00000000-0000-4000-8000-000000000003.webp";
+    vi.mocked(getBookSuggestions).mockResolvedValue([
+      book({ suggestedBy: [{ ...ada, image: photo }, ben] }),
+    ]);
+    renderPage();
+    await screen.findByText(/Suggested by Ada L\., Ben O\./);
+    const faces = document.querySelector(".faces");
+    expect(faces?.querySelector("img")?.getAttribute("src")).toBe(photo);
+    expect(faces?.textContent).toBe("BO");
   });
 
   it("defaults to newest suggestion first", async () => {

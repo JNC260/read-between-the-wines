@@ -6,10 +6,10 @@ import {
   type SuggestedBookDTO,
   type SuggesterDTO,
 } from "shared";
+import Avatar from "../components/Avatar";
 import BookCover from "../components/BookCover";
 import { useBookSuggestions, useCurrentPoll } from "../hooks";
 import { authClient } from "../lib/auth-client";
-import { initials } from "../lib/initials";
 
 type SortOrder = "asc" | "desc";
 
@@ -173,9 +173,7 @@ const SuggestionItem = ({
       <div className="catalog-card-foot">
         <span className="faces" aria-hidden="true">
           {book.suggestedBy.slice(0, MAX_FACES).map((m) => (
-            <span key={m.id} className="face">
-              {initials(m)}
-            </span>
+            <Avatar key={m.id} member={m} size="small" />
           ))}
         </span>
         <span>
