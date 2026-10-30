@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { Link, NavLink, useLocation } from "react-router-dom";
 import { authClient } from "../lib/auth-client";
-import { initials } from "../lib/initials";
+import Avatar from "./Avatar";
 import Logo from "./Logo";
 import SignOutButton from "./SignOutButton";
 
@@ -34,9 +34,7 @@ const AccountMenu = ({ isAdmin }: { isAdmin: boolean }) => {
   return (
     <details className="account-menu" ref={menu}>
       <summary aria-label="Account menu">
-        <span className="face face-me" aria-hidden="true">
-          {initials(session.user)}
-        </span>
+        <Avatar member={session.user} size="small" className="face-me" />
       </summary>
       <ul>
         <li>

@@ -107,7 +107,7 @@ export const getRsvps = async (
     where: { meetingId },
     orderBy: { createdAt: "asc" },
     include: {
-      user: { select: { id: true, firstName: true, lastName: true } },
+      user: { select: { id: true, firstName: true, lastName: true, image: true } },
     },
   });
   return {

@@ -96,11 +96,13 @@ export type CreateBookSuggestionDTO = z.infer<
   typeof CreateBookSuggestionSchema
 >;
 
-// Just enough to name a member next to a book or an RSVP; no email.
+// Just enough to name and picture a member next to a book or an RSVP; no
+// email.
 export const SuggesterSchema = z.object({
   id: z.uuidv4(),
   firstName: z.string(),
   lastName: z.string(),
+  image: z.string().nullable(),
 });
 
 export type SuggesterDTO = z.output<typeof SuggesterSchema>;

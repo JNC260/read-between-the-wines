@@ -26,11 +26,13 @@ export const toProfileImage = async (input: Buffer): Promise<ProcessedImage> => 
       // Phones save photos sideways and record which way is up in the
       // metadata. rotate() with no angle applies that before it's dropped.
       .rotate()
-      // Crops to a square around the most interesting part (skin tones,
-      // contrast) rather than the dead center, which suits faces.
+      // Crops to a square from the top of a tall photo and the middle of a
+      // wide one, since that's where the head usually is in a portrait.
+      // (sharp's "attention" crop looked for the busiest part instead, and
+      // often picked a patterned shirt or the background over a face.)
       .resize(PROFILE_IMAGE_SIZE, PROFILE_IMAGE_SIZE, {
         fit: "cover",
-        position: sharp.strategy.attention,
+        position: "top",
       })
       .webp({ quality: 82 })
       .toBuffer();

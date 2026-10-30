@@ -244,12 +244,14 @@ describe("GET /books/suggestions", () => {
     const circe = await createBook({ title: "Circe" });
     await addSuggestion(ada.id, circe.id, new Date("2026-10-05T00:00:00Z"));
     await addSuggestion(ben.id, circe.id, new Date("2026-10-02T00:00:00Z"));
+    const photo = "/api/uploads/00000000-0000-4000-8000-000000000001.webp";
+    await prisma.user.update({ where: { id: ben.id }, data: { image: photo } });
 
     const [book] = (await list()).body;
-    // Names only: no emails go to other members.
+    // Names and photos only: no emails go to other members.
     expect(book.suggestedBy).toEqual([
-      { id: ben.id, firstName: "Ben", lastName: "Reader" },
-      { id: ada.id, firstName: "Ada", lastName: "Reader" },
+      { id: ben.id, firstName: "Ben", lastName: "Reader", image: photo },
+      { id: ada.id, firstName: "Ada", lastName: "Reader", image: null },
     ]);
     expect(book.suggestedAt).toBe("2026-10-02T00:00:00.000Z");
   });
