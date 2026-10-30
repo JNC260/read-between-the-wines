@@ -1941,11 +1941,53 @@ li:has(> :is(h2, h3)) > :last-child {
   right: 0.9rem;
 }
 
+.catalog-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 1rem;
+  margin-top: 0.5rem;
+}
+
 .catalog-card-edit {
   display: inline-block;
-  margin-top: 0.5rem;
   font-size: 0.82rem;
   font-weight: 600;
+}
+
+/* Reads like the Edit link next to it. */
+.catalog-card-withdraw {
+  min-height: 0;
+  padding: 0;
+  background: none;
+  border: 0;
+  color: var(--color-accent);
+  font-size: 0.82rem;
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+.catalog-card-confirm {
+  display: grid;
+  gap: 0.5rem;
+  flex-basis: 100%;
+  font-size: 0.88rem;
+}
+
+.catalog-card-confirm p {
+  margin: 0;
+}
+
+.catalog-card-confirm-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.catalog-card-confirm-buttons button {
+  min-height: 2.25rem;
+  padding: 0 0.9rem;
+  font-size: 0.85rem;
 }
 
 .badges {

@@ -104,7 +104,11 @@ const apiFetch = async <T extends z.ZodType>(
   if (!response.ok) {
     await throwApiError(response, fallback);
   }
-  return z.decode(schema, await response.json());
+  // 204 No Content has no body to parse; pass z.undefined() for those.
+  return z.decode(
+    schema,
+    response.status === 204 ? undefined : await response.json(),
+  );
 };
 
 export const getUsersList = () =>
@@ -347,6 +351,15 @@ export const createManualBookSuggestion = (body: ManualBookSuggestionDTO) =>
     BookSchema,
     "Failed to suggest book",
     { method: "POST", schema: ManualBookSuggestionSchema, body },
+  );
+
+// Only allowed while this member is the book's one suggester.
+export const withdrawSuggestion = (bookId: string) =>
+  apiFetch(
+    `/api/books/${encodeURIComponent(bookId)}/suggestion`,
+    z.undefined(),
+    "Failed to withdraw your suggestion",
+    { method: "DELETE" },
   );
 
 export const getBookSuggestions = () =>

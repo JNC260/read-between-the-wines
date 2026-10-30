@@ -55,6 +55,7 @@ import {
   updateProfile,
   updateVenue,
   uploadProfileImage,
+  withdrawSuggestion,
 } from "../api";
 import { authClient } from "../lib/auth-client";
 
@@ -362,6 +363,15 @@ export const useCreateBookSuggestion = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: createBookSuggestion,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["books"] }),
+  });
+};
+
+// The book leaves the suggestions list, and searches stop flagging it.
+export const useWithdrawSuggestion = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: withdrawSuggestion,
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["books"] }),
   });
 };
