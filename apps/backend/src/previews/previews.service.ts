@@ -1,3 +1,4 @@
+import { cachedCoverUrl } from "../covers/covers.service";
 import { config } from "../lib/config";
 import { prisma } from "../lib/prisma";
 import { type Preview } from "./previews.html";
@@ -47,7 +48,7 @@ const meetingPreview = async (id: string, url: string): Promise<Preview | null> 
     description,
     url,
     ...(book?.coverUrl && {
-      image: book.coverUrl,
+      image: cachedCoverUrl(book.coverUrl),
       imageAlt: `The cover of ${book.title} by ${book.author}`,
     }),
   };

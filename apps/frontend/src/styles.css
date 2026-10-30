@@ -3042,6 +3042,84 @@ button:disabled {
   margin-top: 1.4rem;
 }
 
+/* ---------- Bottom sheet ---------- */
+
+/* Over everything, the tab bar included. */
+.sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: flex-end;
+  background: rgb(36 27 58 / 0.45);
+  animation: sheet-fade 0.2s ease-out;
+}
+
+.sheet {
+  position: relative;
+  width: 100%;
+  max-height: 85vh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 0.5rem 1.25rem calc(1.25rem + env(safe-area-inset-bottom));
+  background: var(--color-surface);
+  border-radius: 22px 22px 0 0;
+  box-shadow: 0 -12px 30px -12px rgb(36 27 58 / 0.4);
+  animation: sheet-up 0.25s ease-out;
+  transition: transform 0.2s ease-out;
+}
+
+.sheet:focus {
+  outline: none;
+}
+
+/* The grab bar: drag it down to close. Taller than it looks, for thumbs. */
+.sheet-handle {
+  width: 100%;
+  height: 1.5rem;
+  margin-bottom: 0.25rem;
+  touch-action: none;
+  background: linear-gradient(var(--color-line), var(--color-line)) center / 2.75rem 0.3rem no-repeat;
+  border-radius: 999px;
+}
+
+.sheet-close {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.75rem;
+  min-height: 2.25rem;
+  width: 2.25rem;
+  padding: 0;
+  border-color: transparent;
+  font-size: 1rem;
+}
+
+/* The details card's own border and padding would double up in a sheet. */
+.sheet .book-details {
+  border: 0;
+  padding: 0;
+  background: none;
+}
+
+@keyframes sheet-up {
+  from {
+    transform: translateY(100%);
+  }
+}
+
+@keyframes sheet-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sheet,
+  .sheet-backdrop {
+    animation: none;
+  }
+}
+
 /* Stacked under the shelves on a phone, where sticking would cover them. */
 @media (max-width: 45rem) {
   .shelf-aside {

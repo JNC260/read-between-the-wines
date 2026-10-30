@@ -1,4 +1,4 @@
-import { render } from "@testing-library/react";
+import { fireEvent, render } from "@testing-library/react";
 import { avatarColor } from "../lib/avatar-color";
 import Avatar from "./Avatar";
 
@@ -44,5 +44,14 @@ describe("Avatar", () => {
   it("adds extra classes, like the header's", () => {
     const circle = shown(<Avatar member={ada} size="small" className="face-me" />);
     expect(circle.classList).toContain("face-me");
+  });
+
+  it("falls back to initials when the photo won't load", () => {
+    const { container } = render(
+      <Avatar member={{ id: "00000000-0000-4000-8000-000000000001", firstName: "Ada", lastName: "Lovelace", image: "/api/uploads/gone.webp" }} />,
+    );
+    fireEvent.error(container.querySelector("img") as HTMLImageElement);
+    expect(container.querySelector("img")).toBeNull();
+    expect(container.textContent).toBe("AL");
   });
 });
