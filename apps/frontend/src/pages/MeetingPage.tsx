@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { type RsvpDTO, type RsvpStatus, type VenueDTO } from "shared";
+import AddToCalendar from "../components/AddToCalendar";
 import BookCover from "../components/BookCover";
+import MeetingAdminActions from "../components/MeetingAdmin";
 import { plural, RsvpButtons, RsvpDetails } from "../components/RsvpButtons";
 import { useMeeting, useMeetingRsvps } from "../hooks";
 import { authClient } from "../lib/auth-client";
@@ -14,6 +16,8 @@ const when = new Intl.DateTimeFormat(undefined, {
   hour: "numeric",
   minute: "2-digit",
 });
+
+const cancelledOn = new Intl.DateTimeFormat(undefined, { dateStyle: "medium" });
 
 // Open Library synopses separate paragraphs with blank lines.
 const paragraphs = (text: string) =>
@@ -202,6 +206,7 @@ const MeetingPage = () => {
 
   const { book, venue } = meeting;
   const isOver = meeting.end < new Date();
+  const cancelled = meeting.cancelledAt !== null;
 
   return (
     <article className="meeting-page">
@@ -213,12 +218,18 @@ const MeetingPage = () => {
         <div>
           <p className="eyebrow">{meeting.title}</p>
           <h1>{book?.title ?? meeting.title}</h1>
-          <p className="byline">{book ? book.author : "Book to be announced"}</p>
-          {session?.user.isAdmin && (
-            <Link to={`/meetings/${meeting.id}/edit`}>Edit meeting</Link>
-          )}
+          <p className="byline">
+            {book ? book.author : cancelled ? "Cancelled" : "Book to be announced"}
+          </p>
         </div>
       </header>
+
+      {meeting.cancelledAt && (
+        <p className="notice meeting-cancelled" role="status">
+          This meeting was cancelled on {cancelledOn.format(meeting.cancelledAt)}.
+        </p>
+      )}
+      {session?.user.isAdmin && <MeetingAdminActions meeting={meeting} />}
 
       <dl className="facts facts-large">
         <div>
@@ -245,6 +256,8 @@ const MeetingPage = () => {
         </div>
       </dl>
 
+      {!cancelled && !isOver && <AddToCalendar meeting={meeting} />}
+
       {meeting.description && (
         <div className="meeting-description">
           {paragraphs(meeting.description).map((p, i) => (
@@ -253,9 +266,12 @@ const MeetingPage = () => {
         </div>
       )}
 
+      {/* A cancelled meeting keeps its answers, but nobody can change them. */}
       <section className="card" aria-labelledby="rsvp-title">
-        <h2 id="rsvp-title">{isOver ? "Who came" : "Are you coming?"}</h2>
-        {isOver ? (
+        <h2 id="rsvp-title">
+          {cancelled ? "Who had answered" : isOver ? "Who came" : "Are you coming?"}
+        </h2>
+        {cancelled ? null : isOver ? (
           <p className="muted">This meeting is over.</p>
         ) : (
           <YourRsvp meetingId={meeting.id} />
@@ -263,7 +279,7 @@ const MeetingPage = () => {
         <WhoIsComing meetingId={meeting.id} />
       </section>
 
-      <OnTheMenu meetingId={meeting.id} />
+      {!cancelled && <OnTheMenu meetingId={meeting.id} />}
 
       {meeting.craft && (
         <section aria-labelledby="craft-title">
@@ -283,7 +299,7 @@ const MeetingPage = () => {
         </section>
       )}
 
-      {venue && <Directions venue={venue} />}
+      {venue && !cancelled && <Directions venue={venue} />}
     </article>
   );
 };

@@ -84,7 +84,7 @@ export const AssignBook = ({
   isAdmin: boolean;
 }) => {
   const assign = useUpdateMeeting();
-  const open = upcoming.filter((m) => m.bookId === null);
+  const open = upcoming.filter((m) => m.bookId === null && !m.cancelledAt);
   const [choice, setChoice] = useState("");
   const picked = choice || open[0]?.id || "";
 

@@ -15,6 +15,9 @@ export const MeetingSchema = z.object({
   craft: z.string().nullable(),
   venueId: z.uuidv4().nullable(),
   bookId: z.uuidv4().nullable(),
+  // Set when an admin cancels it. A cancelled meeting stays listed, marked
+  // cancelled, with no book and no new RSVPs.
+  cancelledAt: isoDate.nullable(),
   venue: VenueSchema.nullable(),
   book: BookSchema.nullable(),
 });

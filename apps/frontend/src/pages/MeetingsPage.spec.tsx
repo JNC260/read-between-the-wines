@@ -20,6 +20,7 @@ const aMeeting = (overrides: Partial<MeetingDTO> = {}): MeetingDTO => ({
   craft: null,
   venueId: "00000000-0000-4000-8000-000000000003",
   bookId: null,
+  cancelledAt: null,
   venue: {
     id: "00000000-0000-4000-8000-000000000003",
     name: "Ada's house",

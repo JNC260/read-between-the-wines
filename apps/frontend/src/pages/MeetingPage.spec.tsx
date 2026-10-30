@@ -1,13 +1,21 @@
 import { fireEvent, screen, within } from "@testing-library/react";
-import { getMeeting, getMeetingRsvps, setRsvp } from "../api";
+import {
+  cancelMeeting,
+  getMeeting,
+  getMeetingRsvps,
+  restoreMeeting,
+  setRsvp,
+} from "../api";
 import { testMeeting, testRsvp, testRsvps } from "../test/fixtures";
 import { mockSession, renderRoutes, Route, testUser } from "../test-utils";
 import MeetingPage from "./MeetingPage";
 
 vi.mock("../lib/auth-client", () => ({ authClient: { useSession: vi.fn() } }));
 vi.mock("../api", () => ({
+  cancelMeeting: vi.fn(),
   getMeeting: vi.fn(),
   getMeetingRsvps: vi.fn(),
+  restoreMeeting: vi.fn(),
   setRsvp: vi.fn(),
 }));
 
@@ -261,5 +269,71 @@ describe("MeetingPage", () => {
     renderPage();
     await screen.findByRole("heading", { name: "Circe" });
     expect(screen.queryByRole("link", { name: "Edit meeting" })).toBeNull();
+  });
+
+  describe("cancelling", () => {
+    const cancelled = { ...meeting, cancelledAt: new Date("2099-11-01T12:00:00"), book: null, bookId: null };
+
+    it("asks admins before cancelling, and can back out", async () => {
+      mockSession(testUser({ isAdmin: true }));
+      vi.mocked(cancelMeeting).mockResolvedValue(cancelled);
+      renderPage();
+      fireEvent.click(await screen.findByRole("button", { name: "Cancel meeting" }));
+      expect(screen.getByText(/Circe goes back to the suggestions/)).toBeTruthy();
+      fireEvent.click(screen.getByRole("button", { name: "Keep it" }));
+      expect(cancelMeeting).not.toHaveBeenCalled();
+
+      fireEvent.click(screen.getByRole("button", { name: "Cancel meeting" }));
+      fireEvent.click(
+        within(screen.getByRole("group", { name: "Cancel meeting" })).getByRole("button", {
+          name: "Cancel meeting",
+        }),
+      );
+      await vi.waitFor(() => expect(vi.mocked(cancelMeeting).mock.calls[0][0]).toBe(meeting.id));
+    });
+
+    it("tells everyone it's cancelled and hides RSVPs, the calendar and directions", async () => {
+      vi.mocked(getMeeting).mockResolvedValue(cancelled);
+      renderPage();
+      expect((await screen.findByRole("status")).textContent).toMatch(/This meeting was cancelled on/);
+      expect(screen.getByRole("heading", { name: "Who had answered" })).toBeTruthy();
+      expect(screen.queryByRole("button", { name: "Going" })).toBeNull();
+      expect(screen.queryByRole("group", { name: "Add to your calendar" })).toBeNull();
+      expect(screen.queryByRole("heading", { name: "Getting there" })).toBeNull();
+    });
+
+    it("lets admins restore it", async () => {
+      mockSession(testUser({ isAdmin: true }));
+      vi.mocked(getMeeting).mockResolvedValue(cancelled);
+      vi.mocked(restoreMeeting).mockResolvedValue(meeting);
+      renderPage();
+      fireEvent.click(await screen.findByRole("button", { name: "Restore meeting" }));
+      await vi.waitFor(() => expect(vi.mocked(restoreMeeting).mock.calls[0][0]).toBe(meeting.id));
+      // A cancelled meeting can't be edited until it's restored.
+      expect(screen.queryByRole("link", { name: "Edit meeting" })).toBeNull();
+    });
+  });
+
+  describe("adding to a calendar", () => {
+    it("links to Google Calendar with the meeting's details", async () => {
+      renderPage();
+      const google = await screen.findByRole("link", { name: "Google" });
+      const url = new URL(google.getAttribute("href") ?? "");
+      expect(url.origin + url.pathname).toBe("https://calendar.google.com/calendar/render");
+      expect(url.searchParams.get("text")).toBe(meeting.title);
+      expect(url.searchParams.get("dates")).toBe(
+        `${meeting.start.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "")}/${meeting.end
+          .toISOString()
+          .replace(/[-:]/g, "")
+          .replace(/\.\d{3}/, "")}`,
+      );
+      expect(url.searchParams.get("location")).toContain("14 Elm St");
+      expect(url.searchParams.get("details")).toContain("Circe by Madeline Miller");
+    });
+
+    it("offers a calendar file for Apple and Outlook", async () => {
+      renderPage();
+      expect(await screen.findByRole("button", { name: "Apple or Outlook" })).toBeTruthy();
+    });
   });
 });

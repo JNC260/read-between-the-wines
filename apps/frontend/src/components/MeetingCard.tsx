@@ -16,7 +16,7 @@ const when = new Intl.DateTimeFormat(undefined, {
 const MeetingCard = ({ meeting }: { meeting: MeetingDTO }) => {
   const { book, venue } = meeting;
   return (
-    <article className="card meeting-card">
+    <article className={`card meeting-card${meeting.cancelledAt ? " is-cancelled" : ""}`}>
       <div className="meeting-card-top">
         {book && <BookCover book={book} />}
         <div className="meeting-card-text">
@@ -28,6 +28,7 @@ const MeetingCard = ({ meeting }: { meeting: MeetingDTO }) => {
           <p className="byline">
             {book ? book.author : "Book to be announced"}
           </p>
+          {meeting.cancelledAt && <p className="badge badge-cancelled">Cancelled</p>}
           <dl className="facts">
             <div>
               <dt>When</dt>
@@ -46,10 +47,15 @@ const MeetingCard = ({ meeting }: { meeting: MeetingDTO }) => {
           </dl>
         </div>
       </div>
-      <div className="above-link">
-        <RsvpButtons meetingId={meeting.id} />
-      </div>
-      <WhoIsGoing meetingId={meeting.id} />
+      {/* Nobody can answer for a cancelled meeting. */}
+      {!meeting.cancelledAt && (
+        <>
+          <div className="above-link">
+            <RsvpButtons meetingId={meeting.id} />
+          </div>
+          <WhoIsGoing meetingId={meeting.id} />
+        </>
+      )}
     </article>
   );
 };

@@ -6,6 +6,7 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import {
+  type MeetingDTO,
   type MeetingListQuery,
   type MeetingRsvpsDTO,
   type PollDTO,
@@ -13,6 +14,7 @@ import {
   type VenueDTO,
 } from "shared";
 import {
+  cancelMeeting,
   castVotes,
   closePoll,
   createBookSuggestion,
@@ -32,6 +34,7 @@ import {
   getPoll,
   getReadBooks,
   rateBook,
+  restoreMeeting,
   getVenue,
   getVenues,
   getInvite,
@@ -203,6 +206,23 @@ export const useUpdateMeeting = () => {
       ]),
   });
 };
+
+// Cancelling frees the meeting's book, so books and polls refresh too.
+const useMeetingStatusChange = (mutationFn: (id: string) => Promise<MeetingDTO>) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn,
+    onSuccess: () =>
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["meetings"] }),
+        queryClient.invalidateQueries({ queryKey: ["books"] }),
+        queryClient.invalidateQueries({ queryKey: ["polls"] }),
+      ]),
+  });
+};
+
+export const useCancelMeeting = () => useMeetingStatusChange(cancelMeeting);
+export const useRestoreMeeting = () => useMeetingStatusChange(restoreMeeting);
 
 // Under "meetings" too, so invalidating meetings refreshes RSVPs.
 export const useMeetingRsvps = (meetingId: string) => {

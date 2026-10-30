@@ -522,3 +522,75 @@ describe("PUT /meetings/:id/rsvp", () => {
     expect(res.status).toBe(401);
   });
 });
+
+describe("POST /meetings/:id/cancel and /restore", () => {
+  const cancel = (id: string, as: User = admin) =>
+    api.request("POST", `/meetings/${id}/cancel`, { as });
+  const restore = (id: string, as: User = admin) =>
+    api.request("POST", `/meetings/${id}/restore`, { as });
+
+  it("marks the meeting cancelled and frees its book", async () => {
+    const book = await createBook({ title: "Circe" });
+    const meeting = await createMeeting({ start: hoursFromNow(48), bookId: book.id });
+    const before = Date.now();
+    const res = await cancel(meeting.id);
+
+    expect(res.status).toBe(200);
+    expect(new Date(res.body.cancelledAt).getTime()).toBeGreaterThanOrEqual(before - 1000);
+    expect(res.body).toMatchObject({ bookId: null, book: null });
+    // Still listed, so members can see what happened to it.
+    const list = await api.request("GET", "/meetings?when=upcoming", { as: ada });
+    expect(list.body.map((m: { id: string }) => m.id)).toEqual([meeting.id]);
+  });
+
+  it("keeps RSVPs but stops new ones and edits", async () => {
+    const meeting = await createMeeting({ start: hoursFromNow(48) });
+    await api.request("PUT", `/meetings/${meeting.id}/rsvp`, { as: ada, body: { status: "YES" } });
+    await cancel(meeting.id);
+
+    const answer = await api.request("PUT", `/meetings/${meeting.id}/rsvp`, {
+      as: ada,
+      body: { status: "NO" },
+    });
+    expect(answer.status).toBe(409);
+    expect(await prisma.rsvp.count({ where: { meetingId: meeting.id, status: "YES" } })).toBe(1);
+    const edit = await api.request("PATCH", `/meetings/${meeting.id}`, {
+      as: admin,
+      body: { title: "Moved" },
+    });
+    expect(edit.status).toBe(409);
+  });
+
+  it("restores a cancelled meeting, without its old book", async () => {
+    const book = await createBook({ title: "Circe" });
+    const meeting = await createMeeting({ start: hoursFromNow(48), bookId: book.id });
+    await cancel(meeting.id);
+    const res = await restore(meeting.id);
+
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchObject({ cancelledAt: null, bookId: null });
+    const answer = await api.request("PUT", `/meetings/${meeting.id}/rsvp`, {
+      as: ada,
+      body: { status: "YES" },
+    });
+    expect(answer.status).toBe(200);
+  });
+
+  it("won't cancel twice, restore one that isn't cancelled, or cancel one that's over", async () => {
+    const meeting = await createMeeting({ start: hoursFromNow(48) });
+    expect((await restore(meeting.id)).status).toBe(409);
+    await cancel(meeting.id);
+    expect((await cancel(meeting.id)).status).toBe(409);
+
+    const past = await createMeeting({ start: hoursFromNow(-48), end: hoursFromNow(-46) });
+    expect((await cancel(past.id)).status).toBe(400);
+  });
+
+  it("returns 403 for members and 404 for an unknown meeting", async () => {
+    const meeting = await createMeeting({ start: hoursFromNow(48) });
+    expect((await cancel(meeting.id, ada)).status).toBe(403);
+    expect((await restore(meeting.id, ada)).status).toBe(403);
+    expect((await cancel(randomUUID())).status).toBe(404);
+    expect(errorCode(await cancel(randomUUID()))).toBe("NOT_FOUND");
+  });
+});
