@@ -79,6 +79,13 @@ if (isProduction) {
       next();
       return;
     }
+    // A built file that isn't here, like a page from before the last
+    // deploy, is a real 404. Sending index.html instead would hand the
+    // browser HTML where it wanted JavaScript, and the page would go blank.
+    if (req.path.startsWith("/assets/")) {
+      res.status(404).type("text").send("Not found");
+      return;
+    }
     // Always revalidate, so a deploy's new asset names are picked up.
     res.setHeader("Cache-Control", "no-cache");
     // Meeting and poll links get their own preview card. A lookup that

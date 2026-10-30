@@ -3042,6 +3042,20 @@ button:disabled {
   margin-top: 1.4rem;
 }
 
+/* ---------- Page that didn't load ---------- */
+
+.page-error {
+  display: grid;
+  justify-items: start;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+}
+
+.page-error h1 {
+  margin: 0;
+  font-size: 1.5rem;
+}
+
 /* ---------- Bottom sheet ---------- */
 
 /* Over everything, the tab bar included. */
