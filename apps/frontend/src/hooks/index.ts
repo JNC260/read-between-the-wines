@@ -14,6 +14,7 @@ import {
 } from "shared";
 import {
   castVotes,
+  closePoll,
   createBookSuggestion,
   createManualBookSuggestion,
   createPoll,
@@ -23,6 +24,7 @@ import {
   getBook,
   getBookSuggestions,
   getCurrentPoll,
+  getLatestPoll,
   getMeeting,
   getMeetingRsvps,
   getMeetings,
@@ -46,6 +48,7 @@ import {
   removeProfileImage,
   updateBook,
   updateMeeting,
+  updatePoll,
   updateProfile,
   updateVenue,
   uploadProfileImage,
@@ -177,10 +180,12 @@ export const useCreateMeeting = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: createMeeting,
+    // Polls too: a new meeting can take a book from a poll's results.
     onSuccess: () =>
       Promise.all([
         queryClient.invalidateQueries({ queryKey: ["meetings"] }),
         queryClient.invalidateQueries({ queryKey: ["books"] }),
+        queryClient.invalidateQueries({ queryKey: ["polls"] }),
       ]),
   });
 };
@@ -189,10 +194,12 @@ export const useUpdateMeeting = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: updateMeeting,
+    // Polls too: their books say which meeting each one is on.
     onSuccess: () =>
       Promise.all([
         queryClient.invalidateQueries({ queryKey: ["meetings"] }),
         queryClient.invalidateQueries({ queryKey: ["books"] }),
+        queryClient.invalidateQueries({ queryKey: ["polls"] }),
       ]),
   });
 };
@@ -358,10 +365,11 @@ export const useCurrentPoll = ({ enabled = true } = {}) => {
   });
 };
 
-export const usePoll = (id: string) => {
+export const usePoll = (id: string, { enabled = true } = {}) => {
   return useQuery({
     queryKey: ["polls", id],
     queryFn: () => getPoll(id),
+    enabled,
   });
 };
 
@@ -375,6 +383,34 @@ export const useCreatePoll = () => {
     },
   });
 };
+
+// The landing page's poll: the ballot while it's open, the results after.
+export const useLatestPoll = ({ enabled = true } = {}) => {
+  return useQuery({
+    queryKey: ["polls", "latest"],
+    queryFn: getLatestPoll,
+    enabled,
+  });
+};
+
+// Editing or closing a poll changes what the landing and suggestions pages
+// show, so every poll query refreshes; the poll page gets the response.
+const usePollChange = <T,>(mutationFn: (input: T) => Promise<PollDTO>) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn,
+    onSuccess: (poll) => {
+      queryClient.setQueryData<PollDTO>(["polls", poll.id], poll);
+      return queryClient.invalidateQueries({
+        queryKey: ["polls"],
+        predicate: (q) => q.queryKey[1] !== poll.id,
+      });
+    },
+  });
+};
+
+export const useUpdatePoll = () => usePollChange(updatePoll);
+export const useClosePoll = () => usePollChange(closePoll);
 
 // The response is the updated poll, so the poll page updates without a
 // refetch. The landing page's "you've voted" message reads the current poll.

@@ -18,10 +18,16 @@ export type MeetingValues = Required<
   >
 >;
 
+type BookChoice = { id: string; title: string; author: string };
+
 // Shared by the new and edit meeting pages. Pass `meeting` to pre-fill it; it's
 // only read on the first render, so render the form once the meeting loads.
+// From a poll, `bookChoices` narrows the book dropdown to its results and
+// `initialBookId` picks one.
 const MeetingForm = ({
   meeting,
+  bookChoices,
+  initialBookId,
   onSubmit,
   isPending,
   error,
@@ -29,6 +35,8 @@ const MeetingForm = ({
   pendingLabel,
 }: {
   meeting?: MeetingDTO;
+  bookChoices?: BookChoice[];
+  initialBookId?: string;
   onSubmit: (values: MeetingValues) => void;
   isPending: boolean;
   error: Error | null;
@@ -41,7 +49,7 @@ const MeetingForm = ({
   const [start, setStart] = useState(meeting ? toLocalInput(meeting.start) : "");
   const [end, setEnd] = useState(meeting ? toLocalInput(meeting.end) : "");
   const [venueId, setVenueId] = useState(meeting?.venueId ?? "");
-  const [bookId, setBookId] = useState(meeting?.bookId ?? "");
+  const [bookId, setBookId] = useState(meeting?.bookId ?? initialBookId ?? "");
   const [description, setDescription] = useState(meeting?.description ?? "");
   const [craft, setCraft] = useState(meeting?.craft ?? "");
   const [invalid, setInvalid] = useState<string | null>(null);
@@ -145,15 +153,23 @@ const MeetingForm = ({
               {meeting.book.title} by {meeting.book.author}
             </option>
           )}
-          {[...(suggestions.data ?? [])]
-            .sort((a, b) => a.title.localeCompare(b.title))
-            .map((book) => (
-              <option key={book.id} value={book.id}>
-                {book.title} by {book.author}
-              </option>
-            ))}
+          {(
+            bookChoices ??
+            [...(suggestions.data ?? [])].sort((a, b) =>
+              a.title.localeCompare(b.title),
+            )
+          ).map((book) => (
+            <option key={book.id} value={book.id}>
+              {book.title} by {book.author}
+            </option>
+          ))}
         </select>
-        {suggestions.error && <p role="alert">{suggestions.error.message}</p>}
+        {bookChoices && (
+          <p className="muted">From the poll's results, most votes first.</p>
+        )}
+        {!bookChoices && suggestions.error && (
+          <p role="alert">{suggestions.error.message}</p>
+        )}
       </div>
       <div>
         <label htmlFor="description">Description</label>

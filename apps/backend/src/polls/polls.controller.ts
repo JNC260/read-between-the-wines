@@ -4,6 +4,7 @@ import {
   PollSchema,
   type CastVotesDTO,
   type CreatePollDTO,
+  type UpdatePollDTO,
 } from "shared";
 import * as service from "./polls.service";
 import * as z from "zod";
@@ -63,4 +64,34 @@ export const castVotes = async (
     req.body,
   );
   res.json(z.encode(PollSchema, pollWithVotes));
+};
+
+// GET /polls/latest -> the newest poll, open or closed, or null
+export const getLatestPoll = async (req: Request, res: Response) => {
+  if (!req.user) {
+    throw new UnauthorizedError();
+  }
+  const poll = await service.getLatestPoll(req.user.id);
+  res.json(z.encode(CurrentPollSchema, poll));
+};
+
+// PATCH /polls/:id (admins) -> the updated poll
+export const updatePoll = async (
+  req: Request<Params, unknown, UpdatePollDTO>,
+  res: Response,
+) => {
+  if (!req.user) {
+    throw new UnauthorizedError();
+  }
+  const poll = await service.updatePoll(req.params.id, req.user.id, req.body);
+  res.json(z.encode(PollSchema, poll));
+};
+
+// POST /polls/:id/close (admins) -> the closed poll, with its results
+export const closePoll = async (req: Request<Params>, res: Response) => {
+  if (!req.user) {
+    throw new UnauthorizedError();
+  }
+  const poll = await service.closePoll(req.params.id, req.user.id);
+  res.json(z.encode(PollSchema, poll));
 };

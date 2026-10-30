@@ -70,10 +70,17 @@ export const getVoterCount = (
   return voterSet.size;
 };
 
+// What every poll query includes: the votes, and the ballot with which
+// meeting (if any) each book has been assigned to.
+export const pollInclude = {
+  votes: true,
+  books: { include: { meeting: { select: { id: true } } } },
+} as const;
+
 export const buildPollDTO = (
   prismaPoll:
     | ({
-        books: BookDTO[];
+        books: (BookDTO & { meeting: { id: string } | null })[];
         votes: VoteDTO[];
       } & {
         createdAt: Date;
@@ -93,6 +100,10 @@ export const buildPollDTO = (
   const isOpen = getIsOpen(prismaPoll.opensAt, prismaPoll.closesAt);
   const poll = {
     ...prismaPoll,
+    books: prismaPoll.books.map(({ meeting, ...book }) => ({
+      ...book,
+      meetingId: meeting?.id ?? null,
+    })),
     myVotes,
     isOpen,
     voterCount: getVoterCount(prismaPoll.votes),

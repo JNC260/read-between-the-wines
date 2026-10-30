@@ -2,7 +2,9 @@ import { type FormEvent, useId, useState } from "react";
 import { useParams } from "react-router-dom";
 import { type BookDTO, type PollDTO } from "shared";
 import BookCover from "../components/BookCover";
-import { useCastVotes, usePoll } from "../hooks";
+import { AssignBook, PollAdminActions } from "../components/PollAdmin";
+import { useCastVotes, useMeetings, usePoll } from "../hooks";
+import { authClient } from "../lib/auth-client";
 
 const closesOn = new Intl.DateTimeFormat(undefined, {
   dateStyle: "medium",
@@ -167,8 +169,9 @@ const Ballot = ({ poll }: { poll: PollDTO }) => {
 
 // results is only sent once the poll has closed, most votes first. Each bar
 // is measured against the top book, so the winner's always fills its row.
-const Results = ({ poll }: { poll: PollDTO }) => {
+const Results = ({ poll, isAdmin }: { poll: PollDTO; isAdmin: boolean }) => {
   const byId = new Map(poll.books.map((b) => [b.id, b]));
+  const upcoming = useMeetings("upcoming");
   const results = poll.results ?? [];
   const most = Math.max(0, ...results.map((r) => r.votes));
   return (
@@ -204,6 +207,16 @@ const Results = ({ poll }: { poll: PollDTO }) => {
                       <span className="badge badge-mine">Your vote</span>
                     )}
                   </p>
+                  {upcoming.data && (
+                    <AssignBook
+                      pollId={poll.id}
+                      bookId={book.id}
+                      bookTitle={book.title}
+                      meetingId={book.meetingId}
+                      upcoming={upcoming.data}
+                      isAdmin={isAdmin}
+                    />
+                  )}
                 </div>
               </li>
             )
@@ -217,6 +230,8 @@ const Results = ({ poll }: { poll: PollDTO }) => {
 const PollPage = () => {
   const { id = "" } = useParams();
   const { data: poll, isPending, error } = usePoll(id);
+  const { data: session } = authClient.useSession();
+  const isAdmin = !!session?.user.isAdmin;
 
   if (isPending) {
     return <p>Loading...</p>;
@@ -239,11 +254,12 @@ const PollPage = () => {
           </p>
         </div>
       </div>
+      {isAdmin && <PollAdminActions poll={poll} />}
       {poll.isOpen ? (
         // key: start the ballot over if a different poll loads.
         <Ballot key={poll.id} poll={poll} />
       ) : (
-        <Results poll={poll} />
+        <Results poll={poll} isAdmin={isAdmin} />
       )}
     </div>
   );

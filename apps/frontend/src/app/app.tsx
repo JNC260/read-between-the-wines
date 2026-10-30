@@ -14,6 +14,7 @@ import LoginPage from "../pages/LoginPage";
 // first opened, so the site's first load stays small.
 const EditBookPage = lazy(() => import("../pages/EditBookPage"));
 const EditMeetingPage = lazy(() => import("../pages/EditMeetingPage"));
+const EditPollPage = lazy(() => import("../pages/EditPollPage"));
 const MeetingsPage = lazy(() => import("../pages/MeetingsPage"));
 const ForgotPasswordPage = lazy(() => import("../pages/ForgotPasswordPage"));
 const InviteMemberPage = lazy(() => import("../pages/InviteMemberPage"));
@@ -154,6 +155,14 @@ export function App() {
               element={
                 <RequireAuth admin>
                   <NewPollPage />
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/polls/:id/edit"
+              element={
+                <RequireAuth admin>
+                  <EditPollPage />
                 </RequireAuth>
               }
             />

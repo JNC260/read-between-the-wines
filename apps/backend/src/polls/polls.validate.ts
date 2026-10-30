@@ -42,11 +42,13 @@ export const validateBooks = async (bookIds: string[]) => {
   }
 };
 
-export const validateOnlyPollOpen = async () => {
+// exceptId: the poll being reopened, which doesn't count against itself.
+export const validateOnlyPollOpen = async (exceptId?: string) => {
   const openPolls = await prisma.poll.findMany({
     where: {
       opensAt: { lte: new Date() },
       closesAt: { gt: new Date() },
+      ...(exceptId && { id: { not: exceptId } }),
     },
   });
 

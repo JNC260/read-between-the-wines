@@ -1,10 +1,10 @@
 import { Link, Navigate, useLocation } from "react-router-dom";
 import Logo from "../components/Logo";
 import MeetingCard from "../components/MeetingCard";
-import PollCard from "../components/PollCard";
+import PollCard, { PollResultsCard } from "../components/PollCard";
 import ShelfCard from "../components/ShelfCard";
 import SuggestionsCard from "../components/SuggestionsCard";
-import { useCurrentPoll, useMeetings } from "../hooks";
+import { useLatestPoll, useMeetings } from "../hooks";
 import { authClient } from "../lib/auth-client";
 
 const today = new Intl.DateTimeFormat(undefined, {
@@ -38,11 +38,26 @@ const NextMeeting = ({ isAdmin }: { isAdmin: boolean }) => {
   );
 };
 
-// Nothing while loading or when no poll is open. An error just hides the
-// card; the poll page itself shows what went wrong.
-const OpenPoll = () => {
-  const { data: poll } = useCurrentPoll();
-  return poll ? <PollCard poll={poll} /> : null;
+// How long a closed poll's results stay on the landing page if nobody
+// assigns its books to a meeting.
+const RESULTS_FOR_MS = 30 * 24 * 60 * 60 * 1000;
+
+// The newest poll: its ballot while it's open, then its results until a
+// book from it goes on a meeting. Nothing while loading, and an error just
+// hides the card; the poll page itself shows what went wrong.
+const LatestPoll = ({ isAdmin }: { isAdmin: boolean }) => {
+  const { data: poll } = useLatestPoll();
+  if (!poll) {
+    return null;
+  }
+  if (poll.isOpen) {
+    return <PollCard poll={poll} />;
+  }
+  const assigned = poll.books.some((b) => b.meetingId !== null);
+  const recent = Date.now() - poll.closesAt.getTime() < RESULTS_FOR_MS;
+  return !assigned && recent ? (
+    <PollResultsCard poll={poll} isAdmin={isAdmin} />
+  ) : null;
 };
 
 const LandingPage = () => {
@@ -83,7 +98,7 @@ const LandingPage = () => {
       <div className="landing-grid">
         <div className="landing-column">
           <NextMeeting isAdmin={!!session.user.isAdmin} />
-          <OpenPoll />
+          <LatestPoll isAdmin={!!session.user.isAdmin} />
         </div>
         <div className="landing-column">
           <SuggestionsCard />

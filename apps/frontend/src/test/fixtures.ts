@@ -62,7 +62,7 @@ export const testPoll = (overrides: Partial<PollDTO> = {}): PollDTO => ({
   votesPerMember: 2,
   createdAt: new Date("2026-10-20T19:00:00Z"),
   isOpen: true,
-  books: [circe, piranesi, beloved],
+  books: [circe, piranesi, beloved].map((b) => ({ ...b, meetingId: null })),
   myVotes: [],
   voterCount: 0,
   results: null,
