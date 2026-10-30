@@ -229,7 +229,7 @@ describe("SuggestionsPage", () => {
     const checkbox = (title: string) =>
       screen.getByRole("checkbox", { name: `Select ${title} for a poll` });
     const createButton = () =>
-      screen.getByRole("button", { name: "Create a poll from selection" });
+      screen.getByRole("button", { name: "Create poll" });
 
     const openPoll = (bookIds: string[]): PollDTO => ({
       id: "00000000-0000-4000-8000-000000000099",
@@ -254,7 +254,7 @@ describe("SuggestionsPage", () => {
       await titles();
       expect(screen.queryAllByRole("checkbox")).toHaveLength(0);
       expect(
-        screen.queryByRole("button", { name: "Create a poll from selection" }),
+        screen.queryByRole("button", { name: "Create poll" }),
       ).toBeNull();
     });
 
@@ -263,15 +263,17 @@ describe("SuggestionsPage", () => {
       vi.mocked(getBookSuggestions).mockResolvedValue(books);
       renderPage();
       await titles();
-      await screen.findByText(/0 of 6 selected/);
-      expect((createButton() as HTMLButtonElement).disabled).toBe(true);
+      await screen.findByText("Tick 2 to 6 books to start a poll.");
+      // Nothing to create until a book is ticked.
+      expect(screen.queryByRole("button", { name: "Create poll" })).toBeNull();
 
       fireEvent.click(checkbox("Piranesi"));
-      expect(screen.getByText(/1 of 6 selected/)).toBeTruthy();
+      expect(screen.getByText("1 of 6")).toBeTruthy();
+      expect(screen.getByText(/pick 1 more/)).toBeTruthy();
       expect((createButton() as HTMLButtonElement).disabled).toBe(true);
 
       fireEvent.click(checkbox("Beloved"));
-      expect(screen.getByText("2 of 6 selected")).toBeTruthy();
+      expect(screen.getByText("2 of 6")).toBeTruthy();
       fireEvent.click(createButton());
       expect(
         await screen.findByText(
@@ -286,8 +288,22 @@ describe("SuggestionsPage", () => {
       renderPage();
       await titles();
       fireEvent.click(await screen.findByRole("checkbox", { name: "Select Circe for a poll" }));
+      expect(screen.getByText("1 of 6")).toBeTruthy();
       fireEvent.click(checkbox("Circe"));
-      expect(screen.getByText(/0 of 6 selected/)).toBeTruthy();
+      expect(screen.queryByRole("button", { name: "Create poll" })).toBeNull();
+    });
+
+    it("clears the whole selection at once", async () => {
+      mockSession(testUser({ isAdmin: true }));
+      vi.mocked(getBookSuggestions).mockResolvedValue(books);
+      renderPage();
+      await titles();
+      fireEvent.click(await screen.findByRole("checkbox", { name: "Select Circe for a poll" }));
+      fireEvent.click(checkbox("Beloved"));
+      fireEvent.click(screen.getByRole("button", { name: "Clear" }));
+      expect((checkbox("Circe") as HTMLInputElement).checked).toBe(false);
+      expect((checkbox("Beloved") as HTMLInputElement).checked).toBe(false);
+      expect(screen.queryByRole("button", { name: "Create poll" })).toBeNull();
     });
 
     it("stops at six books", async () => {
@@ -298,7 +314,7 @@ describe("SuggestionsPage", () => {
       for (let i = 0; i < 6; i++) {
         fireEvent.click(await screen.findByRole("checkbox", { name: `Select Book ${i} for a poll` }));
       }
-      expect(screen.getByText("6 of 6 selected")).toBeTruthy();
+      expect(screen.getByText("6 of 6")).toBeTruthy();
       expect((checkbox("Book 6") as HTMLInputElement).disabled).toBe(true);
       // Unticking one frees a spot again.
       fireEvent.click(checkbox("Book 0"));

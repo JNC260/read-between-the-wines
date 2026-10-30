@@ -314,6 +314,11 @@ const SuggestionsPage = () => {
                 : `${shown.length} of ${books.length} books`}
             </p>
           )}
+          {canStartPoll && books && books.length >= MIN_POLL_BOOKS && (
+            <p className="muted">
+              Tick {MIN_POLL_BOOKS} to {MAX_POLL_BOOKS} books to start a poll.
+            </p>
+          )}
         </div>
         <Link to="/books/suggest" className="button-link button-quiet">
           Suggest a book
@@ -461,22 +466,31 @@ const SuggestionsPage = () => {
         </div>
       )}
 
-      {canStartPoll && books && books.length >= MIN_POLL_BOOKS && (
+      {/* Out of the way until an admin ticks a book, then a small pill
+          that follows them down the list. */}
+      {canStartPoll && selected.length > 0 && (
         <div className="pick-bar">
           <p aria-live="polite">
             <strong>
-              {selected.length} of {MAX_POLL_BOOKS} selected
+              {selected.length} of {MAX_POLL_BOOKS}
             </strong>
             {selected.length < MIN_POLL_BOOKS &&
-              ` (pick at least ${MIN_POLL_BOOKS})`}
+              ` · pick ${MIN_POLL_BOOKS - selected.length} more`}
           </p>
+          <button
+            type="button"
+            className="button-quiet pick-bar-clear"
+            onClick={() => setSelected([])}
+          >
+            Clear
+          </button>
           <button
             type="button"
             className="button-primary"
             disabled={selected.length < MIN_POLL_BOOKS}
             onClick={() => navigate(`/polls/new?books=${selected.join(",")}`)}
           >
-            Create a poll from selection
+            Create poll
           </button>
         </div>
       )}

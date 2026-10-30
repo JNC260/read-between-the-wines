@@ -1448,32 +1448,42 @@ li:has(> :is(h2, h3)) > :last-child {
   gap: 0.75rem;
 }
 
-/* Stays at the bottom of the screen while an admin scrolls and picks. */
+/* A small pill at the bottom right while an admin scrolls and picks. It
+   only shows once a book is ticked. */
 .pick-bar {
   position: sticky;
   bottom: calc(0.75rem + max(var(--tab-bar-space), env(safe-area-inset-bottom)));
   z-index: 5;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  margin-top: 1rem;
-  padding: 0.5rem 0.5rem 0.5rem 1.1rem;
-  background: var(--color-surface);
-  border: 1px solid var(--color-line);
+  gap: 0.4rem;
+  width: fit-content;
+  max-width: 100%;
+  margin: 1rem 0 0 auto;
+  padding: 0.3rem 0.3rem 0.3rem 0.9rem;
+  /* Ink and paper swapped, so it stands apart from the cards it floats over
+     in either theme. */
+  background: var(--color-ink);
+  color: var(--color-paper);
   border-radius: var(--radius-pill);
-  box-shadow: 0 14px 30px -16px rgb(36 27 58 / 0.45);
+  box-shadow: 0 12px 28px -12px rgb(36 27 58 / 0.6);
 }
 
 .pick-bar p {
-  margin: 0;
+  margin: 0 0.25rem 0 0;
   font-size: 0.85rem;
-  line-height: 1.3;
+  white-space: nowrap;
 }
 
-.pick-bar strong {
-  display: block;
-  font-size: 0.95rem;
+.pick-bar button {
+  min-height: 2.25rem;
+  padding: 0 0.9rem;
+  font-size: 0.85rem;
+}
+
+.pick-bar .pick-bar-clear {
+  border-color: transparent;
+  color: inherit;
 }
 
 /* ---------- Members ---------- */
