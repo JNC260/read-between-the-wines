@@ -2060,6 +2060,109 @@ li:has(> :is(h2, h3)) > :last-child {
   color: inherit;
 }
 
+/* ---------- Manage members (admins) ---------- */
+
+.page-head-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.manage-page section {
+  margin-top: 1.75rem;
+}
+
+.manage-section-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.manage-section-head h2 {
+  margin: 0;
+}
+
+.manage-list {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Avatar, name and email, then the action on the right; the action wraps
+   under on a narrow phone. */
+.manage-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 0.9rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-card);
+}
+
+.manage-row-text {
+  display: grid;
+  flex: 1 1 10rem;
+  min-width: 0;
+  gap: 0.1rem;
+  justify-items: start;
+}
+
+.manage-row-text .muted {
+  overflow-wrap: anywhere;
+  font-size: 0.85rem;
+}
+
+.manage-row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.manage-row-actions > button {
+  min-height: 2.25rem;
+  padding: 0 0.9rem;
+  font-size: 0.85rem;
+}
+
+.manage-row-actions [role="alert"] {
+  margin: 0;
+  flex-basis: 100%;
+}
+
+.manage-confirm {
+  display: grid;
+  gap: 0.5rem;
+  font-size: 0.88rem;
+}
+
+.manage-confirm p {
+  margin: 0;
+}
+
+.manage-confirm-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.manage-confirm-buttons button {
+  min-height: 2.25rem;
+  padding: 0 0.9rem;
+  font-size: 0.85rem;
+}
+
+/* The confirm takes the whole row. */
+.manage-row:has(.manage-confirm) .manage-row-actions {
+  flex-basis: 100%;
+}
+
 /* ---------- Members ---------- */
 
 /* One per row on phones, so the social icons fit on one line. */

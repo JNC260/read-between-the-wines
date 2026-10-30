@@ -255,9 +255,16 @@ const MembersPage = () => {
             {users.data.length} {users.data.length === 1 ? "reader" : "readers"}
           </p>
         </div>
-        <Link to="/invite-member" className="button-link button-quiet">
-          Invite a member
-        </Link>
+        <div className="page-head-actions">
+          {session?.user.isAdmin && (
+            <Link to="/members/manage" className="button-link button-quiet">
+              Manage members
+            </Link>
+          )}
+          <Link to="/invite-member" className="button-link button-quiet">
+            Invite a member
+          </Link>
+        </div>
       </div>
 
       <ul className="member-list">

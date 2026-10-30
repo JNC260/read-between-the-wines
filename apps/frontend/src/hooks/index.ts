@@ -55,6 +55,11 @@ import {
   updateProfile,
   updateVenue,
   uploadProfileImage,
+  unbanUser,
+  revokeInvite,
+  getOpenInvites,
+  getAccounts,
+  banUser,
   withdrawSuggestion,
 } from "../api";
 import { authClient } from "../lib/auth-client";
@@ -129,9 +134,40 @@ export const useInvite = (token: string) => {
   });
 };
 
+// A new link shows up in the admin's list of open invites.
 export const useCreateInvite = () => {
-  return useMutation({ mutationFn: createInvite });
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: createInvite,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["invites"] }),
+  });
 };
+
+export const useOpenInvites = () =>
+  useQuery({ queryKey: ["invites"], queryFn: getOpenInvites });
+
+export const useRevokeInvite = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: revokeInvite,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["invites"] }),
+  });
+};
+
+export const useAccounts = () =>
+  useQuery({ queryKey: ["users", "accounts"], queryFn: getAccounts });
+
+// The member list leaves banned members out, so it refreshes too.
+const useAccountChange = (mutationFn: (id: string) => Promise<UserDTO>) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["users"] }),
+  });
+};
+
+export const useBanUser = () => useAccountChange(banUser);
+export const useUnbanUser = () => useAccountChange(unbanUser);
 
 export const useSignIn = () => {
   return useMutation({ mutationFn: signIn });
@@ -209,7 +245,9 @@ export const useUpdateMeeting = () => {
 };
 
 // Cancelling frees the meeting's book, so books and polls refresh too.
-const useMeetingStatusChange = (mutationFn: (id: string) => Promise<MeetingDTO>) => {
+const useMeetingStatusChange = (
+  mutationFn: (id: string) => Promise<MeetingDTO>,
+) => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn,
@@ -425,7 +463,7 @@ export const useLatestPoll = ({ enabled = true } = {}) => {
 
 // Editing or closing a poll changes what the landing and suggestions pages
 // show, so every poll query refreshes; the poll page gets the response.
-const usePollChange = <T,>(mutationFn: (input: T) => Promise<PollDTO>) => {
+const usePollChange = <T>(mutationFn: (input: T) => Promise<PollDTO>) => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn,

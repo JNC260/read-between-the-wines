@@ -1,17 +1,17 @@
 import { type Request, type Response } from "express";
 import * as z from "zod";
-import { CreatedInviteSchema, InviteLookupSchema, InviteSchema } from "shared";
+import { CreatedInviteSchema, InviteLookupSchema, OpenInviteSchema } from "shared";
 import { getUser } from "../middleware/auth";
 import {
   createInviteLink,
-  listInvites,
+  listOpenInvites,
   lookupInvite,
   revokeInvite,
 } from "./invites.service";
 
 export const inviteList = async (_req: Request, res: Response) => {
-  const invites = await listInvites();
-  res.json(z.encode(InviteSchema.array(), invites));
+  const invites = await listOpenInvites();
+  res.json(z.encode(OpenInviteSchema.array(), invites));
 };
 
 export const inviteCreate = async (req: Request, res: Response) => {

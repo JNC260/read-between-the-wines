@@ -34,6 +34,7 @@ export const UserSchema = z.object({
   venmo: z.string().nullable(),
   memberSince: z.int().nullable(), // a year
   status: UserStatusSchema,
+  isAdmin: z.boolean(),
   createdAt: isoDate,
   updatedAt: isoDate,
 });

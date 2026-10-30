@@ -8,13 +8,16 @@ import {
 import { uploadImage } from "../middleware/upload";
 import { validate } from "../middleware/validate";
 import {
+  accountList,
   placeholderList,
   placeholderMerge,
+  userBan,
   userDeactivate,
   userDeactivateSelf,
   userList,
   userReactivateSelf,
   userRemoveImage,
+  userUnban,
   userUpdateSelf,
   userUploadImage,
 } from "./users.controller";
@@ -31,6 +34,8 @@ router.put("/me/image", requireAuth, uploadImage, userUploadImage);
 router.delete("/me/image", requireAuth, userRemoveImage);
 router.post("/me/deactivate", requireAuth, userDeactivateSelf);
 router.post("/me/reactivate", requireAuthAllowInactive, userReactivateSelf);
+// Every account whatever its status, for the manage members page.
+router.get("/accounts", requireAuth, requireAdmin, accountList);
 router.get("/placeholders", requireAuth, requireAdmin, placeholderList);
 router.post(
   "/placeholders/:id/merge",
@@ -40,5 +45,7 @@ router.post(
   placeholderMerge,
 );
 router.post("/:id/deactivate", requireAuth, requireAdmin, userDeactivate);
+router.post("/:id/ban", requireAuth, requireAdmin, userBan);
+router.post("/:id/unban", requireAuth, requireAdmin, userUnban);
 
 export default router;

@@ -44,6 +44,42 @@ export const deactivateUser = (id: string): Promise<UserDTO> =>
 export const reactivateUser = (id: string): Promise<UserDTO> =>
   changeStatus(id, UserStatus.INACTIVE, UserStatus.ACTIVE);
 
+// Admins only (the routes check). Every real account, whatever its status,
+// for the manage members page. Legacy placeholders have their own page.
+export const listAccounts = (): Promise<UserDTO[]> =>
+  prisma.user.findMany({
+    where: { NOT: { email: PLACEHOLDER_EMAIL } },
+    orderBy: [{ firstName: "asc" }, { lastName: "asc" }],
+  });
+
+// A ban is the security measure deactivating isn't: the member is signed out
+// everywhere and can't sign in or reactivate. Their suggestions, ratings and
+// RSVPs stay. Admins can't ban themselves or another admin.
+export const banUser = async (adminId: string, id: string): Promise<UserDTO> => {
+  const user = await prisma.user.findUnique({ where: { id } });
+  if (!user || isPlaceholderEmail(user.email)) {
+    throw new NotFoundError("User not found");
+  }
+  if (user.id === adminId) {
+    throw new BadRequestError("You can't ban yourself");
+  }
+  if (user.isAdmin) {
+    throw new BadRequestError("Admins can't be banned");
+  }
+  if (user.status === UserStatus.BANNED) {
+    throw new ConflictError("Account is banned");
+  }
+  const [banned] = await prisma.$transaction([
+    prisma.user.update({ where: { id }, data: { status: UserStatus.BANNED } }),
+    prisma.session.deleteMany({ where: { userId: id } }),
+  ]);
+  return banned;
+};
+
+// Lifting a ban makes the account active again, so they can sign straight in.
+export const unbanUser = (id: string): Promise<UserDTO> =>
+  changeStatus(id, UserStatus.BANNED, UserStatus.ACTIVE);
+
 // name is Better Auth's display name. Sign-up sets it to "First Last", so it
 // follows any change to either half.
 export const updateProfile = async (
