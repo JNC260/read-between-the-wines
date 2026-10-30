@@ -206,6 +206,19 @@ describe("PollPage", () => {
       );
     });
 
+    it("offers a WhatsApp reminder with the link to vote", async () => {
+      vi.mocked(getPoll).mockResolvedValue(testPoll({ theme: "Witchy reads" }));
+      renderPage();
+      await loaded();
+      const href = screen.getByRole("link", { name: "Remind on WhatsApp" }).getAttribute("href") ?? "";
+      expect(href.startsWith("https://wa.me/?text=")).toBe(true);
+      const text = decodeURIComponent(href.slice("https://wa.me/?text=".length));
+      const lines = text.split("\n");
+      expect(lines[0]).toBe("*📚 Vote for what we read next!*");
+      expect(lines[1]).toMatch(/^Voting closes /);
+      expect(lines.at(-1)).toBe(`👉 ${window.location.origin}/polls/${ID}`);
+    });
+
     it("asks before closing voting early, and can back out", async () => {
       vi.mocked(getPoll).mockResolvedValue(testPoll());
       vi.mocked(closePoll).mockResolvedValue(testPoll({ isOpen: false, results: [] }));

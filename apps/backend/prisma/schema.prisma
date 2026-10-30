@@ -7,6 +7,14 @@ datasource db {
   provider = "postgresql"
 }
 
+// The emails members can opt out of, one kind each.
+enum NotificationKind {
+  NEW_POLL
+  VOTE_REMINDER
+  RSVP_REMINDER
+  MEETING_REMINDER
+}
+
 enum UserStatus {
   ACTIVE
   INACTIVE
@@ -19,15 +27,15 @@ enum UserStatus {
 // The profile fields after isAdmin are ours alone; Better Auth never reads
 // them. Every member can see them, so they're optional.
 model User {
-  id            String     @id @default(uuid())
+  id            String             @id @default(uuid())
   name          String
-  email         String     @unique
-  emailVerified Boolean    @default(false)
+  email         String             @unique
+  emailVerified Boolean            @default(false)
   image         String?
   firstName     String
   lastName      String
-  isAdmin       Boolean    @default(false)
-  status        UserStatus @default(ACTIVE)
+  isAdmin       Boolean            @default(false)
+  status        UserStatus         @default(ACTIVE)
   phone         String? // E.164, e.g. "+15551234567"
   facebookUrl   String?
   goodreadsUrl  String?
@@ -36,16 +44,20 @@ model User {
   x             String?
   venmo         String?
   memberSince   Int? // the year they joined the club, which for most is before the site existed
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @updatedAt
+  // Notification emails they've turned off. Account emails (password
+  // resets, verification) always send.
+  emailOptOuts  NotificationKind[] @default([])
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
 
-  sessions    Session[]
-  accounts    Account[]
-  suggestions Suggestion[]
-  ratings     Rating[]
-  votes       Vote[]
-  rsvps       Rsvp[]
-  invitesSent Invite[]
+  sessions      Session[]
+  accounts      Account[]
+  suggestions   Suggestion[]
+  ratings       Rating[]
+  votes         Vote[]
+  rsvps         Rsvp[]
+  invitesSent   Invite[]
+  notifications NotificationLog[]
 }
 
 // Better Auth: one row per signed-in browser
@@ -176,14 +188,14 @@ model Venue {
 }
 
 model Meeting {
-  id          String   @id @default(uuid())
+  id          String    @id @default(uuid())
   title       String
   start       DateTime
   end         DateTime
   description String?
   craft       String? // what we're making, and anything to bring for it
   venueId     String? // null until a venue is picked
-  bookId      String?  @unique // one book per meeting; null until a book is assigned
+  bookId      String?   @unique // one book per meeting; null until a book is assigned
   cancelledAt DateTime? // set when an admin cancels it; the meeting stays listed, marked cancelled
 
   venue Venue? @relation(fields: [venueId], references: [id])
@@ -237,4 +249,19 @@ model Rsvp {
   meeting Meeting @relation(fields: [meetingId], references: [id])
 
   @@id([userId, meetingId])
+}
+
+// One row per notification email sent, so each goes out once however often
+// the reminder check runs or the server restarts. subjectId is the poll or
+// meeting it was about.
+model NotificationLog {
+  id        String           @id @default(uuid())
+  userId    String
+  kind      NotificationKind
+  subjectId String
+  sentAt    DateTime         @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, kind, subjectId])
 }

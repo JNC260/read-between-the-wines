@@ -61,6 +61,9 @@ import {
   getAccounts,
   banUser,
   withdrawSuggestion,
+  updateEmailSettings,
+  unsubscribe,
+  getEmailSettings,
 } from "../api";
 import { authClient } from "../lib/auth-client";
 
@@ -142,6 +145,20 @@ export const useCreateInvite = () => {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["invites"] }),
   });
 };
+
+export const useEmailSettings = () =>
+  useQuery({ queryKey: ["email-settings"], queryFn: getEmailSettings });
+
+// The response is the saved settings, so the switches don't wait on a refetch.
+export const useUpdateEmailSettings = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: updateEmailSettings,
+    onSuccess: (settings) => queryClient.setQueryData(["email-settings"], settings),
+  });
+};
+
+export const useUnsubscribe = () => useMutation({ mutationFn: unsubscribe });
 
 export const useOpenInvites = () =>
   useQuery({ queryKey: ["invites"], queryFn: getOpenInvites });

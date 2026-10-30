@@ -1,6 +1,7 @@
 import { app } from "./app";
 import { config } from "./lib/config";
 import { prisma } from "./lib/prisma";
+import { startReminderSchedule } from "./notifications/notifications.schedule";
 
 // Railway sets PORT; locally it's 3333, where Vite's proxy expects it.
 const server = app.listen(config.PORT, () => {
@@ -8,7 +9,10 @@ const server = app.listen(config.PORT, () => {
 });
 server.on("error", console.error);
 
+const stopReminders = startReminderSchedule();
+
 const shutdown = () => {
+  stopReminders();
   server.close(async () => {
     await prisma.$disconnect();
     process.exit(0);

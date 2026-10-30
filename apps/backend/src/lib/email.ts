@@ -5,6 +5,8 @@ export type Email = {
   to: string;
   subject: string;
   html: string;
+  // Extra headers, like List-Unsubscribe on notification emails.
+  headers?: Record<string, string>;
 };
 
 type Sender = (email: Email) => Promise<void>;
@@ -16,14 +18,20 @@ const RESEND_URL = "https://api.resend.com/emails";
 // would do for us.
 const sendWithResend =
   (apiKey: string): Sender =>
-  async ({ to, subject, html }) => {
+  async ({ to, subject, html, headers }) => {
     const response = await fetch(RESEND_URL, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${apiKey}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ from: config.EMAIL_FROM, to: [to], subject, html }),
+      body: JSON.stringify({
+        from: config.EMAIL_FROM,
+        to: [to],
+        subject,
+        html,
+        ...(headers && { headers }),
+      }),
       signal: AbortSignal.timeout(10_000),
     });
     if (!response.ok) {
@@ -44,8 +52,8 @@ const sendWithSmtp = (): Sender => {
     // Mailpit needs no login, so only send credentials when they're set.
     auth: config.SMTP_USER ? { user: config.SMTP_USER, pass: config.SMTP_PASS } : undefined,
   });
-  return async ({ to, subject, html }) => {
-    await transport.sendMail({ from: config.EMAIL_FROM, to, subject, html });
+  return async ({ to, subject, html, headers }) => {
+    await transport.sendMail({ from: config.EMAIL_FROM, to, subject, html, headers });
   };
 };
 

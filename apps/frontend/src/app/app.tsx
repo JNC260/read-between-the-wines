@@ -32,6 +32,7 @@ const ReadBooksPage = lazy(() => import("../pages/ReadBooksPage"));
 const ResetPasswordPage = lazy(() => import("../pages/ResetPasswordPage"));
 const SuggestBookPage = lazy(() => import("../pages/SuggestBookPage"));
 const SuggestionsPage = lazy(() => import("../pages/SuggestionsPage"));
+const UnsubscribePage = lazy(() => import("../pages/UnsubscribePage"));
 
 // A 4xx (not found, signed out, forbidden) won't change on a retry, so show
 // it right away. Server and network errors still get React Query's default
@@ -70,6 +71,8 @@ export function App() {
             <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route path="/invite/:token" element={<InvitePage />} />
             <Route path="/reactivate" element={<ReactivatePage />} />
+            {/* Public: the link in an email works signed out. */}
+            <Route path="/unsubscribe" element={<UnsubscribePage />} />
             <Route
               path="/members"
               element={

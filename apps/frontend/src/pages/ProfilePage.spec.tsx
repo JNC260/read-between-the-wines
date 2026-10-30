@@ -1,11 +1,18 @@
-import { fireEvent, screen } from "@testing-library/react";
+import { fireEvent, screen, within } from "@testing-library/react";
 import { type UserDTO } from "shared";
-import { getUsersList, updateProfile } from "../api";
+import {
+  getEmailSettings,
+  getUsersList,
+  updateEmailSettings,
+  updateProfile,
+} from "../api";
 import { mockSession, renderRoutes, Route, testUser } from "../test-utils";
 import ProfilePage from "./ProfilePage";
 
 vi.mock("../lib/auth-client", () => ({ authClient: { useSession: vi.fn() } }));
 vi.mock("../api", () => ({
+  getEmailSettings: vi.fn(),
+  updateEmailSettings: vi.fn(),
   getUsersList: vi.fn(),
   updateProfile: vi.fn(),
   uploadProfileImage: vi.fn(),
@@ -60,6 +67,8 @@ const loaded = async () => {
 };
 
 beforeEach(() => {
+  vi.mocked(getEmailSettings).mockResolvedValue({ emailOptOuts: ["NEW_POLL"] });
+  vi.mocked(updateEmailSettings).mockImplementation(async (body) => body);
   vi.mocked(getUsersList).mockResolvedValue([grace, ada]);
   vi.mocked(updateProfile).mockImplementation(async (body) => ({
     ...ada,
@@ -168,5 +177,40 @@ describe("ProfilePage", () => {
     expect((await screen.findByRole("alert")).textContent).toBe(
       "Failed to save your profile",
     );
+  });
+
+  describe("email settings", () => {
+    const settings = async () =>
+      within(await screen.findByRole("region", { name: "Email me when" }));
+    const box = (scope: ReturnType<typeof within>, name: RegExp) =>
+      scope.getByRole("checkbox", { name }) as HTMLInputElement;
+
+    it("shows which emails are on", async () => {
+      mockSession(testUser({ id: ada.id }));
+      renderPage();
+      const scope = await settings();
+      await scope.findByRole("checkbox", { name: /new book poll/ });
+      expect(box(scope, /new book poll/).checked).toBe(false);
+      expect(box(scope, /poll closes/).checked).toBe(true);
+    });
+
+    it("saves each change straight away, as the whole list", async () => {
+      mockSession(testUser({ id: ada.id }));
+      renderPage();
+      const scope = await settings();
+      fireEvent.click(await scope.findByRole("checkbox", { name: /poll closes/ }));
+      await vi.waitFor(() =>
+        expect(vi.mocked(updateEmailSettings).mock.calls[0][0]).toEqual({
+          emailOptOuts: ["NEW_POLL", "VOTE_REMINDER"],
+        }),
+      );
+      expect(await scope.findByText("Saved.")).toBeTruthy();
+      fireEvent.click(box(scope, /new book poll/));
+      await vi.waitFor(() =>
+        expect(vi.mocked(updateEmailSettings).mock.calls[1][0]).toEqual({
+          emailOptOuts: ["VOTE_REMINDER"],
+        }),
+      );
+    });
   });
 });

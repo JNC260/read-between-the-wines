@@ -43,6 +43,19 @@ const EnvSchema = z
     // Mailpit needs no login, so these are usually empty.
     SMTP_USER: z.string().optional(),
     SMTP_PASS: z.string().optional(),
+    // The club's time zone, for the dates and times in emails. The server
+    // runs in UTC, so without this "7 PM" would come out wrong.
+    CLUB_TIME_ZONE: z
+      .string()
+      .default("America/Chicago")
+      .refine((tz) => {
+        try {
+          new Intl.DateTimeFormat("en-US", { timeZone: tz });
+          return true;
+        } catch {
+          return false;
+        }
+      }, "Must be an IANA time zone, like America/Chicago"),
     // Where uploaded photos are written. Relative paths are from the
     // directory the server starts in (the repo root with nx serve); on
     // Railway it's the volume's mount path. Made absolute here so nothing
