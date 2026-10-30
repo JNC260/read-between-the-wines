@@ -1,11 +1,19 @@
-import { type CSSProperties, useState } from "react";
+import { type CSSProperties, Fragment, type ReactNode, useCallback, useState } from "react";
 import { Link } from "react-router-dom";
 import { type ReadBookDTO } from "shared";
 import BookCover from "../components/BookCover";
 import Bookend, { BOOKEND_KINDS } from "../components/Bookend";
 import BooksTabs from "../components/BooksTabs";
+import BottomSheet from "../components/BottomSheet";
 import { useRateBook, useReadBooks } from "../hooks";
 import { authClient } from "../lib/auth-client";
+import { packShelves } from "../lib/pack-shelves";
+import { useElementWidth } from "../lib/use-element-width";
+import { useMediaQuery } from "../lib/use-media-query";
+
+// Below this the details card would sit under every shelf, out of sight, so
+// picking a book opens it in a panel from the bottom instead.
+const SHEET_QUERY = "(max-width: 60rem)";
 
 const discussedOn = new Intl.DateTimeFormat(undefined, { dateStyle: "medium" });
 const upNextOn = new Intl.DateTimeFormat(undefined, {
@@ -39,6 +47,12 @@ const SPINE_COLORS = [
   ["#6B2D5C", "#FFFFFF"],
 ];
 
+// Longer books stand taller and thicker; an unknown length sits mid-shelf.
+const thickness = (book: ReadBookDTO) =>
+  Math.min(1, Math.max(0, ((book.pageCount ?? 340) - 170) / 410));
+
+const spineWidth = (book: ReadBookDTO) => Math.round(28 + thickness(book) * 20);
+
 // Picked from the id, so a book keeps its color even if its title is edited.
 const spineStyle = (book: ReadBookDTO): CSSProperties => {
   let hash = 0;
@@ -46,12 +60,11 @@ const spineStyle = (book: ReadBookDTO): CSSProperties => {
     hash = (hash * 31 + c.charCodeAt(0)) % 9973;
   }
   const [background, color] = SPINE_COLORS[hash % SPINE_COLORS.length];
-  // Longer books stand taller and thicker; an unknown length sits mid-shelf.
-  const t = Math.min(1, Math.max(0, ((book.pageCount ?? 340) - 170) / 410));
+  const t = thickness(book);
   return {
     background,
     color,
-    width: `${Math.round(28 + t * 20)}px`,
+    width: `${spineWidth(book)}px`,
     height: `${Math.round(168 + t * 70)}px`,
   };
 };
@@ -172,6 +185,47 @@ const Spine = ({
   </button>
 );
 
+// Matches .shelf-row's gap and side padding (1.75rem each side), and the
+// widest bookend with its margin, so the packing agrees with the layout.
+const SPINE_GAP = 3;
+const SHELF_PADDING = 56;
+const BOOKEND_ROOM = 86;
+
+// A year's books on as many shelves as the screen needs, like a bookcase,
+// instead of one shelf scrolling sideways off a phone screen. The bookend
+// sits at the end of the last shelf when there's room for it.
+const YearShelves = ({
+  books,
+  bookend,
+  renderSpine,
+}: {
+  books: ReadBookDTO[];
+  bookend: (typeof BOOKEND_KINDS)[number];
+  renderSpine: (book: ReadBookDTO) => ReactNode;
+}) => {
+  const [ref, width] = useElementWidth<HTMLDivElement>();
+  const room = width - SHELF_PADDING;
+  const shelves = packShelves(books, spineWidth, room, SPINE_GAP);
+  const last = shelves[shelves.length - 1];
+  const lastUsed = last.reduce((sum, b) => sum + spineWidth(b), 0) + SPINE_GAP * (last.length - 1);
+  const bookendFits = !(room > 0) || lastUsed + BOOKEND_ROOM <= room;
+  return (
+    <div ref={ref}>
+      {shelves.map((row, n) => (
+        <Fragment key={row[0]?.id ?? n}>
+          <div className="shelf-scroll">
+            <div className="shelf-row">
+              {row.map(renderSpine)}
+              {n === shelves.length - 1 && bookendFits && <Bookend kind={bookend} />}
+            </div>
+          </div>
+          <div className="shelf-plank" />
+        </Fragment>
+      ))}
+    </div>
+  );
+};
+
 const BookDetails = ({
   book,
   now,
@@ -226,6 +280,13 @@ const ReadBooksPage = () => {
   const { data: books, isPending, error } = useReadBooks();
   const { data: session } = authClient.useSession();
   const [pickedId, setPickedId] = useState<string | null>(null);
+  const asSheet = useMediaQuery(SHEET_QUERY);
+  const [sheetOpen, setSheetOpen] = useState(false);
+  const closeSheet = useCallback(() => setSheetOpen(false), []);
+  const pick = (id: string) => {
+    setPickedId(id);
+    setSheetOpen(true);
+  };
   const now = new Date();
 
   const discussed = books?.filter((b) => b.meetingStart <= now) ?? [];
@@ -278,35 +339,48 @@ const ReadBooksPage = () => {
                     {plural(pagesIn(shelf.books), "page")}
                   </p>
                 </div>
-                <div className="shelf-scroll">
-                  <div className="shelf-row">
-                    {shelf.books.map((book) => (
-                      <Spine
-                        key={book.id}
-                        book={book}
-                        picked={book.id === picked.id}
-                        isNext={book.id === next?.id}
-                        onPick={() => setPickedId(book.id)}
-                      />
-                    ))}
-                    <Bookend kind={BOOKEND_KINDS[i % BOOKEND_KINDS.length]} />
-                  </div>
-                </div>
-                <div className="shelf-plank" />
+                <YearShelves
+                  books={shelf.books}
+                  bookend={BOOKEND_KINDS[i % BOOKEND_KINDS.length]}
+                  renderSpine={(book) => (
+                    <Spine
+                      key={book.id}
+                      book={book}
+                      picked={book.id === picked.id}
+                      isNext={book.id === next?.id}
+                      onPick={() => pick(book.id)}
+                    />
+                  )}
+                />
               </section>
             ))}
           </div>
 
-          <aside id="book-details" className="shelf-aside" aria-label="Book details" aria-live="polite">
-            {/* Keyed so a rating error doesn't follow you to the next book. */}
+          {!asSheet && (
+            <aside id="book-details" className="shelf-aside" aria-label="Book details" aria-live="polite">
+              {/* Keyed so a rating error doesn't follow you to the next book. */}
+              <BookDetails
+                key={picked.id}
+                book={picked}
+                now={now}
+                canEdit={picked.suggestedByMe || !!session?.user.isAdmin}
+              />
+            </aside>
+          )}
+        </div>
+      )}
+
+      {asSheet && sheetOpen && picked && (
+        <BottomSheet label={`${picked.title} details`} onClose={closeSheet}>
+          <div id="book-details">
             <BookDetails
               key={picked.id}
               book={picked}
               now={now}
               canEdit={picked.suggestedByMe || !!session?.user.isAdmin}
             />
-          </aside>
-        </div>
+          </div>
+        </BottomSheet>
       )}
     </div>
   );

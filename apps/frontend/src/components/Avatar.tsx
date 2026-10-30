@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { avatarColor } from "../lib/avatar-color";
 import { initials } from "../lib/initials";
 
@@ -28,8 +29,12 @@ const Avatar = ({
   src?: string | null;
 }) => {
   const classes = [SIZE_CLASSES[size], className].filter(Boolean).join(" ");
-  return src ? (
-    <img className={classes} src={src} alt="" />
+  // A photo that won't load (its file is gone, or the network dropped it)
+  // shows the initials instead of the browser's broken-image icon. Keyed to
+  // the URL, so a new photo gets its own try.
+  const [failed, setFailed] = useState<string | null>(null);
+  return src && src !== failed ? (
+    <img className={classes} src={src} alt="" onError={() => setFailed(src)} />
   ) : (
     <span className={`${classes} avatar-color-${avatarColor(member.id)}`} aria-hidden="true">
       {initials(member)}

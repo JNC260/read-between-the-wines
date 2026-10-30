@@ -233,4 +233,68 @@ describe("ReadBooksPage", () => {
       expect(within(details()).getByRole("link", { name: "Edit book" })).toBeTruthy();
     });
   });
+
+  describe("on a phone", () => {
+    // Pretends the screen is narrow, so the details open in a bottom sheet.
+    beforeEach(() => {
+      vi.stubGlobal(
+        "matchMedia",
+        (query: string) =>
+          ({
+            matches: query === "(max-width: 60rem)",
+            media: query,
+            addEventListener: () => undefined,
+            removeEventListener: () => undefined,
+          }) as unknown as MediaQueryList,
+      );
+    });
+    afterEach(() => vi.unstubAllGlobals());
+
+    const sheet = () => screen.queryByRole("dialog", { name: /details$/ });
+
+    it("opens a picked book in a sheet, with the rating stars, and closes it", async () => {
+      vi.mocked(getReadBooks).mockResolvedValue([slewfoot, piranesi, circe]);
+      renderPage();
+      await screen.findByRole("region", { name: "2021" });
+      // Nothing out of sight under the shelves, and nothing open until a pick.
+      expect(screen.queryByRole("complementary", { name: "Book details" })).toBeNull();
+      expect(sheet()).toBeNull();
+
+      fireEvent.click(spine("Circe"));
+      const open = sheet() as HTMLElement;
+      expect(open.getAttribute("aria-label")).toBe("Circe details");
+      expect(within(open).getByRole("group", { name: "Your rating for Circe" })).toBeTruthy();
+      expect(document.body.style.overflow).toBe("hidden");
+
+      fireEvent.click(within(open).getByRole("button", { name: "Close" }));
+      expect(sheet()).toBeNull();
+      expect(document.body.style.overflow).toBe("");
+    });
+
+    it("closes with Escape and with a tap outside", async () => {
+      vi.mocked(getReadBooks).mockResolvedValue([slewfoot, piranesi, circe]);
+      renderPage();
+      await screen.findByRole("region", { name: "2021" });
+
+      fireEvent.click(spine("Circe"));
+      fireEvent.keyDown(document, { key: "Escape" });
+      expect(sheet()).toBeNull();
+
+      fireEvent.click(spine("Piranesi"));
+      fireEvent.click(document.querySelector(".sheet-backdrop") as HTMLElement);
+      expect(sheet()).toBeNull();
+    });
+
+    it("rates from the sheet", async () => {
+      vi.mocked(getReadBooks).mockResolvedValue([slewfoot, piranesi, circe]);
+      vi.mocked(rateBook).mockResolvedValue({ bookId: circe.id, score: 4 });
+      renderPage();
+      await screen.findByRole("region", { name: "2021" });
+      fireEvent.click(spine("Circe"));
+      fireEvent.click(within(sheet() as HTMLElement).getByRole("button", { name: "4 stars" }));
+      await vi.waitFor(() =>
+        expect(vi.mocked(rateBook).mock.calls[0][0]).toEqual({ bookId: circe.id, score: 4 }),
+      );
+    });
+  });
 });

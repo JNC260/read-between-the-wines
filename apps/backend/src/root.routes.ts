@@ -1,5 +1,6 @@
 import express from "express";
 import bookRoutes from "./books/books.routes";
+import coverRoutes from "./covers/covers.routes";
 import healthRoutes from "./health/health.routes";
 import inviteRoutes from "./invites/invites.routes";
 import meetingRoutes from "./meetings/meetings.routes";
@@ -11,6 +12,7 @@ import venueRoutes from "./venues/venues.routes";
 const router = express.Router();
 
 router.use("/books", bookRoutes);
+router.use("/covers", coverRoutes);
 router.use("/health", healthRoutes);
 router.use("/invites", inviteRoutes);
 router.use("/meetings", meetingRoutes);

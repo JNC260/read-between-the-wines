@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { type BookDTO } from "shared";
+import { coverSrc } from "../lib/covers";
 
 type Props = {
   book: Pick<BookDTO, "title" | "author" | "coverUrl">;
@@ -17,7 +18,7 @@ const BookCover = ({ book }: Props) => {
     return (
       <img
         className="book-cover"
-        src={book.coverUrl}
+        src={coverSrc(book.coverUrl)}
         alt=""
         loading="lazy"
         onError={() => setFailed(true)}
