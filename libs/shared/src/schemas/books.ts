@@ -1,4 +1,5 @@
 import * as z from "zod";
+import { GENRES, MAX_GENRES } from "../lib/genres";
 import { parseGoodreadsUrl } from "../lib/goodreads";
 import { isoDate } from "./dates";
 
@@ -49,7 +50,10 @@ export const UpdateBookSchema = z
     author: requiredText,
     // Negative for BCE, for the occasional Odyssey.
     yearPublished: z.int().min(-3000).max(9999).nullable(),
-    genres: z.array(z.string().trim().min(1).max(50)).max(20),
+    genres: z
+      .array(z.enum(GENRES))
+      .max(MAX_GENRES, `Pick up to ${MAX_GENRES}`)
+      .refine((g) => new Set(g).size === g.length, "Each genre only once"),
     coverUrl: z.url({ protocol: /^https?$/ }).nullable(),
     synopsis: optionalText(10_000),
     pageCount: z.int().min(1).max(20_000).nullable(),

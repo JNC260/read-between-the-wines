@@ -1,3 +1,4 @@
+export * from "./lib/genres";
 export * from "./lib/goodreads";
 export * from "./lib/normalize-title";
 export * from "./lib/phone";

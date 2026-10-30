@@ -58,8 +58,16 @@ describe("CreateBookSuggestionSchema", () => {
 describe("UpdateBookSchema", () => {
   it("accepts any subset of fields, trimming text", () => {
     expect(
-      UpdateBookSchema.parse({ title: " Circe ", genres: [" Fantasy "] }),
+      UpdateBookSchema.parse({ title: " Circe ", genres: ["Fantasy"] }),
     ).toEqual({ title: "Circe", genres: ["Fantasy"] });
+  });
+
+  it.each([
+    ["a genre that isn't on the list", ["Fantasy", "Chick lit"]],
+    ["more than three genres", ["Fantasy", "Horror", "Romance", "Humor"]],
+    ["the same genre twice", ["Fantasy", "Fantasy"]],
+  ])("rejects %s", (_, genres) => {
+    expect(UpdateBookSchema.safeParse({ genres }).success).toBe(false);
   });
 
   it("leaves out the work id, which isn't editable", () => {

@@ -18,6 +18,7 @@ const circe = (overrides: Partial<BookDetailDTO> = {}): BookDetailDTO => ({
   title: "Circe",
   author: "Madeline Miller",
   yearPublished: 2018,
+  // Mythology is from before the club's genre list.
   genres: ["Fantasy", "Mythology"],
   coverUrl: "https://covers.openlibrary.org/b/id/1-L.jpg",
   synopsis: "A witch on an island.",
@@ -44,6 +45,12 @@ const valueOf = (label: string) =>
 const type = (label: string, value: string) =>
   fireEvent.change(screen.getByLabelText(label), { target: { value } });
 
+const genre = (name: string) => screen.getByRole("button", { name });
+const pressedGenres = () =>
+  screen
+    .getAllByRole("button", { pressed: true })
+    .map((b) => b.textContent);
+
 describe("EditBookPage", () => {
   it("fills the form from the book", async () => {
     vi.mocked(getBook).mockResolvedValue(circe());
@@ -53,7 +60,7 @@ describe("EditBookPage", () => {
     expect(valueOf("Author")).toBe("Madeline Miller");
     expect(valueOf("Year published")).toBe("2018");
     expect(valueOf("Pages")).toBe("404");
-    expect(valueOf("Genres")).toBe("Fantasy, Mythology");
+    expect(pressedGenres()).toEqual(["Fantasy"]);
     expect(valueOf("Synopsis")).toBe("A witch on an island.");
     // The work id stops duplicate books, so it isn't offered.
     expect(screen.queryByLabelText(/Open Library/)).toBeNull();
@@ -67,7 +74,8 @@ describe("EditBookPage", () => {
 
     type("Title", "  Circe: A Novel ");
     type("Year published", "");
-    type("Genres", "Fantasy, retelling, fantasy, ");
+    fireEvent.click(genre("Fantasy"));
+    fireEvent.click(genre("Historical fiction"));
     type("Synopsis", "");
     fireEvent.click(screen.getByRole("button", { name: "Save changes" }));
 
@@ -78,7 +86,7 @@ describe("EditBookPage", () => {
       author: "Madeline Miller",
       yearPublished: null,
       pageCount: 404,
-      genres: ["Fantasy", "retelling"],
+      genres: ["Historical fiction"],
       synopsis: null,
       coverUrl: "https://covers.openlibrary.org/b/id/1-L.jpg",
       goodreadsUrl: "https://www.goodreads.com/book/show/35959740",
@@ -131,5 +139,21 @@ describe("EditBookPage", () => {
     );
     renderPage();
     expect((await screen.findByRole("alert")).textContent).toBe("Book not found");
+  });
+
+  it("offers the club's genres as chips, up to three", async () => {
+    vi.mocked(getBook).mockResolvedValue(circe({ genres: [] }));
+    renderPage();
+    await screen.findByLabelText("Title");
+
+    fireEvent.click(genre("Fantasy"));
+    fireEvent.click(genre("Romance"));
+    fireEvent.click(genre("Horror"));
+    // In the list's order, not the order they were picked.
+    expect(pressedGenres()).toEqual(["Romance", "Fantasy", "Horror"]);
+    expect((genre("Humor") as HTMLButtonElement).disabled).toBe(true);
+    // Turning one off frees a spot.
+    fireEvent.click(genre("Romance"));
+    expect((genre("Humor") as HTMLButtonElement).disabled).toBe(false);
   });
 });

@@ -25,6 +25,11 @@ const EnvSchema = z
       .transform((url) => url.replace(/\/+$/, "")),
     // Production email goes through Resend's HTTP API.
     RESEND_API_KEY: z.string().startsWith("re_", "Resend keys start with re_").optional(),
+    // AI features (book genres). Optional: without it they're skipped.
+    ANTHROPIC_API_KEY: z
+      .string()
+      .startsWith("sk-ant-", "Anthropic keys start with sk-ant-")
+      .optional(),
     EMAIL_FROM: z.string().trim().min(1, "Required, like: Read Between the Wines <hello@example.org>"),
     // Everywhere else, email goes over SMTP to Mailpit (inbox at
     // http://localhost:8025). Unused in production.

@@ -3,6 +3,7 @@ import {
   type BookDetailDTO,
   type BookDTO,
   type CreateBookSuggestionDTO,
+  type Genre,
   type ManualBookSuggestionDTO,
   normalizeTitle,
   type RatingDTO,
@@ -27,6 +28,7 @@ import {
   workIdFromKey,
 } from "./open-library";
 import { Prisma, type Suggestion } from "../../generated/prisma/client";
+import { pickGenres } from "./genres";
 
 // How the three "search-ish" functions fit together:
 //
@@ -138,6 +140,9 @@ export const createSuggestion = async (
   });
 
   await addSuggestion(userId, book.id);
+  if (book.genres.length === 0) {
+    tagInBackground(book.id, workDescription.subjects);
+  }
   return book;
 };
 
@@ -162,7 +167,32 @@ export const createManualSuggestion = async (
     (await prisma.book.create({ data: { ...data, normalizedTitle } }));
 
   await addSuggestion(userId, book.id);
+  if (book.genres.length === 0) {
+    tagInBackground(book.id, []);
+  }
   return book;
+};
+
+// The AI's genres for a book, without saving them, or null when AI is off.
+// subjects are Open Library's, when the caller has them.
+export const genresFor = async (
+  bookId: string,
+  subjects: string[],
+): Promise<Genre[] | null> => {
+  const book = await prisma.book.findUniqueOrThrow({ where: { id: bookId } });
+  return pickGenres({ ...book, subjects });
+};
+
+// Every book, oldest first, for the tag-genres script.
+export const listBooksForTagging = () =>
+  prisma.book.findMany({
+    select: { id: true, title: true, genres: true, openLibraryWorkId: true },
+    orderBy: { createdAt: "asc" },
+  });
+
+// updateMany, so a book deleted in the meantime is a no-op, not an error.
+export const setGenres = async (bookId: string, genres: Genre[]) => {
+  await prisma.book.updateMany({ where: { id: bookId }, data: { genres } });
 };
 
 // Books with at least one suggestion that aren't on a meeting yet, newest
@@ -338,4 +368,17 @@ const addSuggestion = async (userId: string, bookId: string) => {
     }
     throw e;
   }
+};
+
+// Tags a new book once its suggestion is saved. The member doesn't wait for
+// it, and a failure only means the book has no genres until the next
+// tag-genres run.
+const tagInBackground = (bookId: string, subjects: string[]) => {
+  const tag = async () => {
+    const genres = await genresFor(bookId, subjects);
+    if (genres && genres.length > 0) {
+      await setGenres(bookId, genres);
+    }
+  };
+  tag().catch((e) => console.error("Tagging genres failed:", e));
 };

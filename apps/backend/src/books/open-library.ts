@@ -38,12 +38,14 @@ export const SearchResponseSchema = z.object({
   docs: z.array(SearchDocSchema),
 });
 
-// GET /works/<id>.json. Only the synopsis is read from here. description is
-// a plain string on some works and { type, value } on others.
+// GET /works/<id>.json. Read for the synopsis and the subjects, which help
+// the AI pick genres. description is a plain string on some works and
+// { type, value } on others.
 export const WorkDescriptionSchema = z.object({
   description: z
     .union([z.string(), z.object({ value: z.string() })])
     .optional(),
+  subjects: z.array(z.string()).default([]),
 });
 
 export type WorkDescription = z.infer<typeof WorkDescriptionSchema>;
