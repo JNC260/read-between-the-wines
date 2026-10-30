@@ -64,6 +64,7 @@ const meeting: MeetingDTO = {
   craft: "Bookmarks",
   venueId: VENUE_ID,
   bookId: null,
+  cancelledAt: null,
   venue,
   book: null,
 };

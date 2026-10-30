@@ -6,6 +6,7 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import {
+  type MeetingDTO,
   type MeetingListQuery,
   type MeetingRsvpsDTO,
   type PollDTO,
@@ -13,6 +14,7 @@ import {
   type VenueDTO,
 } from "shared";
 import {
+  cancelMeeting,
   castVotes,
   closePoll,
   createBookSuggestion,
@@ -32,6 +34,7 @@ import {
   getPoll,
   getReadBooks,
   rateBook,
+  restoreMeeting,
   getVenue,
   getVenues,
   getInvite,
@@ -57,6 +60,7 @@ import {
   getOpenInvites,
   getAccounts,
   banUser,
+  withdrawSuggestion,
 } from "../api";
 import { authClient } from "../lib/auth-client";
 
@@ -240,6 +244,25 @@ export const useUpdateMeeting = () => {
   });
 };
 
+// Cancelling frees the meeting's book, so books and polls refresh too.
+const useMeetingStatusChange = (
+  mutationFn: (id: string) => Promise<MeetingDTO>,
+) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn,
+    onSuccess: () =>
+      Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["meetings"] }),
+        queryClient.invalidateQueries({ queryKey: ["books"] }),
+        queryClient.invalidateQueries({ queryKey: ["polls"] }),
+      ]),
+  });
+};
+
+export const useCancelMeeting = () => useMeetingStatusChange(cancelMeeting);
+export const useRestoreMeeting = () => useMeetingStatusChange(restoreMeeting);
+
 // Under "meetings" too, so invalidating meetings refreshes RSVPs.
 export const useMeetingRsvps = (meetingId: string) => {
   return useQuery({
@@ -382,6 +405,15 @@ export const useCreateBookSuggestion = () => {
   });
 };
 
+// The book leaves the suggestions list, and searches stop flagging it.
+export const useWithdrawSuggestion = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: withdrawSuggestion,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["books"] }),
+  });
+};
+
 // For a book the search can't find. Refreshes the same lists as above.
 export const useCreateManualBookSuggestion = () => {
   const queryClient = useQueryClient();
@@ -431,7 +463,7 @@ export const useLatestPoll = ({ enabled = true } = {}) => {
 
 // Editing or closing a poll changes what the landing and suggestions pages
 // show, so every poll query refreshes; the poll page gets the response.
-const usePollChange = <T,>(mutationFn: (input: T) => Promise<PollDTO>) => {
+const usePollChange = <T>(mutationFn: (input: T) => Promise<PollDTO>) => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn,

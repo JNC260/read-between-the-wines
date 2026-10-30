@@ -16,6 +16,7 @@ import {
   rateBook,
   searchBooks,
   updateBook,
+  withdrawSuggestion,
 } from "./books.controller";
 
 const router = express.Router();
@@ -45,5 +46,7 @@ router.post(
 // Suggesters and admins can edit; the service checks which.
 router.get("/:id", getBook);
 router.patch("/:id", validate(UpdateBookSchema), updateBook);
+// This member's own suggestion; only allowed while they're the only one.
+router.delete("/:id/suggestion", withdrawSuggestion);
 
 export default router;

@@ -38,7 +38,7 @@ const DateStamp = ({ date }: { date: Date }) => (
 const PastMeeting = ({ meeting }: { meeting: MeetingDTO }) => {
   const { book, venue } = meeting;
   return (
-    <li className="timeline-entry">
+    <li className={`timeline-entry${meeting.cancelledAt ? " is-cancelled" : ""}`}>
       <DateStamp date={meeting.start} />
       {book && (
         <div className="timeline-cover">
@@ -52,7 +52,11 @@ const PastMeeting = ({ meeting }: { meeting: MeetingDTO }) => {
           </Link>
         </h4>
         {book && <p className="byline">{book.author}</p>}
-        {venue && <p className="muted">{venue.name}</p>}
+        {meeting.cancelledAt ? (
+          <p className="muted">Cancelled</p>
+        ) : (
+          venue && <p className="muted">{venue.name}</p>
+        )}
       </div>
     </li>
   );
@@ -65,16 +69,18 @@ const MeetingsPage = () => {
   const upcoming = useMeetings("upcoming");
   const past = useMeetings("past");
   const isAdmin = !!session?.user.isAdmin;
+  // The "45 meetings since 2023" count leaves out cancelled ones.
+  const held = past.data?.filter((m) => !m.cancelledAt);
 
   return (
     <div className="meetings-page">
       <div className="page-head">
         <div>
           <h1>Meetings</h1>
-          {past.data && past.data.length > 0 && (
+          {held && held.length > 0 && (
             <p className="muted">
-              {plural(past.data.length, "meeting")} since{" "}
-              {past.data[past.data.length - 1].start.getFullYear()}
+              {plural(held.length, "meeting")} since{" "}
+              {held[held.length - 1].start.getFullYear()}
             </p>
           )}
         </div>
@@ -100,7 +106,7 @@ const MeetingsPage = () => {
               {upcoming.data.map((meeting) => (
                 <li key={meeting.id}>
                   <MeetingCard meeting={meeting} />
-                  {isAdmin && (
+                  {isAdmin && !meeting.cancelledAt && (
                     <Link
                       to={`/meetings/${meeting.id}/edit`}
                       aria-label={`Edit ${meeting.title}`}

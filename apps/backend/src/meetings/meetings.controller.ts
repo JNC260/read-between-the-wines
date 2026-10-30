@@ -46,6 +46,18 @@ export const updateMeeting = async (
   res.json(z.encode(MeetingSchema, meeting));
 };
 
+// POST /meetings/:id/cancel (admins) -> the cancelled meeting
+export const cancelMeeting = async (req: Request<Params>, res: Response) => {
+  const meeting = await service.cancelMeeting(req.params.id);
+  res.json(z.encode(MeetingSchema, meeting));
+};
+
+// POST /meetings/:id/restore (admins) -> the meeting, no longer cancelled
+export const restoreMeeting = async (req: Request<Params>, res: Response) => {
+  const meeting = await service.restoreMeeting(req.params.id);
+  res.json(z.encode(MeetingSchema, meeting));
+};
+
 export const getRsvps = async (req: Request<Params>, res: Response) => {
   const rsvps = await service.getRsvps(req.params.id, getUser(req).id);
   res.json(z.encode(MeetingRsvpsSchema, rsvps));

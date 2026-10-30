@@ -105,6 +105,16 @@ describe("LandingPage", () => {
         expect(vi.mocked(getMeetings).mock.calls[0][0]).toBe("upcoming");
       });
 
+      it("skips a cancelled meeting", async () => {
+        vi.mocked(getMeetings).mockResolvedValue([
+          testMeeting({ cancelledAt: new Date(), book: null, bookId: null, title: "Cancelled one" }),
+          testMeeting({ id: "00000000-0000-4000-8000-000000000031", book: piranesi }),
+        ]);
+        renderLanding();
+        expect(await screen.findByRole("heading", { name: "Piranesi" })).toBeTruthy();
+        expect(screen.queryByText("Cancelled one")).toBeNull();
+      });
+
       it("counts who's going", async () => {
         vi.mocked(getMeetings).mockResolvedValue([testMeeting()]);
         vi.mocked(getMeetingRsvps).mockResolvedValue(

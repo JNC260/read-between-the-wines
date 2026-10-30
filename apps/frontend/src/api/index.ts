@@ -305,6 +305,22 @@ export const updateMeeting = ({
     { method: "PATCH", schema: UpdateMeetingSchema, body },
   );
 
+export const cancelMeeting = (id: string) =>
+  apiFetch(
+    `/api/meetings/${encodeURIComponent(id)}/cancel`,
+    MeetingSchema,
+    "Failed to cancel the meeting",
+    { method: "POST" },
+  );
+
+export const restoreMeeting = (id: string) =>
+  apiFetch(
+    `/api/meetings/${encodeURIComponent(id)}/restore`,
+    MeetingSchema,
+    "Failed to restore the meeting",
+    { method: "POST" },
+  );
+
 export const getMeetingRsvps = (meetingId: string) =>
   apiFetch(
     `/api/meetings/${encodeURIComponent(meetingId)}/rsvps`,
@@ -369,6 +385,15 @@ export const createManualBookSuggestion = (body: ManualBookSuggestionDTO) =>
     BookSchema,
     "Failed to suggest book",
     { method: "POST", schema: ManualBookSuggestionSchema, body },
+  );
+
+// Only allowed while this member is the book's one suggester.
+export const withdrawSuggestion = (bookId: string) =>
+  apiFetch(
+    `/api/books/${encodeURIComponent(bookId)}/suggestion`,
+    z.undefined(),
+    "Failed to withdraw your suggestion",
+    { method: "DELETE" },
   );
 
 export const getBookSuggestions = () =>

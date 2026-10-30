@@ -28,6 +28,7 @@ const meeting = {
   craft: null,
   venueId: null,
   bookId: null,
+  cancelledAt: null,
   venue: null,
   book: null,
 };

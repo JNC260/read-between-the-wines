@@ -19,9 +19,10 @@ const Squiggle = () => (
   </svg>
 );
 
-// The soonest meeting, including one in progress.
+// The soonest meeting, including one in progress, skipping cancelled ones.
 const NextMeeting = ({ isAdmin }: { isAdmin: boolean }) => {
-  const { data: meetings, error } = useMeetings("upcoming");
+  const { data: all, error } = useMeetings("upcoming");
+  const meetings = all?.filter((m) => !m.cancelledAt);
   const next = meetings?.[0];
   return (
     <section className="landing-section" aria-label="Next meeting">

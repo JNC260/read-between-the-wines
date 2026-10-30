@@ -173,6 +173,43 @@ export const createManualSuggestion = async (
   return book;
 };
 
+// Takes back this member's suggestion, which only the book's one suggester
+// can do. The book leaves the suggestions list, but its row stays: old polls
+// and votes still point at it, and suggesting it again brings it back.
+export const withdrawSuggestion = async (userId: string, bookId: string) => {
+  const book = await prisma.book.findUnique({
+    where: { id: bookId },
+    include: {
+      suggestions: { select: { userId: true } },
+      meeting: { select: { id: true } },
+      polls: {
+        where: { opensAt: { lte: new Date() }, closesAt: { gt: new Date() } },
+        select: { id: true },
+      },
+    },
+  });
+  if (!book) {
+    throw new NotFoundError();
+  }
+  if (!book.suggestions.some((s) => s.userId === userId)) {
+    throw new NotFoundError("You haven't suggested this book");
+  }
+  if (book.suggestions.length > 1) {
+    throw new ConflictError(
+      "Other members suggested this book too, so it stays on the list",
+    );
+  }
+  if (book.meeting) {
+    throw new ConflictError("This book is already on a meeting");
+  }
+  if (book.polls.length > 0) {
+    throw new ConflictError("This book is on the open poll");
+  }
+  await prisma.suggestion.delete({
+    where: { userId_bookId: { userId, bookId } },
+  });
+};
+
 // The AI's genres for a book, without saving them, or null when AI is off.
 // subjects are Open Library's, when the caller has them.
 export const genresFor = async (
