@@ -20,8 +20,10 @@ import {
   userBan,
   userDeactivate,
   userDeactivateSelf,
+  userMakeAdmin,
   userList,
   userReactivateSelf,
+  userRemoveAdmin,
   userRemoveImage,
   userUnban,
   userUpdateSelf,
@@ -61,5 +63,8 @@ router.post(
 router.post("/:id/deactivate", requireAuth, requireAdmin, userDeactivate);
 router.post("/:id/ban", requireAuth, requireAdmin, userBan);
 router.post("/:id/unban", requireAuth, requireAdmin, userUnban);
+// PUT and DELETE: it's a yes/no setting, and sending either twice is a 409.
+router.put("/:id/admin", requireAuth, requireAdmin, userMakeAdmin);
+router.delete("/:id/admin", requireAuth, requireAdmin, userRemoveAdmin);
 
 export default router;

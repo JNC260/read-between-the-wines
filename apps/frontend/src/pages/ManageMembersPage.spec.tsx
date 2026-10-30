@@ -1,6 +1,14 @@
 import { fireEvent, screen, within } from "@testing-library/react";
 import { type UserDTO } from "shared";
-import { banUser, getAccounts, getOpenInvites, revokeInvite, unbanUser } from "../api";
+import {
+  banUser,
+  getAccounts,
+  getOpenInvites,
+  makeAdmin,
+  removeAdmin,
+  revokeInvite,
+  unbanUser,
+} from "../api";
 import { mockSession, renderRoutes, Route, testUser } from "../test-utils";
 import ManageMembersPage from "./ManageMembersPage";
 
@@ -9,6 +17,8 @@ vi.mock("../api", () => ({
   banUser: vi.fn(),
   getAccounts: vi.fn(),
   getOpenInvites: vi.fn(),
+  makeAdmin: vi.fn(),
+  removeAdmin: vi.fn(),
   revokeInvite: vi.fn(),
   unbanUser: vi.fn(),
 }));
@@ -125,5 +135,40 @@ describe("ManageMembersPage", () => {
     vi.mocked(getOpenInvites).mockResolvedValue([]);
     renderPage();
     expect(await screen.findByText("No unused links.")).toBeTruthy();
+  });
+
+  it("makes a member an admin, after asking", async () => {
+    vi.mocked(makeAdmin).mockResolvedValue({ ...ada, isAdmin: true });
+    renderPage();
+    fireEvent.click(await screen.findByRole("button", { name: "Make admin: Ada Lovelace" }));
+    const confirm = screen.getByRole("group", { name: "Make admin: Ada Lovelace" });
+    expect(within(confirm).getByText(/ban members and make other admins/)).toBeTruthy();
+    fireEvent.click(within(confirm).getByRole("button", { name: "Make admin" }));
+    await vi.waitFor(() => expect(vi.mocked(makeAdmin).mock.calls[0][0]).toBe(ada.id));
+  });
+
+  it("removes another admin, but never offers it for yourself", async () => {
+    vi.mocked(removeAdmin).mockResolvedValue({ ...other, isAdmin: false });
+    renderPage();
+    fireEvent.click(await screen.findByRole("button", { name: "Remove admin: Otto Admin" }));
+    fireEvent.click(
+      within(screen.getByRole("group", { name: "Remove admin: Otto Admin" })).getByRole("button", {
+        name: "Remove admin",
+      }),
+    );
+    await vi.waitFor(() => expect(vi.mocked(removeAdmin).mock.calls[0][0]).toBe(other.id));
+    expect(screen.queryByRole("button", { name: /Remove admin: Jen/ })).toBeNull();
+    expect(screen.queryByRole("button", { name: /Make admin: Jen/ })).toBeNull();
+  });
+
+  it("only offers admin to active members", async () => {
+    vi.mocked(getAccounts).mockResolvedValue([
+      { ...ada, status: "INACTIVE" },
+      self,
+    ]);
+    renderPage();
+    await screen.findByText("Ada Lovelace");
+    expect(screen.queryByRole("button", { name: /Make admin: Ada/ })).toBeNull();
+    expect(screen.getByRole("button", { name: "Ban Ada Lovelace" })).toBeTruthy();
   });
 });

@@ -5,7 +5,9 @@ import Avatar from "../components/Avatar";
 import {
   useAccounts,
   useBanUser,
+  useMakeAdmin,
   useOpenInvites,
+  useRemoveAdmin,
   useRevokeInvite,
   useUnbanUser,
 } from "../hooks";
@@ -19,10 +21,25 @@ const shortDate = new Intl.DateTimeFormat(undefined, {
 const fullName = (u: { firstName: string; lastName: string }) =>
   `${u.firstName} ${u.lastName}`;
 
-// Banning asks once first, in the member's row: it signs them out
-// everywhere and they can't come back until an admin lifts it.
-const BanButton = ({ member }: { member: UserDTO }) => {
-  const { mutate, isPending, error } = useBanUser();
+// An action that asks once first, in the member's row: banning, and making
+// or removing an admin. useAction is the mutation hook for it.
+const ConfirmButton = ({
+  member,
+  label,
+  verb,
+  question,
+  keepLabel,
+  useAction,
+}: {
+  member: UserDTO;
+  label: string;
+  // "Ban" becomes the button's accessible name "Ban Ada Lovelace".
+  verb: string;
+  question: string;
+  keepLabel: string;
+  useAction: () => { mutate: (id: string) => void; isPending: boolean; error: Error | null };
+}) => {
+  const { mutate, isPending, error } = useAction();
   const [confirming, setConfirming] = useState(false);
   const name = fullName(member);
 
@@ -31,19 +48,16 @@ const BanButton = ({ member }: { member: UserDTO }) => {
       <button
         type="button"
         className="button-quiet"
-        aria-label={`Ban ${name}`}
+        aria-label={`${verb} ${name}`}
         onClick={() => setConfirming(true)}
       >
-        Ban
+        {label}
       </button>
     );
   }
   return (
-    <div className="manage-confirm" role="group" aria-label={`Ban ${name}`}>
-      <p>
-        Ban {name}? They're signed out right away and can't sign in again until
-        the ban is lifted. Their suggestions, ratings and RSVPs stay.
-      </p>
+    <div className="manage-confirm" role="group" aria-label={`${verb} ${name}`}>
+      <p>{question}</p>
       {error && <p role="alert">{error.message}</p>}
       <div className="manage-confirm-buttons">
         <button
@@ -52,15 +66,48 @@ const BanButton = ({ member }: { member: UserDTO }) => {
           disabled={isPending}
           onClick={() => mutate(member.id)}
         >
-          {isPending ? "Banning..." : "Ban"}
+          {isPending ? "Saving..." : label}
         </button>
         <button type="button" className="button-quiet" onClick={() => setConfirming(false)}>
-          Keep them
+          {keepLabel}
         </button>
       </div>
     </div>
   );
 };
+
+const BanButton = ({ member }: { member: UserDTO }) => (
+  <ConfirmButton
+    member={member}
+    label="Ban"
+    verb="Ban"
+    question={`Ban ${fullName(member)}? They're signed out right away and can't sign in again until the ban is lifted. Their suggestions, ratings and RSVPs stay.`}
+    keepLabel="Keep them"
+    useAction={useBanUser}
+  />
+);
+
+const MakeAdminButton = ({ member }: { member: UserDTO }) => (
+  <ConfirmButton
+    member={member}
+    label="Make admin"
+    verb="Make admin:"
+    question={`Make ${fullName(member)} an admin? They'll be able to create polls and meetings, cancel meetings, ban members and make other admins.`}
+    keepLabel="Not now"
+    useAction={useMakeAdmin}
+  />
+);
+
+const RemoveAdminButton = ({ member }: { member: UserDTO }) => (
+  <ConfirmButton
+    member={member}
+    label="Remove admin"
+    verb="Remove admin:"
+    question={`Remove ${fullName(member)} as an admin? They'll stay a member.`}
+    keepLabel="Keep them"
+    useAction={useRemoveAdmin}
+  />
+);
 
 const UnbanButton = ({ member }: { member: UserDTO }) => {
   const { mutate, isPending, error } = useUnbanUser();
@@ -158,9 +205,15 @@ const ManageMembersPage = () => {
               const isMe = member.id === session?.user.id;
               return (
                 <AccountRow key={member.id} member={member} isMe={isMe}>
-                  {/* Admins can't ban themselves or each other (the API checks). */}
-                  {!isMe && !member.isAdmin && <BanButton member={member} />}
                   {member.isAdmin && <span className="badge badge-mine">Admin</span>}
+                  {/* Nobody changes their own role, and admins can't be
+                      banned (the API checks both). Only active members can
+                      become admins. */}
+                  {!isMe && member.isAdmin && <RemoveAdminButton member={member} />}
+                  {!isMe && !member.isAdmin && member.status === "ACTIVE" && (
+                    <MakeAdminButton member={member} />
+                  )}
+                  {!isMe && !member.isAdmin && <BanButton member={member} />}
                 </AccountRow>
               );
             })}

@@ -77,6 +77,30 @@ export const banUser = async (adminId: string, id: string): Promise<UserDTO> => 
   return banned;
 };
 
+// Admins only. Only active members can be made admins. An admin can't drop
+// their own admin, which also means the club always keeps at least one:
+// whoever removes an admin is one, and stays one.
+export const setAdmin = async (
+  adminId: string,
+  id: string,
+  isAdmin: boolean,
+): Promise<UserDTO> => {
+  const user = await prisma.user.findUnique({ where: { id } });
+  if (!user || isPlaceholderEmail(user.email)) {
+    throw new NotFoundError("User not found");
+  }
+  if (user.isAdmin === isAdmin) {
+    throw new ConflictError(isAdmin ? "Already an admin" : "Not an admin");
+  }
+  if (isAdmin && user.status !== UserStatus.ACTIVE) {
+    throw new BadRequestError(`Account is ${user.status.toLowerCase()}`);
+  }
+  if (!isAdmin && user.id === adminId) {
+    throw new BadRequestError("You can't remove your own admin");
+  }
+  return prisma.user.update({ where: { id }, data: { isAdmin } });
+};
+
 // Lifting a ban makes the account active again, so they can sign straight in.
 export const unbanUser = (id: string): Promise<UserDTO> =>
   changeStatus(id, UserStatus.BANNED, UserStatus.ACTIVE);

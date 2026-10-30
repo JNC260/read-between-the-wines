@@ -123,3 +123,43 @@ describe("POST /users/:id/unban", () => {
     expect((await unban(ada.id, grace)).status).toBe(403);
   });
 });
+
+describe("PUT and DELETE /users/:id/admin", () => {
+  const makeAdmin = (id: string, as: User = admin) =>
+    api.request("PUT", `/users/${id}/admin`, { as });
+  const removeAdmin = (id: string, as: User = admin) =>
+    api.request("DELETE", `/users/${id}/admin`, { as });
+
+  it("makes a member an admin, and takes it away again", async () => {
+    const made = await makeAdmin(ada.id);
+    expect(made.status).toBe(200);
+    expect(made.body.isAdmin).toBe(true);
+    // Now an admin, Ada can use admin tools.
+    expect((await api.request("GET", "/users/accounts", { as: ada })).status).toBe(200);
+
+    const removed = await removeAdmin(ada.id);
+    expect(removed.body.isAdmin).toBe(false);
+    expect((await api.request("GET", "/users/accounts", { as: ada })).status).toBe(403);
+  });
+
+  it("won't make an inactive or banned member an admin", async () => {
+    await prisma.user.update({ where: { id: ada.id }, data: { status: "BANNED" } });
+    expect((await makeAdmin(ada.id)).status).toBe(400);
+  });
+
+  it("won't let an admin remove their own admin", async () => {
+    await makeAdmin(ada.id);
+    const res = await removeAdmin(admin.id);
+    expect(res.status).toBe(400);
+    expect(res.body.error.message).toBe("You can't remove your own admin");
+  });
+
+  it("returns 409 when nothing would change, 403 for members, 404 for unknown accounts", async () => {
+    expect((await removeAdmin(ada.id)).status).toBe(409);
+    await makeAdmin(ada.id);
+    expect((await makeAdmin(ada.id)).status).toBe(409);
+    const grace = await createUser({ firstName: "Grace" });
+    expect((await makeAdmin(grace.id, grace)).status).toBe(403);
+    expect((await makeAdmin(randomUUID())).status).toBe(404);
+  });
+});
