@@ -14,6 +14,15 @@ export const InviteSchema = z.object({
 
 export type InviteDTO = z.output<typeof InviteSchema>;
 
+// GET /invites (admins): the links nobody has used yet that still work.
+// Only a hash of each link is stored, so the link itself can't be shown
+// again; an admin can revoke one and make a new one instead.
+export const OpenInviteSchema = InviteSchema.extend({
+  invitedBy: z.object({ firstName: z.string(), lastName: z.string() }).nullable(),
+});
+
+export type OpenInviteDTO = z.output<typeof OpenInviteSchema>;
+
 // Returned only when an invite is created, so the member can share the
 // sign-up link. It can't be fetched again later.
 export const CreatedInviteSchema = InviteSchema.extend({

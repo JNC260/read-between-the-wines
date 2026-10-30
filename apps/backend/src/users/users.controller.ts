@@ -10,12 +10,15 @@ import {
 } from "shared";
 import { getUser } from "../middleware/auth";
 import {
+  banUser,
   deactivateUser,
   getActiveUsers,
+  listAccounts,
   listPlaceholders,
   mergePlaceholder,
   reactivateUser,
   removeProfileImage,
+  unbanUser,
   updateProfile,
   updateProfileImage,
 } from "./users.service";
@@ -64,6 +67,23 @@ export const userDeactivate = async (
   res: Response,
 ) => {
   const user = await deactivateUser(req.params.id);
+  res.json(z.encode(UserSchema, user));
+};
+
+// GET /users/accounts (admins) -> every real account, with its status
+export const accountList = async (_req: Request, res: Response) => {
+  res.json(z.encode(UserSchema.array(), await listAccounts()));
+};
+
+// POST /users/:id/ban (admins)
+export const userBan = async (req: Request<{ id: string }>, res: Response) => {
+  const user = await banUser(getUser(req).id, req.params.id);
+  res.json(z.encode(UserSchema, user));
+};
+
+// POST /users/:id/unban (admins)
+export const userUnban = async (req: Request<{ id: string }>, res: Response) => {
+  const user = await unbanUser(req.params.id);
   res.json(z.encode(UserSchema, user));
 };
 

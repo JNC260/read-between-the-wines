@@ -3,6 +3,7 @@ import {
   type CreatedInviteDTO,
   type InviteDTO,
   type InviteLookupDTO,
+  type OpenInviteDTO,
 } from "shared";
 import { config } from "../lib/config";
 import { ConflictError, NotFoundError } from "../lib/errors";
@@ -42,9 +43,13 @@ export const createInviteLink = async (
   return { ...invite, url: `${config.BETTER_AUTH_URL}/invite/${token}` };
 };
 
-export const listInvites = (): Promise<InviteDTO[]> => {
-  return prisma.invite.findMany({ orderBy: { createdAt: "desc" } });
-};
+// Unused links that haven't expired, newest first.
+export const listOpenInvites = (): Promise<OpenInviteDTO[]> =>
+  prisma.invite.findMany({
+    where: { usedAt: null, expiresAt: { gt: new Date() } },
+    orderBy: { createdAt: "desc" },
+    include: { invitedBy: { select: { firstName: true, lastName: true } } },
+  });
 
 export const revokeInvite = async (id: string): Promise<void> => {
   const invite = await prisma.invite.findUnique({ where: { id } });

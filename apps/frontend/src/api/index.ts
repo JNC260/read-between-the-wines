@@ -8,6 +8,7 @@ import {
   type CreateBookSuggestionDTO,
   CreateBookSuggestionSchema,
   CreatedInviteSchema,
+  OpenInviteSchema,
   type CreateMeetingDTO,
   CreateMeetingSchema,
   type CreatePollDTO,
@@ -126,6 +127,39 @@ export const getInvite = async (token: string) => {
     throw err;
   }
 };
+
+// Admin-only: unused invite links that still work. Only a hash of each link
+// is stored, so these can be revoked but not shown again.
+export const getOpenInvites = () =>
+  apiFetch(`/api/invites`, OpenInviteSchema.array(), "Failed to fetch invites");
+
+export const revokeInvite = (id: string) =>
+  apiFetch(
+    `/api/invites/${encodeURIComponent(id)}`,
+    z.undefined(),
+    "Failed to revoke the invite",
+    { method: "DELETE" },
+  );
+
+// Admin-only: every account whatever its status, and banning.
+export const getAccounts = () =>
+  apiFetch(`/api/users/accounts`, UserSchema.array(), "Failed to fetch accounts");
+
+export const banUser = (id: string) =>
+  apiFetch(
+    `/api/users/${encodeURIComponent(id)}/ban`,
+    UserSchema,
+    "Failed to ban the member",
+    { method: "POST" },
+  );
+
+export const unbanUser = (id: string) =>
+  apiFetch(
+    `/api/users/${encodeURIComponent(id)}/unban`,
+    UserSchema,
+    "Failed to lift the ban",
+    { method: "POST" },
+  );
 
 export const createInvite = () =>
   apiFetch(`/api/invites`, CreatedInviteSchema, "Failed to create invite", {

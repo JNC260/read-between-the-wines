@@ -20,6 +20,7 @@ const ForgotPasswordPage = lazy(() => import("../pages/ForgotPasswordPage"));
 const InviteMemberPage = lazy(() => import("../pages/InviteMemberPage"));
 const InvitePage = lazy(() => import("../pages/InvitePage"));
 const LegacyMembersPage = lazy(() => import("../pages/LegacyMembersPage"));
+const ManageMembersPage = lazy(() => import("../pages/ManageMembersPage"));
 const MeetingPage = lazy(() => import("../pages/MeetingPage"));
 const MembersPage = lazy(() => import("../pages/MembersPage"));
 const NewMeetingPage = lazy(() => import("../pages/NewMeetingPage"));
@@ -74,6 +75,14 @@ export function App() {
               element={
                 <RequireAuth>
                   <MembersPage />
+                </RequireAuth>
+              }
+            />
+            <Route
+              path="/members/manage"
+              element={
+                <RequireAuth admin>
+                  <ManageMembersPage />
                 </RequireAuth>
               }
             />
