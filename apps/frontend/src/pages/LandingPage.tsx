@@ -31,7 +31,7 @@ const NextMeeting = ({ isAdmin }: { isAdmin: boolean }) => {
       {meetings?.length === 0 && (
         <div className="card">
           <p>Nothing scheduled yet. Check back soon.</p>
-          {isAdmin && <Link to="/events/new">Schedule a meeting</Link>}
+          {isAdmin && <Link to="/meetings/new">Schedule a meeting</Link>}
         </div>
       )}
     </section>

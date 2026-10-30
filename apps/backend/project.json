@@ -29,6 +29,9 @@
       "dependsOn": [
         "^build",
         "prisma-generate"
+      ],
+      "outputs": [
+        "{workspaceRoot}/dist/apps/backend"
       ]
     },
     "prune-lockfile": {

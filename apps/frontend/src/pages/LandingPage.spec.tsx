@@ -101,7 +101,7 @@ describe("LandingPage", () => {
         renderLanding();
         expect(await screen.findByRole("heading", { name: "Circe" })).toBeTruthy();
         expect(screen.queryByRole("heading", { name: "Piranesi" })).toBeNull();
-        expect(linkTo("Circe")).toBe(`/events/${meeting.id}`);
+        expect(linkTo("Circe")).toBe(`/meetings/${meeting.id}`);
         expect(vi.mocked(getMeetings).mock.calls[0][0]).toBe("upcoming");
       });
 
@@ -145,7 +145,7 @@ describe("LandingPage", () => {
         mockSession(testUser({ isAdmin: true }));
         renderLanding();
         await screen.findByText(/Nothing scheduled yet/);
-        expect(linkTo("Schedule a meeting")).toBe("/events/new");
+        expect(linkTo("Schedule a meeting")).toBe("/meetings/new");
       });
     });
 

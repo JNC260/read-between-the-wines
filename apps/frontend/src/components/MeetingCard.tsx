@@ -21,7 +21,7 @@ const MeetingCard = ({ meeting }: { meeting: MeetingDTO }) => {
         {book && <BookCover book={book} />}
         <div className="meeting-card-text">
           <h2>
-            <Link to={`/events/${meeting.id}`} className="stretched-link">
+            <Link to={`/meetings/${meeting.id}`} className="stretched-link">
               {book?.title ?? meeting.title}
             </Link>
           </h2>

@@ -1,14 +1,14 @@
 // Uncomment this line to use CSS modules
 // import styles from './app.module.css';
 
-import { Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ApiError } from "../api";
 import RequireAuth from "../components/RequireAuth";
 import SiteHeader from "../components/SiteHeader";
 import EditBookPage from "../pages/EditBookPage";
-import EditEventPage from "../pages/EditEventPage";
-import EventsPage from "../pages/EventsPage";
+import EditMeetingPage from "../pages/EditMeetingPage";
+import MeetingsPage from "../pages/MeetingsPage";
 import ForgotPasswordPage from "../pages/ForgotPasswordPage";
 import InviteMemberPage from "../pages/InviteMemberPage";
 import InvitePage from "../pages/InvitePage";
@@ -17,7 +17,7 @@ import LegacyMembersPage from "../pages/LegacyMembersPage";
 import LoginPage from "../pages/LoginPage";
 import MeetingPage from "../pages/MeetingPage";
 import MembersPage from "../pages/MembersPage";
-import NewEventPage from "../pages/NewEventPage";
+import NewMeetingPage from "../pages/NewMeetingPage";
 import NewPollPage from "../pages/NewPollPage";
 import PollPage from "../pages/PollPage";
 import ProfilePage from "../pages/ProfilePage";
@@ -38,6 +38,13 @@ const queryClient = new QueryClient({
     },
   },
 });
+
+// Meetings used to live at /events. Old links (bookmarks, texts) still land
+// on the same page.
+const OldEventsLink = () => {
+  const { pathname, search } = useLocation();
+  return <Navigate to={pathname.replace(/^\/events/, "/meetings") + search} replace />;
+};
 
 export function App() {
   return (
@@ -83,24 +90,25 @@ export function App() {
               </RequireAuth>
             }
           />
+          <Route path="/events/*" element={<OldEventsLink />} />
           <Route
-            path="/events"
+            path="/meetings"
             element={
               <RequireAuth>
-                <EventsPage />
+                <MeetingsPage />
               </RequireAuth>
             }
           />
           <Route
-            path="/events/new"
+            path="/meetings/new"
             element={
               <RequireAuth admin>
-                <NewEventPage />
+                <NewMeetingPage />
               </RequireAuth>
             }
           />
           <Route
-            path="/events/:id"
+            path="/meetings/:id"
             element={
               <RequireAuth>
                 <MeetingPage />
@@ -108,10 +116,10 @@ export function App() {
             }
           />
           <Route
-            path="/events/:id/edit"
+            path="/meetings/:id/edit"
             element={
               <RequireAuth admin>
-                <EditEventPage />
+                <EditMeetingPage />
               </RequireAuth>
             }
           />

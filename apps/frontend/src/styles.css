@@ -45,6 +45,9 @@
   --radius-field: 12px;
   --radius-pill: 999px;
   --gutter: 18px;
+  /* Room the phone tab bar takes at the bottom of the screen, so content
+     and sticky bars can stay clear of it. None on wider screens. */
+  --tab-bar-space: calc(4.5rem + env(safe-area-inset-bottom));
 
   color-scheme: light dark;
 }
@@ -99,7 +102,7 @@ body {
   max-width: 40rem;
   margin: 0 auto;
   padding: 0 max(var(--gutter), env(safe-area-inset-right))
-    calc(2.5rem + env(safe-area-inset-bottom))
+    calc(2.5rem + max(var(--tab-bar-space), env(safe-area-inset-bottom)))
     max(var(--gutter), env(safe-area-inset-left));
 }
 
@@ -241,36 +244,103 @@ mark {
   color: var(--color-accent);
 }
 
-.site-header nav {
-  display: flex;
-  gap: 0.25rem;
-  margin-left: auto;
+/* Phones: a tab bar along the bottom, in thumb reach, with an icon over
+   each label and a pill behind the current one's icon. */
+.main-nav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 20;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  padding: 0.35rem max(var(--gutter), env(safe-area-inset-right))
+    calc(0.35rem + env(safe-area-inset-bottom))
+    max(var(--gutter), env(safe-area-inset-left));
+  background: var(--color-paper);
+  border-top: 1px solid var(--color-line);
 }
 
-.site-header nav a {
-  padding: 0.45rem 0.7rem;
-  border-radius: var(--radius-pill);
-  color: var(--color-ink);
-  font-size: 0.925rem;
+.main-nav a {
+  display: grid;
+  justify-items: center;
+  gap: 0.2rem;
+  padding: 0.3rem 0.25rem;
+  border-radius: var(--radius-field);
+  color: var(--color-ink-soft);
+  font-size: 0.75rem;
+  font-weight: 600;
   text-decoration: none;
 }
 
-.site-header nav a[aria-current="page"] {
-  background: var(--color-accent-soft);
+.main-nav a[aria-current="page"] {
   color: var(--color-accent);
 }
 
-/* Very narrow phones keep the mark and drop the words. */
-@media (max-width: 23rem) {
-  .site-header .logo-word {
-    display: none;
-  }
+.tab-icon {
+  width: 3.4rem;
+  height: 1.9rem;
+  padding: 0.2rem 0;
+  border-radius: var(--radius-pill);
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.main-nav a[aria-current="page"] .tab-icon {
+  background: var(--color-accent-soft);
+}
+
+/* With the tabs at the bottom, the account menu takes the header's right
+   edge. */
+.site-header .account-menu {
+  margin-left: auto;
 }
 
 @media (min-width: 40rem) {
+  :root {
+    --tab-bar-space: 0px;
+  }
+
   .logo-word {
     max-width: none;
     font-size: 1.15rem;
+  }
+
+  /* Wider screens: pills in the header, words only. The logo is the way
+     home, so the Home tab goes. */
+  .main-nav {
+    position: static;
+    display: flex;
+    gap: 0.25rem;
+    margin-left: auto;
+    padding: 0;
+    background: none;
+    border: 0;
+  }
+
+  .main-nav a {
+    display: block;
+    padding: 0.45rem 0.7rem;
+    border-radius: var(--radius-pill);
+    color: var(--color-ink);
+    font-size: 0.925rem;
+    font-weight: 400;
+  }
+
+  .main-nav a[aria-current="page"] {
+    background: var(--color-accent-soft);
+  }
+
+  .main-nav .tab-icon,
+  .main-nav .nav-home {
+    display: none;
+  }
+
+  .site-header .account-menu {
+    margin-left: 0;
   }
 }
 
@@ -412,7 +482,7 @@ mark {
 
 /* ---------- Lists and cards ---------- */
 
-/* Item lists on the pages (events, suggestions, books, members) put an
+/* Item lists on the pages (meetings, suggestions, books, members) put an
    h2 or h3 inside each li; those render as cards. */
 ul:has(> li > :is(h2, h3)) {
   display: grid;
@@ -516,6 +586,246 @@ li:has(> :is(h2, h3)) > :last-child {
   letter-spacing: 0.08em;
   text-transform: uppercase;
   opacity: 0.85;
+}
+
+/* ---------- Books switch ---------- */
+
+/* Suggestions or the shelf: two halves of one pill. */
+.books-tabs {
+  display: inline-flex;
+  gap: 0.2rem;
+  margin-top: 1.25rem;
+  padding: 0.2rem;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+}
+
+.books-tabs a {
+  padding: 0.35rem 0.9rem;
+  border-radius: var(--radius-pill);
+  color: var(--color-ink-soft);
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.books-tabs a[aria-current="page"] {
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+}
+
+/* ---------- Meetings timeline ---------- */
+
+/* One rail down the left. Every stop on it (the "Coming up" and year
+   labels, today, each meeting) puts a dot on the rail with ::before, at
+   --rail-x from the timeline's left edge. */
+.timeline {
+  --rail-x: 0.5rem;
+  --rail-gap: 1.9rem;
+  position: relative;
+  display: grid;
+  gap: 1.75rem;
+  padding-left: var(--rail-gap);
+}
+
+.timeline::before {
+  content: "";
+  position: absolute;
+  left: calc(var(--rail-x) - 1px);
+  top: 0.6rem;
+  bottom: 0.5rem;
+  width: 2px;
+  border-radius: 1px;
+  background: var(--color-line);
+}
+
+.timeline ol {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.timeline-upcoming,
+.timeline-year {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.timeline-upcoming > p {
+  margin: 0;
+}
+
+.timeline-label {
+  position: relative;
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  margin: 0;
+  font-size: 1.5rem;
+}
+
+.timeline-label span {
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 400;
+  letter-spacing: 0;
+  color: var(--color-ink-soft);
+}
+
+/* A hollow ring for each label. */
+.timeline-label::before {
+  content: "";
+  position: absolute;
+  left: calc(var(--rail-x) - var(--rail-gap) - 0.45rem);
+  top: 50%;
+  width: 0.9rem;
+  height: 0.9rem;
+  margin-top: -0.45rem;
+  border: 2px solid var(--color-ink-soft);
+  border-radius: 50%;
+  background: var(--color-paper);
+}
+
+.timeline-cards {
+  gap: 0.75rem;
+}
+
+.timeline-edit {
+  display: inline-block;
+  margin: 0.4rem 0 0 0.25rem;
+  font-size: 0.9rem;
+}
+
+/* Where the future ends: a filled accent dot and a stamp. */
+.timeline-today {
+  position: relative;
+  justify-self: start;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0.35rem 0.8rem;
+  border-radius: var(--radius-pill);
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+  font: 500 0.75rem/1 var(--font-stamp);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.timeline-today span {
+  color: var(--color-ink);
+  letter-spacing: 0.04em;
+}
+
+.timeline-today::before {
+  content: "";
+  position: absolute;
+  left: calc(var(--rail-x) - var(--rail-gap) - 0.5rem);
+  top: 50%;
+  width: 1rem;
+  height: 1rem;
+  margin-top: -0.5rem;
+  border-radius: 50%;
+  background: var(--color-accent);
+  box-shadow: 0 0 0 4px var(--color-paper);
+}
+
+/* A past meeting: date, cover, then the words. The whole row opens it. */
+.timeline-entry {
+  position: relative;
+  display: grid;
+  grid-template-columns: 2.6rem 2.6rem minmax(0, 1fr);
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.55rem 0.6rem;
+  border-radius: 14px;
+}
+
+.timeline-entry:not(:has(.timeline-cover)) {
+  grid-template-columns: 2.6rem minmax(0, 1fr);
+}
+
+.timeline-entry:hover,
+.timeline-entry:focus-within {
+  background: var(--color-surface);
+}
+
+.timeline-entry:focus-within {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* A small dot on the rail for each meeting. */
+.timeline-entry::before {
+  content: "";
+  position: absolute;
+  left: calc(var(--rail-x) - var(--rail-gap) - 0.3rem);
+  top: 50%;
+  width: 0.6rem;
+  height: 0.6rem;
+  margin-top: -0.3rem;
+  border-radius: 50%;
+  background: var(--color-ink-soft);
+  box-shadow: 0 0 0 3px var(--color-paper);
+}
+
+.timeline-entry .stretched-link::after {
+  border-radius: 14px;
+}
+
+.date-stamp {
+  display: grid;
+  justify-items: center;
+  line-height: 1;
+}
+
+.date-stamp span {
+  font: 500 0.68rem/1 var(--font-stamp);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+
+.date-stamp b {
+  font-family: var(--font-display);
+  font-weight: var(--font-display-weight);
+  font-size: 1.45rem;
+  margin-top: 0.2rem;
+}
+
+.timeline-cover .book-cover-plain {
+  padding: 0.3rem;
+}
+
+.timeline-cover .book-cover-plain b {
+  font-size: 0.45rem;
+}
+
+.timeline-cover .book-cover-plain small {
+  display: none;
+}
+
+.timeline-text h4 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: var(--font-display-weight);
+  letter-spacing: var(--font-display-tracking);
+  font-size: 1.05rem;
+  line-height: 1.25;
+}
+
+.timeline-text h4 a {
+  color: var(--color-ink);
+  text-decoration: none;
+}
+
+.timeline-text p {
+  margin: 0.1rem 0 0;
+  font-size: 0.85rem;
 }
 
 /* ---------- Meeting card ---------- */
@@ -683,6 +993,217 @@ li:has(> :is(h2, h3)) > :last-child {
   color: var(--color-accent);
 }
 
+/* ---------- Poll page ---------- */
+
+.poll-intro {
+  margin: 0 0 1rem;
+}
+
+.poll-books {
+  display: grid;
+  gap: 0.85rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Cover on the left, the book beside it, the vote toggle in the corner. */
+.poll-book,
+.poll-result {
+  display: grid;
+  grid-template-columns: 4.5rem minmax(0, 1fr);
+  gap: 0.9rem;
+  align-items: start;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.poll-book.is-picked {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 1px var(--color-accent);
+}
+
+.poll-book h2,
+.poll-result h2 {
+  margin: 0;
+  font-size: 1.15rem;
+  line-height: 1.2;
+}
+
+/* Room for the vote toggle, so a long title doesn't run under it. */
+.poll-book h2 {
+  padding-right: 5.5rem;
+}
+
+.poll-book .byline,
+.poll-result .byline {
+  margin: 0.15rem 0 0.25rem;
+}
+
+.poll-book-meta {
+  margin: 0 0 0.6rem;
+  font-size: 0.85rem;
+  color: var(--color-ink-soft);
+  font-variant-numeric: tabular-nums;
+}
+
+.poll-synopsis p {
+  margin: 0 0 0.6rem;
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+.poll-synopsis.is-clamped {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+  line-clamp: 1;
+  overflow: hidden;
+}
+
+.poll-synopsis.is-clamped p {
+  display: inline;
+  margin: 0;
+}
+
+.poll-synopsis.is-clamped p + p::before {
+  content: " ";
+}
+
+.poll-more {
+  min-height: 0;
+  padding: 0;
+  background: none;
+  border: 0;
+  color: var(--color-accent);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.poll-book-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.35rem 1rem;
+  margin-top: 0.3rem;
+  font-size: 0.85rem;
+}
+
+/* A pill in the corner: the whole label toggles the checkbox inside it. */
+.poll-vote {
+  position: absolute;
+  top: 0.85rem;
+  right: 0.85rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.75rem 0.35rem 0.55rem;
+  border: 1.5px solid var(--color-line);
+  border-radius: var(--radius-pill);
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--color-accent);
+  cursor: pointer;
+}
+
+.poll-vote input {
+  margin: 0;
+  accent-color: var(--color-accent);
+}
+
+.poll-book.is-picked .poll-vote {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: var(--color-on-accent);
+}
+
+.poll-vote:has(input:disabled) {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.poll-vote:has(input:focus-visible) {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* The pick-bar pill, plus room for an error just above it. */
+.poll-submit {
+  position: sticky;
+  bottom: calc(0.75rem + max(var(--tab-bar-space), env(safe-area-inset-bottom)));
+  z-index: 5;
+  display: grid;
+  justify-items: end;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.poll-submit .pick-bar {
+  position: static;
+  margin: 0;
+}
+
+.poll-submit-note {
+  margin: 0;
+  padding: 0.5rem 0.85rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-danger);
+  border-radius: 12px;
+  color: var(--color-danger);
+  font-size: 0.875rem;
+}
+
+.poll-result.is-top {
+  border-color: var(--color-pop);
+  box-shadow: 0 0 0 1px var(--color-pop);
+}
+
+.poll-result-tag {
+  margin: 0 0 0.25rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-ink-soft);
+}
+
+.poll-result-bar {
+  height: 0.5rem;
+  margin: 0.5rem 0 0.4rem;
+  border-radius: var(--radius-pill);
+  background: var(--color-accent-soft);
+  overflow: hidden;
+}
+
+.poll-result-bar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--color-accent);
+}
+
+.poll-result.is-top .poll-result-bar span {
+  background: var(--color-pop);
+}
+
+.poll-result-count {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (min-width: 40rem) {
+  .poll-book,
+  .poll-result {
+    grid-template-columns: 6rem minmax(0, 1fr);
+    gap: 1.25rem;
+    padding: 1.25rem;
+  }
+}
+
 /* ---------- Landing ---------- */
 
 .landing-hello {
@@ -701,8 +1222,13 @@ li:has(> :is(h2, h3)) > :last-child {
   align-content: start;
 }
 
+/* minmax(0, 1fr), not the default auto column: an auto column grows to
+   its widest content, and the shelf's row of spines is wider than a phone
+   (it's cut off by overflow: hidden, but still counts toward the width),
+   which pushed this whole column, suggestions included, off the screen. */
 .landing-column {
   min-width: 0;
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .section-head {
@@ -936,7 +1462,11 @@ li:has(> :is(h2, h3)) > :last-child {
 
 /* Phone: every chip in one row that scrolls sideways, running to the screen
    edges; the group labels are for screen readers only. */
+/* position: relative keeps the hidden labels below inside this scroller.
+   Without it they're placed against the page, out where the off-screen
+   chips are, and the whole page scrolls sideways on a phone. */
 .filter-groups {
+  position: relative;
   display: flex;
   gap: 0.4rem;
   overflow-x: auto;
@@ -1129,32 +1659,42 @@ li:has(> :is(h2, h3)) > :last-child {
   gap: 0.75rem;
 }
 
-/* Stays at the bottom of the screen while an admin scrolls and picks. */
+/* A small pill at the bottom right while an admin scrolls and picks. It
+   only shows once a book is ticked. */
 .pick-bar {
   position: sticky;
-  bottom: calc(0.75rem + env(safe-area-inset-bottom));
+  bottom: calc(0.75rem + max(var(--tab-bar-space), env(safe-area-inset-bottom)));
   z-index: 5;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  margin-top: 1rem;
-  padding: 0.5rem 0.5rem 0.5rem 1.1rem;
-  background: var(--color-surface);
-  border: 1px solid var(--color-line);
+  gap: 0.4rem;
+  width: fit-content;
+  max-width: 100%;
+  margin: 1rem 0 0 auto;
+  padding: 0.3rem 0.3rem 0.3rem 0.9rem;
+  /* Ink and paper swapped, so it stands apart from the cards it floats over
+     in either theme. */
+  background: var(--color-ink);
+  color: var(--color-paper);
   border-radius: var(--radius-pill);
-  box-shadow: 0 14px 30px -16px rgb(36 27 58 / 0.45);
+  box-shadow: 0 12px 28px -12px rgb(36 27 58 / 0.6);
 }
 
 .pick-bar p {
-  margin: 0;
+  margin: 0 0.25rem 0 0;
   font-size: 0.85rem;
-  line-height: 1.3;
+  white-space: nowrap;
 }
 
-.pick-bar strong {
-  display: block;
-  font-size: 0.95rem;
+.pick-bar button {
+  min-height: 2.25rem;
+  padding: 0 0.9rem;
+  font-size: 0.85rem;
+}
+
+.pick-bar .pick-bar-clear {
+  border-color: transparent;
+  color: inherit;
 }
 
 /* ---------- Members ---------- */

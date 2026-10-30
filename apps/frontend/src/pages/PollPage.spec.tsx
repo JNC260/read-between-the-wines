@@ -38,13 +38,27 @@ describe("PollPage", () => {
     renderPage();
     await loaded();
     expect(vi.mocked(getPoll).mock.calls[0][0]).toBe(ID);
-    expect(screen.getByRole("heading", { name: "Book poll: Witchy reads" })).toBeTruthy();
+    expect(screen.getByRole("heading", { level: 1, name: "Witchy reads" })).toBeTruthy();
     expect(screen.getByText("A witch on an island.")).toBeTruthy();
     // Blank lines split the synopsis into paragraphs.
     expect(screen.getByText("A house of endless halls.")).toBeTruthy();
     expect(screen.getByText("And a tide.")).toBeTruthy();
     const link = screen.getByRole("link", { name: "Piranesi on Goodreads" });
     expect(link.getAttribute("href")).toBe(piranesi.goodreadsUrl);
+  });
+
+  it("shortens long synopses until the member asks for more", async () => {
+    vi.mocked(getPoll).mockResolvedValue(testPoll());
+    renderPage();
+    await loaded();
+    // Piranesi's synopsis has two paragraphs, so it starts collapsed.
+    const more = screen.getByRole("button", { name: "Read more" });
+    const synopsis = document.getElementById(more.getAttribute("aria-controls") ?? "");
+    expect(synopsis?.className).toContain("is-clamped");
+    expect(more.getAttribute("aria-expanded")).toBe("false");
+    fireEvent.click(more);
+    expect(synopsis?.className).not.toContain("is-clamped");
+    expect(screen.getByRole("button", { name: "Show less" }).getAttribute("aria-expanded")).toBe("true");
   });
 
   it("says how many votes each member gets and how many have voted", async () => {
@@ -71,7 +85,7 @@ describe("PollPage", () => {
     fireEvent.click(box("Circe"));
     fireEvent.click(box("Beloved"));
     expect(box("Piranesi").disabled).toBe(true);
-    expect(screen.getByText("2 of 2 picked")).toBeTruthy();
+    expect(screen.getByText("2 of 2").parentElement?.textContent).toBe("2 of 2 picked");
     fireEvent.click(box("Circe"));
     expect(box("Piranesi").disabled).toBe(false);
   });
@@ -134,15 +148,17 @@ describe("PollPage", () => {
     );
     renderPage();
     const results = await screen.findByRole("list", { name: "Results" });
+    const rows = within(results).getAllByRole("listitem");
     expect(
-      within(results)
-        .getAllByRole("listitem")
-        .map((li) => li.textContent),
-    ).toEqual([
-      "Piranesi by Susanna Clarke: 3 votes",
-      "Circe by Madeline Miller: 1 vote (you voted for this)",
-      "Beloved by Toni Morrison: 0 votes",
+      rows.map((li) => within(li).getByRole("heading").textContent),
+    ).toEqual(["Piranesi", "Circe", "Beloved"]);
+    expect(rows.map((li) => li.querySelector(".poll-result-count")?.textContent)).toEqual([
+      "3 votes",
+      "1 voteYour vote",
+      "0 votes",
     ]);
+    expect(within(rows[0]).getByText("Most votes")).toBeTruthy();
+    expect(within(rows[1]).queryByText("Most votes")).toBeNull();
     expect(screen.getByText("3 members voted.")).toBeTruthy();
     expect(screen.queryAllByRole("checkbox")).toHaveLength(0);
   });

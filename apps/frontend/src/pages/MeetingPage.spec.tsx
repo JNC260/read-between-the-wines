@@ -15,8 +15,8 @@ const meeting = testMeeting();
 
 const renderPage = () =>
   renderRoutes(
-    `/events/${meeting.id}`,
-    <Route path="/events/:id" element={<MeetingPage />} />,
+    `/meetings/${meeting.id}`,
+    <Route path="/meetings/:id" element={<MeetingPage />} />,
   );
 
 describe("MeetingPage", () => {
@@ -251,15 +251,15 @@ describe("MeetingPage", () => {
     mockSession(testUser({ isAdmin: true }));
     renderPage();
     expect(
-      (await screen.findByRole("link", { name: "Edit event" })).getAttribute(
+      (await screen.findByRole("link", { name: "Edit meeting" })).getAttribute(
         "href",
       ),
-    ).toBe(`/events/${meeting.id}/edit`);
+    ).toBe(`/meetings/${meeting.id}/edit`);
   });
 
   it("doesn't show members the edit link", async () => {
     renderPage();
     await screen.findByRole("heading", { name: "Circe" });
-    expect(screen.queryByRole("link", { name: "Edit event" })).toBeNull();
+    expect(screen.queryByRole("link", { name: "Edit meeting" })).toBeNull();
   });
 });

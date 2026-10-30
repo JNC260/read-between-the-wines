@@ -21,7 +21,7 @@ const EMPTY: CreateVenueDTO = {
 
 type FieldErrors = Partial<Record<keyof CreateVenueDTO, string[]>>;
 
-// Sits inside another form (the event form), and forms can't nest, so this
+// Sits inside another form (the meeting form), and forms can't nest, so this
 // is a fieldset whose Save button saves the venue by itself.
 const NewVenueFields = ({
   onSaved,
@@ -44,7 +44,7 @@ const NewVenueFields = ({
     mutate(result.data, { onSuccess: onSaved });
   };
 
-  // Enter would otherwise submit the event form around this.
+  // Enter would otherwise submit the meeting form around this.
   const handleKeyDown = (e: KeyboardEvent<HTMLFieldSetElement>) => {
     if (e.key === "Enter") {
       e.preventDefault();
