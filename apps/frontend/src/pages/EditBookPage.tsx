@@ -1,8 +1,9 @@
 import { type ChangeEvent, type FormEvent, useState } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import * as z from "zod";
-import { type BookDetailDTO, UpdateBookSchema } from "shared";
+import { type BookDetailDTO, type Genre, isGenre, UpdateBookSchema } from "shared";
 import Field from "../components/Field";
+import GenrePicker from "../components/GenrePicker";
 import { useBook, useUpdateBook } from "../hooks";
 
 type FieldName =
@@ -15,28 +16,17 @@ type FieldName =
   | "coverUrl"
   | "goodreadsUrl";
 
-const initialValues = (book: BookDetailDTO): Record<FieldName, string> => ({
+type TextField = Exclude<FieldName, "genres">;
+
+const initialValues = (book: BookDetailDTO): Record<TextField, string> => ({
   title: book.title,
   author: book.author,
   yearPublished: book.yearPublished?.toString() ?? "",
   pageCount: book.pageCount?.toString() ?? "",
-  genres: book.genres.join(", "),
   synopsis: book.synopsis ?? "",
   coverUrl: book.coverUrl ?? "",
   goodreadsUrl: book.goodreadsUrl ?? "",
 });
-
-// "Thriller, suspense, Thriller" -> ["Thriller", "suspense"]: commas split,
-// and repeats that differ only in case are dropped.
-const parseGenres = (value: string) => {
-  const genres: string[] = [];
-  for (const genre of value.split(",").map((g) => g.trim())) {
-    if (genre && !genres.some((g) => g.toLowerCase() === genre.toLowerCase())) {
-      genres.push(genre);
-    }
-  }
-  return genres;
-};
 
 // Rendered once the book has loaded, since `book` only seeds the inputs.
 const BookForm = ({
@@ -48,6 +38,11 @@ const BookForm = ({
 }) => {
   const { mutate, isPending, error } = useUpdateBook();
   const [values, setValues] = useState(() => initialValues(book));
+  // Genres from before the club's list are dropped here, so saving cleans
+  // them up.
+  const [genres, setGenres] = useState<Genre[]>(() =>
+    book.genres.filter(isGenre),
+  );
   const [fieldErrors, setFieldErrors] = useState<
     Partial<Record<FieldName, string[]>>
   >({});
@@ -66,7 +61,7 @@ const BookForm = ({
       // A typo like "20l1" becomes NaN, which the schema rejects.
       yearPublished: orNumber(values.yearPublished),
       pageCount: orNumber(values.pageCount),
-      genres: parseGenres(values.genres),
+      genres,
       synopsis: orNull(values.synopsis),
       coverUrl: orNull(values.coverUrl),
       goodreadsUrl: orNull(values.goodreadsUrl),
@@ -81,7 +76,7 @@ const BookForm = ({
   };
 
   // The props every input shares.
-  const bind = (name: FieldName) => ({
+  const bind = (name: TextField) => ({
     id: name,
     value: values[name],
     onChange: (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
@@ -101,10 +96,10 @@ const BookForm = ({
         inputMode="numeric"
       />
       <Field {...bind("pageCount")} label="Pages" inputMode="numeric" />
-      <Field
-        {...bind("genres")}
-        label="Genres"
-        hint="Separate genres with commas, like Thriller, Suspense"
+      <GenrePicker
+        value={genres}
+        onChange={setGenres}
+        error={fieldErrors.genres?.[0]}
       />
       <div>
         <label htmlFor="synopsis">Synopsis</label>

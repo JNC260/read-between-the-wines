@@ -33,16 +33,26 @@ describe("WorkDescriptionSchema", () => {
   it("parses a description that is a string", () => {
     expect(WorkDescriptionSchema.parse(workWithStringDescription)).toEqual({
       description: workWithStringDescription.description,
+      subjects: [],
     });
   });
 
   it("parses a description that is an object, keeping only value", () => {
     expect(WorkDescriptionSchema.parse(workWithObjectDescription)).toEqual({
       description: { value: workWithObjectDescription.description.value },
+      subjects: [],
     });
   });
 
   it("parses a work without a description", () => {
-    expect(WorkDescriptionSchema.parse(workWithoutDescription)).toEqual({});
+    expect(WorkDescriptionSchema.parse(workWithoutDescription)).toEqual({
+      subjects: [],
+    });
+  });
+
+  it("keeps the subjects, which help pick genres", () => {
+    expect(
+      WorkDescriptionSchema.parse({ subjects: ["Fantasy", "Greek Mythology"] }).subjects,
+    ).toEqual(["Fantasy", "Greek Mythology"]);
   });
 });

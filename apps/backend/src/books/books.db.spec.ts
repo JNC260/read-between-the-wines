@@ -22,8 +22,12 @@ import {
   workWithoutDescription,
   workWithStringDescription,
 } from "./open-library.fixtures";
+import { pickGenres } from "./genres";
 
 vi.mock("../middleware/auth", () => import("../test/mock-auth"));
+// The AI is faked: each test says which genres it "picks". null is the
+// default, as if no API key were set.
+vi.mock("./genres", () => ({ pickGenres: vi.fn() }));
 
 // Only the app's calls to Open Library go through this; the test client
 // keeps the real fetch (see test/http.ts).
@@ -54,6 +58,7 @@ let ben: User;
 
 beforeEach(async () => {
   fetchMock.mockReset();
+  vi.mocked(pickGenres).mockReset().mockResolvedValue(null);
   await resetDb();
   ada = await createUser({ firstName: "Ada" });
   ben = await createUser({ firstName: "Ben" });
@@ -63,6 +68,13 @@ const CIRCE_WORK_ID = "OL18012166W";
 const CIRCE_LINK = "https://www.goodreads.com/book/show/35959740-circe";
 
 const errorCode = (res: ApiResponse) => res.body?.error?.code;
+
+// Tagging runs after the response is sent, so wait for it to land.
+const genresSaved = (bookId: string, genres: string[]) =>
+  vi.waitFor(async () => {
+    const book = await prisma.book.findUniqueOrThrow({ where: { id: bookId } });
+    expect(book.genres).toEqual(genres);
+  });
 const titles = (res: ApiResponse) =>
   res.body.map((b: { title: string }) => b.title);
 
@@ -195,6 +207,42 @@ describe("POST /books/suggestions", () => {
     expect(await prisma.suggestion.count()).toBe(1);
   });
 
+  it("tags the new book's genres after saving it", async () => {
+    vi.mocked(pickGenres).mockResolvedValue(["Fantasy", "Historical fiction"]);
+    respondWithCirce();
+    const res = await suggest({ openLibraryWorkId: CIRCE_WORK_ID });
+
+    expect(res.status).toBe(201);
+    await genresSaved(res.body.id, ["Fantasy", "Historical fiction"]);
+    expect(vi.mocked(pickGenres).mock.calls[0][0]).toMatchObject({
+      title: "Circe",
+      author: "Madeline Miller",
+      synopsis: workWithStringDescription.description,
+    });
+  });
+
+  it("doesn't re-tag a book that already has genres", async () => {
+    vi.mocked(pickGenres).mockResolvedValue(["Fantasy"]);
+    respondWithCirce();
+    const first = await suggest({ openLibraryWorkId: CIRCE_WORK_ID });
+    await genresSaved(first.body.id, ["Fantasy"]);
+    respondWithCirce();
+    await suggest({ openLibraryWorkId: CIRCE_WORK_ID }, ben);
+    expect(pickGenres).toHaveBeenCalledOnce();
+  });
+
+  it("still saves the suggestion when tagging fails", async () => {
+    const logged = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    vi.mocked(pickGenres).mockRejectedValue(new Error("overloaded"));
+    respondWithCirce();
+    const res = await suggest({ openLibraryWorkId: CIRCE_WORK_ID });
+
+    expect(res.status).toBe(201);
+    await vi.waitFor(() => expect(logged).toHaveBeenCalled());
+    expect(await prisma.suggestion.count()).toBe(1);
+    logged.mockRestore();
+  });
+
   it("returns 404 for a work Open Library doesn't know, and saves nothing", async () => {
     respond(noResults);
     const res = await suggest({ openLibraryWorkId: "OL999W" });
@@ -251,6 +299,17 @@ describe("POST /books/suggestions/manual", () => {
     expect(saved.normalizedTitle).toBe("piranesi");
     expect(saved.suggestions.map((s) => s.userId)).toEqual([ada.id]);
     expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("tags the typed-in book's genres too", async () => {
+    vi.mocked(pickGenres).mockResolvedValue(["Fantasy"]);
+    const res = await suggest(piranesi);
+    await genresSaved(res.body.id, ["Fantasy"]);
+    expect(vi.mocked(pickGenres).mock.calls[0][0]).toMatchObject({
+      title: "Piranesi",
+      synopsis: piranesi.synopsis,
+      subjects: [],
+    });
   });
 
   it("needs only a title and author", async () => {

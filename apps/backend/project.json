@@ -105,6 +105,15 @@
         "command": "jiti src/scripts/create-admin.ts"
       }
     },
+    "tag-genres": {
+      "executor": "nx:run-commands",
+      "cache": false,
+      "dependsOn": ["prisma-generate"],
+      "options": {
+        "cwd": "{projectRoot}",
+        "command": "JITI_ALIAS='{\"shared\":\"'\"$PWD\"'/../../libs/shared/src/index.ts\"}' jiti src/scripts/tag-genres.ts"
+      }
+    },
     "legacy-transform": {
       "executor": "nx:run-commands",
       "cache": false,

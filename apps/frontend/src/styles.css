@@ -993,6 +993,25 @@ li:has(> :is(h2, h3)) > :last-child {
   color: var(--color-accent);
 }
 
+/* ---------- Genre picker ---------- */
+
+.genre-picker > p {
+  margin: 0;
+}
+
+/* Wraps, unlike the filter row on the suggestions page: every genre should
+   be visible while picking. */
+.genre-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.genre-chips .chip:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
 /* ---------- Suggest a book ---------- */
 
 .back-link {
