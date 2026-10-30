@@ -21,6 +21,7 @@ import {
   mergePlaceholder,
   reactivateUser,
   removeProfileImage,
+  setAdmin,
   unbanUser,
   updateEmailSettings,
   updateProfile,
@@ -97,6 +98,18 @@ export const accountList = async (_req: Request, res: Response) => {
 // POST /users/:id/ban (admins)
 export const userBan = async (req: Request<{ id: string }>, res: Response) => {
   const user = await banUser(getUser(req).id, req.params.id);
+  res.json(z.encode(UserSchema, user));
+};
+
+// PUT /users/:id/admin (admins) -> the member, now an admin
+export const userMakeAdmin = async (req: Request<{ id: string }>, res: Response) => {
+  const user = await setAdmin(getUser(req).id, req.params.id, true);
+  res.json(z.encode(UserSchema, user));
+};
+
+// DELETE /users/:id/admin (admins) -> the member, no longer an admin
+export const userRemoveAdmin = async (req: Request<{ id: string }>, res: Response) => {
+  const user = await setAdmin(getUser(req).id, req.params.id, false);
   res.json(z.encode(UserSchema, user));
 };
 

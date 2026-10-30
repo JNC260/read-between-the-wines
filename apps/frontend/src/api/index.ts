@@ -160,6 +160,22 @@ export const banUser = (id: string) =>
     { method: "POST" },
   );
 
+export const makeAdmin = (id: string) =>
+  apiFetch(
+    `/api/users/${encodeURIComponent(id)}/admin`,
+    UserSchema,
+    "Failed to make them an admin",
+    { method: "PUT" },
+  );
+
+export const removeAdmin = (id: string) =>
+  apiFetch(
+    `/api/users/${encodeURIComponent(id)}/admin`,
+    UserSchema,
+    "Failed to remove their admin",
+    { method: "DELETE" },
+  );
+
 export const unbanUser = (id: string) =>
   apiFetch(
     `/api/users/${encodeURIComponent(id)}/unban`,

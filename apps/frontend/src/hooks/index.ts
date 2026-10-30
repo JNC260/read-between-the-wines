@@ -64,6 +64,8 @@ import {
   updateEmailSettings,
   unsubscribe,
   getEmailSettings,
+  removeAdmin,
+  makeAdmin,
 } from "../api";
 import { authClient } from "../lib/auth-client";
 
@@ -185,6 +187,8 @@ const useAccountChange = (mutationFn: (id: string) => Promise<UserDTO>) => {
 
 export const useBanUser = () => useAccountChange(banUser);
 export const useUnbanUser = () => useAccountChange(unbanUser);
+export const useMakeAdmin = () => useAccountChange(makeAdmin);
+export const useRemoveAdmin = () => useAccountChange(removeAdmin);
 
 export const useSignIn = () => {
   return useMutation({ mutationFn: signIn });
