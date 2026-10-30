@@ -993,6 +993,217 @@ li:has(> :is(h2, h3)) > :last-child {
   color: var(--color-accent);
 }
 
+/* ---------- Poll page ---------- */
+
+.poll-intro {
+  margin: 0 0 1rem;
+}
+
+.poll-books {
+  display: grid;
+  gap: 0.85rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Cover on the left, the book beside it, the vote toggle in the corner. */
+.poll-book,
+.poll-result {
+  display: grid;
+  grid-template-columns: 4.5rem minmax(0, 1fr);
+  gap: 0.9rem;
+  align-items: start;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.poll-book.is-picked {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 1px var(--color-accent);
+}
+
+.poll-book h2,
+.poll-result h2 {
+  margin: 0;
+  font-size: 1.15rem;
+  line-height: 1.2;
+}
+
+/* Room for the vote toggle, so a long title doesn't run under it. */
+.poll-book h2 {
+  padding-right: 5.5rem;
+}
+
+.poll-book .byline,
+.poll-result .byline {
+  margin: 0.15rem 0 0.25rem;
+}
+
+.poll-book-meta {
+  margin: 0 0 0.6rem;
+  font-size: 0.85rem;
+  color: var(--color-ink-soft);
+  font-variant-numeric: tabular-nums;
+}
+
+.poll-synopsis p {
+  margin: 0 0 0.6rem;
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+.poll-synopsis.is-clamped {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+  line-clamp: 1;
+  overflow: hidden;
+}
+
+.poll-synopsis.is-clamped p {
+  display: inline;
+  margin: 0;
+}
+
+.poll-synopsis.is-clamped p + p::before {
+  content: " ";
+}
+
+.poll-more {
+  min-height: 0;
+  padding: 0;
+  background: none;
+  border: 0;
+  color: var(--color-accent);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.poll-book-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.35rem 1rem;
+  margin-top: 0.3rem;
+  font-size: 0.85rem;
+}
+
+/* A pill in the corner: the whole label toggles the checkbox inside it. */
+.poll-vote {
+  position: absolute;
+  top: 0.85rem;
+  right: 0.85rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.75rem 0.35rem 0.55rem;
+  border: 1.5px solid var(--color-line);
+  border-radius: var(--radius-pill);
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--color-accent);
+  cursor: pointer;
+}
+
+.poll-vote input {
+  margin: 0;
+  accent-color: var(--color-accent);
+}
+
+.poll-book.is-picked .poll-vote {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+  color: var(--color-on-accent);
+}
+
+.poll-vote:has(input:disabled) {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.poll-vote:has(input:focus-visible) {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* The pick-bar pill, plus room for an error just above it. */
+.poll-submit {
+  position: sticky;
+  bottom: calc(0.75rem + max(var(--tab-bar-space), env(safe-area-inset-bottom)));
+  z-index: 5;
+  display: grid;
+  justify-items: end;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.poll-submit .pick-bar {
+  position: static;
+  margin: 0;
+}
+
+.poll-submit-note {
+  margin: 0;
+  padding: 0.5rem 0.85rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-danger);
+  border-radius: 12px;
+  color: var(--color-danger);
+  font-size: 0.875rem;
+}
+
+.poll-result.is-top {
+  border-color: var(--color-pop);
+  box-shadow: 0 0 0 1px var(--color-pop);
+}
+
+.poll-result-tag {
+  margin: 0 0 0.25rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-ink-soft);
+}
+
+.poll-result-bar {
+  height: 0.5rem;
+  margin: 0.5rem 0 0.4rem;
+  border-radius: var(--radius-pill);
+  background: var(--color-accent-soft);
+  overflow: hidden;
+}
+
+.poll-result-bar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--color-accent);
+}
+
+.poll-result.is-top .poll-result-bar span {
+  background: var(--color-pop);
+}
+
+.poll-result-count {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (min-width: 40rem) {
+  .poll-book,
+  .poll-result {
+    grid-template-columns: 6rem minmax(0, 1fr);
+    gap: 1.25rem;
+    padding: 1.25rem;
+  }
+}
+
 /* ---------- Landing ---------- */
 
 .landing-hello {
