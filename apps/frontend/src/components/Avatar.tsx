@@ -1,25 +1,37 @@
-import { type UserDTO } from "shared";
+import { avatarColor } from "../lib/avatar-color";
 import { initials } from "../lib/initials";
 
-// The photo if they've added one, otherwise initials on one of the theme's
-// colors, picked by position so neighbors differ. Pass `src` to show a
-// different picture, like a preview of a photo that's still uploading.
+// "small" is the overlapping circles next to suggestions and RSVPs (and the
+// header), "medium" the members list, "large" a member's details and the
+// profile page.
+type AvatarSize = "small" | "medium" | "large";
+
+const SIZE_CLASSES: Record<AvatarSize, string> = {
+  small: "face",
+  medium: "avatar",
+  large: "avatar avatar-large",
+};
+
+// The photo if they've added one, otherwise initials on the member's own
+// color (the same on every page). Pass `src` to show a different picture,
+// like a preview of a photo that's still uploading.
 const Avatar = ({
   member,
-  index,
-  large = false,
+  size = "medium",
+  className,
   src = member.image,
 }: {
-  member: Pick<UserDTO, "firstName" | "lastName" | "image">;
-  index: number;
-  large?: boolean;
+  // lastName and image are optional for the signed-in session's user.
+  member: { id: string; firstName: string; lastName?: string; image?: string | null };
+  size?: AvatarSize;
+  className?: string;
   src?: string | null;
 }) => {
-  const className = `avatar${large ? " avatar-large" : ""}`;
+  const classes = [SIZE_CLASSES[size], className].filter(Boolean).join(" ");
   return src ? (
-    <img className={className} src={src} alt="" />
+    <img className={classes} src={src} alt="" />
   ) : (
-    <span className={`${className} avatar-${index % 5}`} aria-hidden="true">
+    <span className={`${classes} avatar-color-${avatarColor(member.id)}`} aria-hidden="true">
       {initials(member)}
     </span>
   );

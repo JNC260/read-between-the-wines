@@ -101,12 +101,10 @@ const CopyButton = ({ value, label }: { value: string; label: string }) => {
 // to the card that opened it.
 const MemberDetails = ({
   member,
-  index,
   isMe,
   onClose,
 }: {
   member: UserDTO;
-  index: number;
   isMe: boolean;
   onClose: () => void;
 }) => {
@@ -149,7 +147,7 @@ const MemberDetails = ({
           ×
         </button>
         <div className="member-details-head">
-          <Avatar member={member} index={index} large />
+          <Avatar member={member} size="large" />
           <h2 id="member-details-name">
             {fullName(member)}
             {isMe && <span className="you-badge">You</span>}
@@ -263,14 +261,14 @@ const MembersPage = () => {
       </div>
 
       <ul className="member-list">
-        {users.data.map((member, index) => {
+        {users.data.map((member) => {
           const isMe = member.id === session?.user.id;
           // Venmo isn't a social; it gets its own Pay button in the details.
           const links = socials(member).filter((s) => s.site !== "venmo");
           return (
             <li key={member.id}>
               <article className="card member-card" aria-labelledby={`member-${member.id}`}>
-                <Avatar member={member} index={index} />
+                <Avatar member={member} />
                 <div className="member-card-text">
                   <h2 id={`member-${member.id}`}>
                     <button
@@ -309,7 +307,6 @@ const MembersPage = () => {
       {openIndex >= 0 && (
         <MemberDetails
           member={users.data[openIndex]}
-          index={openIndex}
           isMe={users.data[openIndex].id === session?.user.id}
           onClose={close}
         />

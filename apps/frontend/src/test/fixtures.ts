@@ -120,6 +120,7 @@ export const testRsvp = (
     id: `00000000-0000-4000-8000-0000000001${String(n).padStart(2, "0")}`,
     firstName,
     lastName: "Reader",
+    image: null,
   },
   status,
   dish: null,

@@ -78,7 +78,7 @@ const ProfileImageField = ({ user }: { user: UserDTO }) => {
 
   return (
     <section className="profile-photo" aria-label="Profile photo">
-      <Avatar member={user} index={0} large src={preview ?? user.image} />
+      <Avatar member={user} size="large" src={preview ?? user.image} />
       <div className="profile-photo-controls">
         <label htmlFor="profile-photo">
           {user.image ? "Change photo" : "Add a photo"}

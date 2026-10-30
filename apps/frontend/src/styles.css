@@ -16,6 +16,25 @@
   --color-highlight: #ffd3e2;
   --color-danger: #b42318;
 
+  /* Avatar colors: each member gets one (lib/avatar-color.ts), with white
+     or ink initials, whichever reads better on it. */
+  --avatar-0: var(--color-accent);
+  --on-avatar-0: #ffffff;
+  --avatar-1: var(--color-pop);
+  --on-avatar-1: #241b3a;
+  --avatar-2: var(--color-highlight);
+  --on-avatar-2: #241b3a;
+  --avatar-3: var(--color-ink);
+  --on-avatar-3: #ffffff;
+  --avatar-4: var(--color-accent-soft);
+  --on-avatar-4: #241b3a;
+  --avatar-5: #6e3d9e; /* plum */
+  --on-avatar-5: #ffffff;
+  --avatar-6: #16716b; /* teal */
+  --on-avatar-6: #ffffff;
+  --avatar-7: #c9dcb8; /* sage, the same in both themes */
+  --on-avatar-7: #241b3a;
+
   --font-display: "Fraunces", Georgia, "Times New Roman", serif;
   --font-body: "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-stamp: "DM Mono", ui-monospace, Menlo, monospace;
@@ -47,6 +66,15 @@
     --color-on-pop: #2a1a05;
     --color-highlight: #5c2347;
     --color-danger: #ff8a80;
+
+    --on-avatar-0: #241b3a;
+    --on-avatar-2: #ffffff;
+    --on-avatar-3: #241b3a;
+    --on-avatar-4: #ffffff;
+    --avatar-5: #c3a0ee;
+    --on-avatar-5: #241b3a;
+    --avatar-6: #5ccabd;
+    --on-avatar-6: #241b3a;
   }
 }
 
@@ -401,8 +429,7 @@ mark {
   font-size: 0.7rem;
   font-weight: 700;
   border: 2px solid var(--color-surface);
-  background: var(--color-highlight);
-  color: var(--color-ink);
+  object-fit: cover;
 }
 
 .face-me {
@@ -410,7 +437,6 @@ mark {
   height: 2.25rem;
   font-size: 0.8rem;
   border: 0;
-  background: var(--color-accent-soft);
 }
 
 .button-link {
@@ -889,21 +915,6 @@ li:has(> :is(h2, h3)) > :last-child {
 
 .faces .face + .face {
   margin-left: -0.5rem;
-}
-
-.faces .face:nth-child(4n + 1) {
-  background: var(--color-accent);
-  color: var(--color-on-accent);
-}
-
-.faces .face:nth-child(4n + 2) {
-  background: var(--color-pop);
-  color: var(--color-on-pop);
-}
-
-.faces .face:nth-child(4n + 4) {
-  background: var(--color-ink);
-  color: var(--color-paper);
 }
 
 .rsvp-groups {
@@ -1583,29 +1594,44 @@ li:has(> :is(h2, h3)) > :last-child {
   font-size: 2.25rem;
 }
 
-.avatar-0 {
-  background: var(--color-accent);
-  color: var(--color-on-accent);
+.avatar-color-0 {
+  background: var(--avatar-0);
+  color: var(--on-avatar-0);
 }
 
-.avatar-1 {
-  background: var(--color-pop);
-  color: var(--color-on-pop);
+.avatar-color-1 {
+  background: var(--avatar-1);
+  color: var(--on-avatar-1);
 }
 
-.avatar-2 {
-  background: var(--color-highlight);
-  color: var(--color-ink);
+.avatar-color-2 {
+  background: var(--avatar-2);
+  color: var(--on-avatar-2);
 }
 
-.avatar-3 {
-  background: var(--color-ink);
-  color: var(--color-paper);
+.avatar-color-3 {
+  background: var(--avatar-3);
+  color: var(--on-avatar-3);
 }
 
-.avatar-4 {
-  background: var(--color-accent-soft);
-  color: var(--color-accent);
+.avatar-color-4 {
+  background: var(--avatar-4);
+  color: var(--on-avatar-4);
+}
+
+.avatar-color-5 {
+  background: var(--avatar-5);
+  color: var(--on-avatar-5);
+}
+
+.avatar-color-6 {
+  background: var(--avatar-6);
+  color: var(--on-avatar-6);
+}
+
+.avatar-color-7 {
+  background: var(--avatar-7);
+  color: var(--on-avatar-7);
 }
 
 /* Member details: a sheet up from the bottom on phones. */
