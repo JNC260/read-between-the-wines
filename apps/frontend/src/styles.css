@@ -1156,6 +1156,89 @@ li:has(> :is(h2, h3)) > :last-child {
   margin-top: 1rem;
 }
 
+/* ---------- Meeting admin, cancelling, calendar ---------- */
+
+.meeting-admin {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0.25rem 0 1.25rem;
+}
+
+.meeting-admin .button-link,
+.meeting-admin > button {
+  min-height: 2.4rem;
+  font-size: 0.9rem;
+}
+
+.meeting-admin [role="alert"] {
+  flex-basis: 100%;
+  margin: 0;
+}
+
+.meeting-admin-confirm {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0.25rem 0 1.25rem;
+}
+
+.meeting-admin-confirm p {
+  margin: 0;
+}
+
+.meeting-admin-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.meeting-cancelled {
+  border-color: var(--color-danger);
+  color: var(--color-danger);
+  font-weight: 600;
+}
+
+.badge-cancelled {
+  display: inline-block;
+  margin: 0 0 0.4rem;
+  background: var(--color-danger);
+  /* Paper on danger reads in both themes: near-white on deep red, deep
+     plum on light red. */
+  color: var(--color-paper);
+}
+
+/* Faded, so the timeline reads past it to the meetings that happened. */
+.meeting-card.is-cancelled .meeting-card-top,
+.timeline-entry.is-cancelled .timeline-cover,
+.timeline-entry.is-cancelled .timeline-text h4 {
+  opacity: 0.55;
+}
+
+.timeline-entry.is-cancelled .timeline-text h4 {
+  text-decoration: line-through;
+}
+
+.add-to-calendar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0 1.5rem;
+}
+
+.add-to-calendar-label {
+  margin-right: 0.25rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.add-to-calendar .button-link,
+.add-to-calendar button {
+  min-height: 2.4rem;
+  padding: 0 1rem;
+  font-size: 0.88rem;
+}
+
 /* ---------- Poll page ---------- */
 
 .poll-intro {

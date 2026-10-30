@@ -97,6 +97,7 @@ export const testMeeting = (
   craft: null,
   venueId: "00000000-0000-4000-8000-000000000040",
   bookId: circe.id,
+  cancelledAt: null,
   venue: {
     id: "00000000-0000-4000-8000-000000000040",
     name: "Priya's place",

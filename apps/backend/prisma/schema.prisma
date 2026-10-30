@@ -184,6 +184,7 @@ model Meeting {
   craft       String? // what we're making, and anything to bring for it
   venueId     String? // null until a venue is picked
   bookId      String?  @unique // one book per meeting; null until a book is assigned
+  cancelledAt DateTime? // set when an admin cancels it; the meeting stays listed, marked cancelled
 
   venue Venue? @relation(fields: [venueId], references: [id])
   book  Book?  @relation(fields: [bookId], references: [id])

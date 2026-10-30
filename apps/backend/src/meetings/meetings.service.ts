@@ -80,6 +80,9 @@ export const updateMeeting = async (
   if (!meeting) {
     throw new NotFoundError("Meeting not found");
   }
+  if (meeting.cancelledAt) {
+    throw new ConflictError("This meeting was cancelled. Restore it to edit it.");
+  }
   const start = data.start ?? meeting.start;
   const end = data.end ?? meeting.end;
   if (end <= start) {
@@ -87,6 +90,38 @@ export const updateMeeting = async (
   }
   await checkReferences(id, data);
   return prisma.meeting.update({ where: { id }, data, include });
+};
+
+// Admins only (the route checks). The meeting stays listed, marked
+// cancelled. Its book is freed for another meeting, and its RSVPs are kept
+// but can't change. Only a meeting that hasn't ended can be cancelled.
+export const cancelMeeting = async (id: string): Promise<MeetingDTO> => {
+  const meeting = await findMeeting(id);
+  if (meeting.cancelledAt) {
+    throw new ConflictError("This meeting is already cancelled");
+  }
+  if (meeting.end < new Date()) {
+    throw new BadRequestError("This meeting is over");
+  }
+  return prisma.meeting.update({
+    where: { id },
+    data: { cancelledAt: new Date(), bookId: null },
+    include,
+  });
+};
+
+// Undoes a cancel. The book isn't put back, since it may be on another
+// meeting by now; edit the meeting to pick one.
+export const restoreMeeting = async (id: string): Promise<MeetingDTO> => {
+  const meeting = await findMeeting(id);
+  if (!meeting.cancelledAt) {
+    throw new ConflictError("This meeting isn't cancelled");
+  }
+  return prisma.meeting.update({
+    where: { id },
+    data: { cancelledAt: null },
+    include,
+  });
 };
 
 const findMeeting = async (id: string) => {
@@ -130,6 +165,9 @@ export const setRsvp = async (
   { status, dish, guestCount }: SetRsvpDTO,
 ): Promise<MeetingRsvpsDTO> => {
   const meeting = await findMeeting(meetingId);
+  if (meeting.cancelledAt) {
+    throw new ConflictError("This meeting was cancelled");
+  }
   if (meeting.end < new Date()) {
     throw new BadRequestError("This meeting is over");
   }

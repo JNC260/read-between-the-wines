@@ -267,6 +267,22 @@ export const updateMeeting = ({
     { method: "PATCH", schema: UpdateMeetingSchema, body },
   );
 
+export const cancelMeeting = (id: string) =>
+  apiFetch(
+    `/api/meetings/${encodeURIComponent(id)}/cancel`,
+    MeetingSchema,
+    "Failed to cancel the meeting",
+    { method: "POST" },
+  );
+
+export const restoreMeeting = (id: string) =>
+  apiFetch(
+    `/api/meetings/${encodeURIComponent(id)}/restore`,
+    MeetingSchema,
+    "Failed to restore the meeting",
+    { method: "POST" },
+  );
+
 export const getMeetingRsvps = (meetingId: string) =>
   apiFetch(
     `/api/meetings/${encodeURIComponent(meetingId)}/rsvps`,
