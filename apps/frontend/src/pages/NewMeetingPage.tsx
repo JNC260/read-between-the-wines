@@ -1,26 +1,26 @@
 import { useNavigate } from "react-router-dom";
-import EventForm from "../components/EventForm";
+import MeetingForm from "../components/MeetingForm";
 import { useCreateMeeting } from "../hooks";
 
-// Admin-only (see the route in app.tsx). Events are meetings in the API.
-const NewEventPage = () => {
+// Admin-only (see the route in app.tsx).
+const NewMeetingPage = () => {
   const navigate = useNavigate();
   const { mutate, isPending, error } = useCreateMeeting();
 
   return (
     <div>
-      <h1>New event</h1>
-      <EventForm
+      <h1>New meeting</h1>
+      <MeetingForm
         onSubmit={(values) =>
-          mutate(values, { onSuccess: () => navigate("/events") })
+          mutate(values, { onSuccess: () => navigate("/meetings") })
         }
         isPending={isPending}
         error={error}
-        submitLabel="Create event"
+        submitLabel="Create meeting"
         pendingLabel="Creating..."
       />
     </div>
   );
 };
 
-export default NewEventPage;
+export default NewMeetingPage;

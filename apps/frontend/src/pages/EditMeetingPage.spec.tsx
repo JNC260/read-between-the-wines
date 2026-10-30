@@ -8,7 +8,7 @@ import {
   updateMeeting,
 } from "../api";
 import { renderRoutes, Route } from "../test-utils";
-import EditEventPage from "./EditEventPage";
+import EditMeetingPage from "./EditMeetingPage";
 
 vi.mock("../api", async (importOriginal) => ({
   // The real ApiError, so the not-found test can throw one.
@@ -70,10 +70,10 @@ const meeting: MeetingDTO = {
 
 const renderPage = () =>
   renderRoutes(
-    `/events/${ID}/edit`,
+    `/meetings/${ID}/edit`,
     <>
-      <Route path="/events/:id/edit" element={<EditEventPage />} />
-      <Route path="/events" element="events page" />
+      <Route path="/meetings/:id/edit" element={<EditMeetingPage />} />
+      <Route path="/meetings" element="meetings page" />
     </>,
   );
 
@@ -85,18 +85,18 @@ const fill = (label: string, value: string) =>
 
 const loaded = async () => {
   renderPage();
-  await screen.findByRole("heading", { name: "Edit event" });
+  await screen.findByRole("heading", { name: "Edit meeting" });
   await screen.findByRole("option", { name: "Ada's house" });
 };
 
-describe("EditEventPage", () => {
+describe("EditMeetingPage", () => {
   beforeEach(() => {
     vi.mocked(getMeeting).mockResolvedValue(meeting);
     vi.mocked(getVenues).mockResolvedValue([venue]);
     vi.mocked(getBookSuggestions).mockResolvedValue([suggestedSlewfoot]);
   });
 
-  it("loads the event from the URL and fills in the form", async () => {
+  it("loads the meeting from the URL and fills in the form", async () => {
     await loaded();
     expect(vi.mocked(getMeeting).mock.calls[0][0]).toBe(ID);
     expect(valueOf("Title")).toBe("November: Piranesi");
@@ -106,14 +106,14 @@ describe("EditEventPage", () => {
     expect(valueOf("Description")).toBe("Bring a snack");
   });
 
-  it("saves every field and goes back to the events list", async () => {
+  it("saves every field and goes back to the meetings list", async () => {
     vi.mocked(updateMeeting).mockResolvedValue(meeting);
     await loaded();
     fill("Title", "November: Piranesi (moved)");
     fill("Starts", "2030-11-05T19:00");
     fill("Ends", "2030-11-05T21:00");
     fireEvent.click(screen.getByRole("button", { name: "Save changes" }));
-    expect(await screen.findByText("events page")).toBeTruthy();
+    expect(await screen.findByText("meetings page")).toBeTruthy();
     expect(vi.mocked(updateMeeting).mock.calls[0][0]).toEqual({
       id: ID,
       title: "November: Piranesi (moved)",
@@ -132,7 +132,7 @@ describe("EditEventPage", () => {
     await screen.findByRole("option", { name: "Slewfoot by Brom" });
     fill("Book", slewfoot.id);
     fireEvent.click(screen.getByRole("button", { name: "Save changes" }));
-    await screen.findByText("events page");
+    await screen.findByText("meetings page");
     expect(vi.mocked(updateMeeting).mock.calls[0][0]).toMatchObject({
       bookId: slewfoot.id,
     });
@@ -151,7 +151,7 @@ describe("EditEventPage", () => {
     expect(valueOf("Book")).toBe(slewfoot.id);
     fill("Book", "");
     fireEvent.click(screen.getByRole("button", { name: "Save changes" }));
-    await screen.findByText("events page");
+    await screen.findByText("meetings page");
     expect(vi.mocked(updateMeeting).mock.calls[0][0]).toMatchObject({
       bookId: null,
     });
@@ -164,7 +164,7 @@ describe("EditEventPage", () => {
     fill("Description", "");
     fill("Craft", "");
     fireEvent.click(screen.getByRole("button", { name: "Save changes" }));
-    await screen.findByText("events page");
+    await screen.findByText("meetings page");
     expect(vi.mocked(updateMeeting).mock.calls[0][0]).toMatchObject({
       venueId: null,
       description: null,
@@ -181,7 +181,7 @@ describe("EditEventPage", () => {
     );
   });
 
-  it("says so when the event doesn't exist", async () => {
+  it("says so when the meeting doesn't exist", async () => {
     vi.mocked(getMeeting).mockRejectedValue(
       new ApiError(404, "Meeting not found"),
     );

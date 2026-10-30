@@ -1,7 +1,7 @@
 import { fireEvent, screen, within } from "@testing-library/react";
 import { createMeeting, createVenue, getBookSuggestions, getVenues } from "../api";
 import { renderRoutes, Route } from "../test-utils";
-import NewEventPage from "./NewEventPage";
+import NewMeetingPage from "./NewMeetingPage";
 
 vi.mock("../api", () => ({
   createMeeting: vi.fn(),
@@ -14,10 +14,10 @@ const VENUE_ID = "00000000-0000-4000-8000-000000000003";
 
 const renderPage = () =>
   renderRoutes(
-    "/events/new",
+    "/meetings/new",
     <>
-      <Route path="/events/new" element={<NewEventPage />} />
-      <Route path="/events" element="events page" />
+      <Route path="/meetings/new" element={<NewMeetingPage />} />
+      <Route path="/meetings" element="meetings page" />
     </>,
   );
 
@@ -31,9 +31,9 @@ const fillForm = (end = "2030-11-04T21:00") => {
 };
 
 const submit = () =>
-  fireEvent.click(screen.getByRole("button", { name: "Create event" }));
+  fireEvent.click(screen.getByRole("button", { name: "Create meeting" }));
 
-describe("NewEventPage", () => {
+describe("NewMeetingPage", () => {
   beforeEach(() => {
     vi.mocked(getBookSuggestions).mockResolvedValue([]);
     vi.mocked(getVenues).mockResolvedValue([
@@ -48,7 +48,7 @@ describe("NewEventPage", () => {
     ]);
   });
 
-  it("creates the event in local time and goes to the events list", async () => {
+  it("creates the meeting in local time and goes to the meetings list", async () => {
     vi.mocked(createMeeting).mockResolvedValue({} as never);
     renderPage();
     fillForm();
@@ -57,7 +57,7 @@ describe("NewEventPage", () => {
     fill("Description", "Bring a snack");
     fill("Craft", "Bookmarks: bring old magazines");
     submit();
-    expect(await screen.findByText("events page")).toBeTruthy();
+    expect(await screen.findByText("meetings page")).toBeTruthy();
     expect(vi.mocked(createMeeting).mock.calls[0][0]).toEqual({
       title: "November: Piranesi",
       start: new Date("2030-11-04T19:00"),
@@ -74,7 +74,7 @@ describe("NewEventPage", () => {
     renderPage();
     fillForm();
     submit();
-    await screen.findByText("events page");
+    await screen.findByText("meetings page");
     expect(vi.mocked(createMeeting).mock.calls[0][0]).toMatchObject({
       venueId: null,
       description: null,
@@ -179,7 +179,7 @@ describe("NewEventPage", () => {
       );
     });
 
-    it("won't create the event until the venue is saved or cancelled", async () => {
+    it("won't create the meeting until the venue is saved or cancelled", async () => {
       await openNewVenue();
       fillForm();
       submit();

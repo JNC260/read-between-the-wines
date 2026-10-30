@@ -100,15 +100,15 @@ describe("ReadBooksPage", () => {
     expect(await screen.findByText(/3 books · 676 pages · since/)).toBeTruthy();
   });
 
-  it("features the next meeting's book, linked to the event, and flags its spine", async () => {
+  it("features the next meeting's book, linked to the meeting, and flags its spine", async () => {
     vi.mocked(getReadBooks).mockResolvedValue([slewfoot, circe]);
     renderPage();
     const banner = await screen.findByRole("region", { name: "Up next" });
     expect(within(banner).getByRole("heading", { name: "Slewfoot" })).toBeTruthy();
     expect(within(banner).getByText("Brom · 320 pages · published 2021")).toBeTruthy();
     expect(
-      within(banner).getByRole("link", { name: "See the event" }).getAttribute("href"),
-    ).toBe(`/events/${slewfoot.meetingId}`);
+      within(banner).getByRole("link", { name: "See the meeting" }).getAttribute("href"),
+    ).toBe(`/meetings/${slewfoot.meetingId}`);
     expect(
       screen.getByRole("button", { name: /^Slewfoot by Brom, up next in/ }),
     ).toBeTruthy();
@@ -137,7 +137,7 @@ describe("ReadBooksPage", () => {
     expect(spine("Piranesi").getAttribute("aria-pressed")).toBe("false");
     expect(
       within(details()).getByRole("link", { name: "See the meeting" }).getAttribute("href"),
-    ).toBe(`/events/${circe.meetingId}`);
+    ).toBe(`/meetings/${circe.meetingId}`);
   });
 
   it("says when a page count is missing", async () => {

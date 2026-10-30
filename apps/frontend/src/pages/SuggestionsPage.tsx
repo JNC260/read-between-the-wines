@@ -7,6 +7,7 @@ import {
   type SuggesterDTO,
 } from "shared";
 import BookCover from "../components/BookCover";
+import BooksTabs from "../components/BooksTabs";
 import { useBookSuggestions, useCurrentPoll } from "../hooks";
 import { authClient } from "../lib/auth-client";
 import { initials } from "../lib/initials";
@@ -304,6 +305,7 @@ const SuggestionsPage = () => {
 
   return (
     <div className="suggestions-page">
+      <BooksTabs />
       <div className="page-head">
         <div>
           <h1>Suggested books</h1>

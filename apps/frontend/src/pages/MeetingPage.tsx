@@ -206,7 +206,7 @@ const MeetingPage = () => {
   return (
     <article className="meeting-page">
       <p>
-        <Link to="/events">← All events</Link>
+        <Link to="/meetings">← All meetings</Link>
       </p>
       <header className="meeting-header">
         {book && <BookCover book={book} />}
@@ -215,7 +215,7 @@ const MeetingPage = () => {
           <h1>{book?.title ?? meeting.title}</h1>
           <p className="byline">{book ? book.author : "Book to be announced"}</p>
           {session?.user.isAdmin && (
-            <Link to={`/events/${meeting.id}/edit`}>Edit event</Link>
+            <Link to={`/meetings/${meeting.id}/edit`}>Edit meeting</Link>
           )}
         </div>
       </header>

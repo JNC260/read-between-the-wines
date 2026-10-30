@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { type ReadBookDTO } from "shared";
 import BookCover from "../components/BookCover";
 import Bookend, { BOOKEND_KINDS } from "../components/Bookend";
+import BooksTabs from "../components/BooksTabs";
 import { useRateBook, useReadBooks } from "../hooks";
 import { authClient } from "../lib/auth-client";
 
@@ -135,8 +136,8 @@ const UpNext = ({ book }: { book: ReadBookDTO }) => (
           .join(" · ")}
       </p>
     </div>
-    <Link to={`/events/${book.meetingId}`} className="button-link up-next-link">
-      See the event
+    <Link to={`/meetings/${book.meetingId}`} className="button-link up-next-link">
+      See the meeting
     </Link>
   </section>
 );
@@ -209,7 +210,7 @@ const BookDetails = ({
     <p className="muted">{average(book)}</p>
     <RateBook book={book} />
     <div className="book-details-links">
-      <Link to={`/events/${book.meetingId}`} className="button-link">
+      <Link to={`/meetings/${book.meetingId}`} className="button-link">
         See the meeting
       </Link>
       {canEdit && (
@@ -237,6 +238,7 @@ const ReadBooksPage = () => {
 
   return (
     <div className="read-page">
+      <BooksTabs />
       <div className="page-head">
         <div>
           {oldest && (

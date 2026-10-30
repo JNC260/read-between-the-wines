@@ -11,25 +11,25 @@ const NEW_VENUE = "new";
 
 // What the form sends: every field, so an edit can also clear the venue,
 // book, description or craft (null) rather than leave them as they were.
-export type EventValues = Required<
+export type MeetingValues = Required<
   Pick<
     CreateMeetingDTO,
     "title" | "start" | "end" | "venueId" | "bookId" | "description" | "craft"
   >
 >;
 
-// Shared by the new and edit event pages. Pass `event` to pre-fill it; it's
-// only read on the first render, so render the form once the event loads.
-const EventForm = ({
-  event,
+// Shared by the new and edit meeting pages. Pass `meeting` to pre-fill it; it's
+// only read on the first render, so render the form once the meeting loads.
+const MeetingForm = ({
+  meeting,
   onSubmit,
   isPending,
   error,
   submitLabel,
   pendingLabel,
 }: {
-  event?: MeetingDTO;
-  onSubmit: (values: EventValues) => void;
+  meeting?: MeetingDTO;
+  onSubmit: (values: MeetingValues) => void;
   isPending: boolean;
   error: Error | null;
   submitLabel: string;
@@ -37,13 +37,13 @@ const EventForm = ({
 }) => {
   const venues = useVenues();
   const suggestions = useBookSuggestions();
-  const [title, setTitle] = useState(event?.title ?? "");
-  const [start, setStart] = useState(event ? toLocalInput(event.start) : "");
-  const [end, setEnd] = useState(event ? toLocalInput(event.end) : "");
-  const [venueId, setVenueId] = useState(event?.venueId ?? "");
-  const [bookId, setBookId] = useState(event?.bookId ?? "");
-  const [description, setDescription] = useState(event?.description ?? "");
-  const [craft, setCraft] = useState(event?.craft ?? "");
+  const [title, setTitle] = useState(meeting?.title ?? "");
+  const [start, setStart] = useState(meeting ? toLocalInput(meeting.start) : "");
+  const [end, setEnd] = useState(meeting ? toLocalInput(meeting.end) : "");
+  const [venueId, setVenueId] = useState(meeting?.venueId ?? "");
+  const [bookId, setBookId] = useState(meeting?.bookId ?? "");
+  const [description, setDescription] = useState(meeting?.description ?? "");
+  const [craft, setCraft] = useState(meeting?.craft ?? "");
   const [invalid, setInvalid] = useState<string | null>(null);
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
@@ -140,9 +140,9 @@ const EventForm = ({
           onChange={(e) => setBookId(e.target.value)}
         >
           <option value="">Not decided yet</option>
-          {event?.book && (
-            <option value={event.book.id}>
-              {event.book.title} by {event.book.author}
+          {meeting?.book && (
+            <option value={meeting.book.id}>
+              {meeting.book.title} by {meeting.book.author}
             </option>
           )}
           {[...(suggestions.data ?? [])]
@@ -185,4 +185,4 @@ const EventForm = ({
   );
 };
 
-export default EventForm;
+export default MeetingForm;
