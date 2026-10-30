@@ -1,7 +1,7 @@
 import { fireEvent, screen, within } from "@testing-library/react";
 import { useLocation } from "react-router-dom";
 import { type PollDTO, type SuggestedBookDTO } from "shared";
-import { getBookSuggestions, getCurrentPoll } from "../api";
+import { getBookSuggestions, getCurrentPoll, withdrawSuggestion } from "../api";
 import { mockSession, renderRoutes, Route, testUser } from "../test-utils";
 import SuggestionsPage from "./SuggestionsPage";
 
@@ -9,6 +9,7 @@ vi.mock("../lib/auth-client", () => ({ authClient: { useSession: vi.fn() } }));
 vi.mock("../api", () => ({
   getBookSuggestions: vi.fn(),
   getCurrentPoll: vi.fn(),
+  withdrawSuggestion: vi.fn(),
 }));
 
 const ada = {
@@ -362,6 +363,76 @@ describe("SuggestionsPage", () => {
       renderPage();
       expect(await screen.findByRole("link", { name: "Edit Piranesi" })).toBeTruthy();
       expect(screen.getAllByRole("link", { name: /^Edit / })).toHaveLength(3);
+    });
+  });
+
+  describe("withdrawing a suggestion", () => {
+    const mine = book({ suggestedByMe: true });
+    const withdrawButton = () => screen.queryByRole("button", { name: "Withdraw Circe" });
+
+    it("lets the only suggester withdraw it, after asking", async () => {
+      vi.mocked(getBookSuggestions).mockResolvedValue([mine]);
+      vi.mocked(withdrawSuggestion).mockResolvedValue(undefined);
+      renderPage();
+      await titles();
+
+      fireEvent.click(withdrawButton() as HTMLElement);
+      const confirm = screen.getByRole("group", { name: "Withdraw Circe" });
+      expect(within(confirm).getByText(/Circe comes off the list/)).toBeTruthy();
+      fireEvent.click(within(confirm).getByRole("button", { name: "Keep it" }));
+      expect(withdrawSuggestion).not.toHaveBeenCalled();
+
+      fireEvent.click(withdrawButton() as HTMLElement);
+      fireEvent.click(
+        within(screen.getByRole("group", { name: "Withdraw Circe" })).getByRole("button", {
+          name: "Withdraw",
+        }),
+      );
+      await vi.waitFor(() => expect(vi.mocked(withdrawSuggestion).mock.calls[0][0]).toBe(mine.id));
+    });
+
+    it("isn't offered when someone else suggested it too, or it isn't mine", async () => {
+      vi.mocked(getBookSuggestions).mockResolvedValue([
+        book({ suggestedByMe: true, suggestedBy: [ada, ben] }),
+        book({ id: "00000000-0000-4000-8000-000000000011", title: "Piranesi" }),
+      ]);
+      renderPage();
+      await titles();
+      expect(screen.queryByRole("button", { name: /^Withdraw/ })).toBeNull();
+    });
+
+    it("isn't offered while the book is on the open poll", async () => {
+      vi.mocked(getBookSuggestions).mockResolvedValue([mine]);
+      vi.mocked(getCurrentPoll).mockResolvedValue({
+        id: "00000000-0000-4000-8000-000000000099",
+        theme: null,
+        opensAt: new Date("2026-10-20T00:00:00Z"),
+        closesAt: new Date("2099-11-01T00:00:00Z"),
+        votesPerMember: 1,
+        createdAt: new Date("2026-10-20T00:00:00Z"),
+        isOpen: true,
+        books: [{ ...mine, synopsis: null, meetingId: null }],
+        myVotes: [],
+        voterCount: 0,
+        results: null,
+      });
+      renderPage();
+      await screen.findByText("On the ballot");
+      expect(withdrawButton()).toBeNull();
+    });
+
+    it("shows the server's reason if it can't be withdrawn", async () => {
+      vi.mocked(getBookSuggestions).mockResolvedValue([mine]);
+      vi.mocked(withdrawSuggestion).mockRejectedValue(new Error("This book is on the open poll"));
+      renderPage();
+      await titles();
+      fireEvent.click(withdrawButton() as HTMLElement);
+      fireEvent.click(
+        within(screen.getByRole("group", { name: "Withdraw Circe" })).getByRole("button", {
+          name: "Withdraw",
+        }),
+      );
+      expect((await screen.findByRole("alert")).textContent).toBe("This book is on the open poll");
     });
   });
 });

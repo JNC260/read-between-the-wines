@@ -9,7 +9,11 @@ import {
 import Avatar from "../components/Avatar";
 import BookCover from "../components/BookCover";
 import BooksTabs from "../components/BooksTabs";
-import { useBookSuggestions, useCurrentPoll } from "../hooks";
+import {
+  useBookSuggestions,
+  useCurrentPoll,
+  useWithdrawSuggestion,
+} from "../hooks";
 import { authClient } from "../lib/auth-client";
 
 type SortOrder = "asc" | "desc";
@@ -151,6 +155,53 @@ type Selection = {
   onChange: () => void;
 };
 
+// Only on books this member alone suggested, and not while the book is on
+// the open poll (the API checks both). Asks once, in the card.
+const Withdraw = ({ book }: { book: SuggestedBookDTO }) => {
+  const { mutate, isPending, error } = useWithdrawSuggestion();
+  const [confirming, setConfirming] = useState(false);
+
+  if (!confirming) {
+    return (
+      <button
+        type="button"
+        className="catalog-card-withdraw"
+        aria-label={`Withdraw ${book.title}`}
+        onClick={() => setConfirming(true)}
+      >
+        Withdraw
+      </button>
+    );
+  }
+  return (
+    <div
+      className="catalog-card-confirm"
+      role="group"
+      aria-label={`Withdraw ${book.title}`}
+    >
+      <p>Withdraw your suggestion? {book.title} comes off the list.</p>
+      {error && <p role="alert">{error.message}</p>}
+      <div className="catalog-card-confirm-buttons">
+        <button
+          type="button"
+          className="button-primary"
+          disabled={isPending}
+          onClick={() => mutate(book.id)}
+        >
+          {isPending ? "Withdrawing..." : "Withdraw"}
+        </button>
+        <button
+          type="button"
+          className="button-quiet"
+          onClick={() => setConfirming(false)}
+        >
+          Keep it
+        </button>
+      </div>
+    </div>
+  );
+};
+
 const SuggestionItem = ({
   book,
   onBallot,
@@ -162,58 +213,70 @@ const SuggestionItem = ({
   // suggested by this member, or they're an admin
   canEdit: boolean;
   selection?: Selection;
-}) => (
-  <li
-    className={`catalog-card${selection?.checked ? " catalog-card-picked" : ""}`}
-  >
-    <BookCover book={book} />
-    <div className="catalog-card-text">
-      <h2>{book.title}</h2>
-      <p className="byline">{book.author}</p>
-      {details(book) && <p className="catalog-card-meta">{details(book)}</p>}
-      <div className="catalog-card-foot">
-        <span className="faces" aria-hidden="true">
-          {book.suggestedBy.slice(0, MAX_FACES).map((m) => (
-            <Avatar key={m.id} member={m} size="small" />
-          ))}
-        </span>
-        <span>
-          Suggested by {names(book.suggestedBy)} on{" "}
-          <time dateTime={book.suggestedAt.toISOString()}>
-            {suggestedOn.format(book.suggestedAt)}
-          </time>
-        </span>
+}) => {
+  // Someone else suggesting it too keeps it on the list.
+  const canWithdraw =
+    book.suggestedByMe && book.suggestedBy.length === 1 && !onBallot;
+  return (
+    <li
+      className={`catalog-card${selection?.checked ? " catalog-card-picked" : ""}`}
+    >
+      <BookCover book={book} />
+      <div className="catalog-card-text">
+        <h2>{book.title}</h2>
+        <p className="byline">{book.author}</p>
+        {details(book) && <p className="catalog-card-meta">{details(book)}</p>}
+        <div className="catalog-card-foot">
+          <span className="faces" aria-hidden="true">
+            {book.suggestedBy.slice(0, MAX_FACES).map((m) => (
+              <Avatar key={m.id} member={m} size="small" />
+            ))}
+          </span>
+          <span>
+            Suggested by {names(book.suggestedBy)} on{" "}
+            <time dateTime={book.suggestedAt.toISOString()}>
+              {suggestedOn.format(book.suggestedAt)}
+            </time>
+          </span>
+        </div>
+        {(onBallot || book.suggestedByMe) && (
+          <p className="badges">
+            {onBallot && (
+              <span className="badge badge-ballot">On the ballot</span>
+            )}
+            {book.suggestedByMe && (
+              <span className="badge badge-mine">You suggested this</span>
+            )}
+          </p>
+        )}
+        {(canEdit || canWithdraw) && (
+          <div className="catalog-card-actions">
+            {canEdit && (
+              <Link
+                to={`/books/${book.id}/edit`}
+                className="catalog-card-edit"
+                aria-label={`Edit ${book.title}`}
+              >
+                Edit
+              </Link>
+            )}
+            {canWithdraw && <Withdraw book={book} />}
+          </div>
+        )}
       </div>
-      {(onBallot || book.suggestedByMe) && (
-        <p className="badges">
-          {onBallot && <span className="badge badge-ballot">On the ballot</span>}
-          {book.suggestedByMe && (
-            <span className="badge badge-mine">You suggested this</span>
-          )}
-        </p>
+      {selection && (
+        <input
+          type="checkbox"
+          className="catalog-card-check"
+          aria-label={`Select ${book.title} for a poll`}
+          checked={selection.checked}
+          disabled={selection.disabled}
+          onChange={selection.onChange}
+        />
       )}
-      {canEdit && (
-        <Link
-          to={`/books/${book.id}/edit`}
-          className="catalog-card-edit"
-          aria-label={`Edit ${book.title}`}
-        >
-          Edit
-        </Link>
-      )}
-    </div>
-    {selection && (
-      <input
-        type="checkbox"
-        className="catalog-card-check"
-        aria-label={`Select ${book.title} for a poll`}
-        checked={selection.checked}
-        disabled={selection.disabled}
-        onChange={selection.onChange}
-      />
-    )}
-  </li>
-);
+    </li>
+  );
+};
 
 // A toggle chip: tap to turn the filter on, tap again to turn it off.
 const Chip = ({
@@ -344,7 +407,11 @@ const SuggestionsPage = () => {
           <div className="catalog-filters">
             <label className="search">
               <span className="visually-hidden">Search titles and authors</span>
-              <svg className="search-icon" viewBox="0 0 24 24" aria-hidden="true">
+              <svg
+                className="search-icon"
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
                 <circle cx="11" cy="11" r="6.5" />
                 <path d="M20 20l-4.2-4.2" />
               </svg>
@@ -395,7 +462,9 @@ const SuggestionsPage = () => {
                       key={genre}
                       pressed={filters.genre === genre}
                       onClick={() =>
-                        update({ genre: filters.genre === genre ? null : genre })
+                        update({
+                          genre: filters.genre === genre ? null : genre,
+                        })
                       }
                     >
                       {genre}
@@ -434,7 +503,9 @@ const SuggestionsPage = () => {
                       setSort(field, order === "asc" ? "desc" : "asc")
                     }
                   >
-                    <span aria-hidden="true">{order === "asc" ? "↑" : "↓"}</span>
+                    <span aria-hidden="true">
+                      {order === "asc" ? "↑" : "↓"}
+                    </span>
                   </button>
                 </div>
               </div>

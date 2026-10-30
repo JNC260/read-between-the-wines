@@ -8,7 +8,9 @@ import { prisma } from "../lib/prisma";
 import {
   addSuggestion,
   createBook,
+  createClosedPollRow,
   createMeeting,
+  createPollRow,
   createRating,
   createUser,
   resetDb,
@@ -738,6 +740,70 @@ describe("PATCH /books/:id", () => {
     const res = await api.request("PATCH", `/books/${book.id}`, {
       body: { title: "Circe" },
     });
+    expect(res.status).toBe(401);
+  });
+});
+
+describe("DELETE /books/:id/suggestion", () => {
+  const withdraw = (bookId: string, as: User = ada) =>
+    api.request("DELETE", `/books/${bookId}/suggestion`, { as });
+  const listed = async () =>
+    titles(await api.request("GET", "/books/suggestions", { as: ada }));
+
+  it("takes the book off the suggestions list for its only suggester", async () => {
+    const book = await createBook({ title: "Circe", suggestedBy: ada.id });
+    const res = await withdraw(book.id);
+
+    expect(res.status).toBe(204);
+    expect(await listed()).toEqual([]);
+    expect(await prisma.suggestion.count()).toBe(0);
+    // The book row stays, for old polls and votes that point at it.
+    expect(await prisma.book.count()).toBe(1);
+  });
+
+  it("can be suggested again afterwards", async () => {
+    const book = await createBook({ title: "Circe", suggestedBy: ada.id });
+    await withdraw(book.id);
+    await addSuggestion(ben.id, book.id);
+    expect(await listed()).toEqual(["Circe"]);
+  });
+
+  it("returns 409 when other members suggested it too", async () => {
+    const book = await createBook({ title: "Circe", suggestedBy: ada.id });
+    await addSuggestion(ben.id, book.id);
+    const res = await withdraw(book.id);
+    expect(res.status).toBe(409);
+    expect(await prisma.suggestion.count()).toBe(2);
+  });
+
+  it("returns 409 for a book on a meeting or on the open poll", async () => {
+    const onMeeting = await createBook({ title: "Circe", suggestedBy: ada.id });
+    await createMeeting({ bookId: onMeeting.id });
+    expect((await withdraw(onMeeting.id)).status).toBe(409);
+
+    const onPoll = await createBook({ title: "Piranesi", suggestedBy: ada.id });
+    const other = await createBook({ title: "Beloved", suggestedBy: ben.id });
+    await createPollRow({ bookIds: [onPoll.id, other.id], votesPerMember: 1 });
+    expect((await withdraw(onPoll.id)).status).toBe(409);
+  });
+
+  it("allows a book that was only on a poll that has closed", async () => {
+    const book = await createBook({ title: "Circe", suggestedBy: ada.id });
+    const other = await createBook({ title: "Beloved", suggestedBy: ben.id });
+    await createClosedPollRow({ bookIds: [book.id, other.id], votesPerMember: 1 });
+    expect((await withdraw(book.id)).status).toBe(204);
+  });
+
+  it("returns 404 for someone else's suggestion or an unknown book", async () => {
+    const book = await createBook({ title: "Circe", suggestedBy: ben.id });
+    expect((await withdraw(book.id)).status).toBe(404);
+    expect(await prisma.suggestion.count()).toBe(1);
+    expect((await withdraw(randomUUID())).status).toBe(404);
+  });
+
+  it("returns 401 when signed out", async () => {
+    const book = await createBook({ title: "Circe", suggestedBy: ada.id });
+    const res = await api.request("DELETE", `/books/${book.id}/suggestion`, {});
     expect(res.status).toBe(401);
   });
 });

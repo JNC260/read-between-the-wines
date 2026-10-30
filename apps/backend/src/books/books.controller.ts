@@ -43,6 +43,15 @@ export const createManualSuggestion = async (
   res.status(201).json(z.encode(BookSchema, book));
 };
 
+// DELETE /books/:id/suggestion -> 204
+export const withdrawSuggestion = async (
+  req: Request<{ id: string }>,
+  res: Response,
+) => {
+  await service.withdrawSuggestion(getUser(req).id, req.params.id);
+  res.status(204).end();
+};
+
 export const listSuggestions = async (req: Request, res: Response) => {
   const books = await service.listSuggestions(getUser(req).id);
   res.json(z.encode(SuggestedBookSchema.array(), books));
