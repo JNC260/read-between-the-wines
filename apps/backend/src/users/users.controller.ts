@@ -3,6 +3,7 @@ import * as z from "zod";
 import {
   type EmailSettingsDTO,
   EmailSettingsSchema,
+  type MergeAccountDTO,
   type MergePlaceholderDTO,
   MergeResultSchema,
   PlaceholderSchema,
@@ -18,6 +19,7 @@ import {
   getEmailSettings,
   listAccounts,
   listPlaceholders,
+  mergeAccounts,
   mergePlaceholder,
   reactivateUser,
   removeProfileImage,
@@ -117,6 +119,15 @@ export const userRemoveAdmin = async (req: Request<{ id: string }>, res: Respons
 export const userUnban = async (req: Request<{ id: string }>, res: Response) => {
   const user = await unbanUser(req.params.id);
   res.json(z.encode(UserSchema, user));
+};
+
+// POST /users/:id/merge (admins) -> what moved to the kept account
+export const userMerge = async (
+  req: Request<{ id: string }, unknown, MergeAccountDTO>,
+  res: Response,
+) => {
+  const result = await mergeAccounts(getUser(req).id, req.params.id, req.body.keepId);
+  res.json(z.encode(MergeResultSchema, result));
 };
 
 export const placeholderList = async (_req: Request, res: Response) => {

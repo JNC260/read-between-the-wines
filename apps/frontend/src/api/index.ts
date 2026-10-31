@@ -26,6 +26,8 @@ import {
   ManualBookSuggestionSchema,
   type MeetingListQuery,
   MeetingRsvpsSchema,
+  type MergeAccountDTO,
+  MergeAccountSchema,
   type MergePlaceholderDTO,
   MergePlaceholderSchema,
   MergeResultSchema,
@@ -158,6 +160,24 @@ export const banUser = (id: string) =>
     UserSchema,
     "Failed to ban the member",
     { method: "POST" },
+  );
+
+// The member can reactivate themselves when they sign in again.
+export const deactivateUser = (id: string) =>
+  apiFetch(
+    `/api/users/${encodeURIComponent(id)}/deactivate`,
+    UserSchema,
+    "Failed to deactivate the member",
+    { method: "POST" },
+  );
+
+// For a member who signed up twice: id's account is merged into keepId's.
+export const mergeAccount = ({ id, ...body }: MergeAccountDTO & { id: string }) =>
+  apiFetch(
+    `/api/users/${encodeURIComponent(id)}/merge`,
+    MergeResultSchema,
+    "Failed to merge the accounts",
+    { method: "POST", schema: MergeAccountSchema, body },
   );
 
 export const makeAdmin = (id: string) =>

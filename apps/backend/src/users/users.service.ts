@@ -258,14 +258,15 @@ const moveRows = async (
     data: { userId: toId },
   });
 
-  const voted = await tx.vote.findMany({ where: theirs });
+  // A ballot moves whole or not at all: in a poll both voted in, the
+  // member's own ballot wins, or they'd have more votes than the poll allows.
+  const voted = await tx.vote.findMany({
+    where: theirs,
+    select: { pollId: true },
+    distinct: ["pollId"],
+  });
   const votes = await tx.vote.updateMany({
-    where: {
-      userId: fromId,
-      ...(voted.length > 0 && {
-        NOT: voted.map((v) => ({ pollId: v.pollId, bookId: v.bookId })),
-      }),
-    },
+    where: { userId: fromId, pollId: { notIn: voted.map((v) => v.pollId) } },
     data: { userId: toId },
   });
 
@@ -308,6 +309,82 @@ export const mergePlaceholder = (
     await tx.user.delete({ where: { id: placeholder.id } });
     return moved;
   });
+
+// What a merge copies to the kept account when it left them blank.
+const PROFILE_FIELDS = [
+  "image",
+  "phone",
+  "facebookUrl",
+  "goodreadsUrl",
+  "instagram",
+  "tiktok",
+  "x",
+  "venmo",
+] as const;
+
+// Admins only. For a member who signed up twice: the duplicate's
+// suggestions, ratings, RSVPs, votes and invites move to the account they
+// keep, as in a placeholder merge, along with any profile details the kept
+// account is missing and the earlier member-since year. Then the duplicate
+// is deleted, which signs it out everywhere. All or nothing, except the
+// duplicate's photo file, deleted afterwards unless it moved over.
+export const mergeAccounts = async (
+  adminId: string,
+  duplicateId: string,
+  keepId: string,
+): Promise<MergeResultDTO> => {
+  const { moved, leftoverImage } = await prisma.$transaction(async (tx) => {
+    const duplicate = await tx.user.findUnique({ where: { id: duplicateId } });
+    if (!duplicate || isPlaceholderEmail(duplicate.email)) {
+      throw new NotFoundError("User not found");
+    }
+    const keep = await tx.user.findUnique({ where: { id: keepId } });
+    if (!keep || isPlaceholderEmail(keep.email)) {
+      throw new NotFoundError("Member not found");
+    }
+    if (keep.id === duplicate.id) {
+      throw new BadRequestError("Pick a different account to keep");
+    }
+    if (duplicate.id === adminId) {
+      throw new BadRequestError("You can't merge away your own account");
+    }
+    // Deleting an admin should be a decision of its own.
+    if (duplicate.isAdmin) {
+      throw new BadRequestError("Remove their admin first");
+    }
+    if (keep.status !== UserStatus.ACTIVE) {
+      throw new BadRequestError(`Account is ${keep.status.toLowerCase()}`);
+    }
+
+    const moved = await moveRows(tx, duplicate.id, keep.id);
+    await tx.invite.updateMany({
+      where: { invitedById: duplicate.id },
+      data: { invitedById: keep.id },
+    });
+    const filled = PROFILE_FIELDS.filter(
+      (field) => keep[field] === null && duplicate[field] !== null,
+    );
+    const years = [keep.memberSince, duplicate.memberSince].filter(
+      (year) => year !== null,
+    );
+    await tx.user.update({
+      where: { id: keep.id },
+      data: {
+        ...Object.fromEntries(filled.map((field) => [field, duplicate[field]])),
+        memberSince: years.length > 0 ? Math.min(...years) : null,
+      },
+    });
+    await tx.user.delete({ where: { id: duplicate.id } });
+    return {
+      moved,
+      leftoverImage: filled.includes("image") ? null : duplicate.image,
+    };
+  });
+  if (leftoverImage) {
+    await deleteImage(leftoverImage);
+  }
+  return moved;
+};
 
 // Called once a new member verifies their email. If exactly one placeholder
 // has their first and last name, it was them, so its history becomes theirs.

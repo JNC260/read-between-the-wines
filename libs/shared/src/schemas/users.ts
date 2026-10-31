@@ -124,6 +124,14 @@ export const MergePlaceholderSchema = z.object({
 
 export type MergePlaceholderDTO = z.infer<typeof MergePlaceholderSchema>;
 
+// For a member who signed up twice: the account they keep. The other one,
+// in the URL, is merged into it.
+export const MergeAccountSchema = z.object({
+  keepId: z.uuid("Pick the account to keep"),
+});
+
+export type MergeAccountDTO = z.infer<typeof MergeAccountSchema>;
+
 // How many rows moved to the member. Ones they already had (the same book
 // suggested twice, say) are dropped rather than counted.
 export const MergeResultSchema = z.object({

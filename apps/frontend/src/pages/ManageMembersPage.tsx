@@ -5,7 +5,9 @@ import Avatar from "../components/Avatar";
 import {
   useAccounts,
   useBanUser,
+  useDeactivateUser,
   useMakeAdmin,
+  useMergeAccount,
   useOpenInvites,
   useRemoveAdmin,
   useRevokeInvite,
@@ -21,8 +23,8 @@ const shortDate = new Intl.DateTimeFormat(undefined, {
 const fullName = (u: { firstName: string; lastName: string }) =>
   `${u.firstName} ${u.lastName}`;
 
-// An action that asks once first, in the member's row: banning, and making
-// or removing an admin. useAction is the mutation hook for it.
+// An action that asks once first, in the member's row: deactivating,
+// banning, and making or removing an admin. useAction is the mutation hook for it.
 const ConfirmButton = ({
   member,
   label,
@@ -87,6 +89,17 @@ const BanButton = ({ member }: { member: UserDTO }) => (
   />
 );
 
+const DeactivateButton = ({ member }: { member: UserDTO }) => (
+  <ConfirmButton
+    member={member}
+    label="Deactivate"
+    verb="Deactivate"
+    question={`Deactivate ${fullName(member)}? They leave the members list until they sign in and reactivate. Their suggestions, ratings and RSVPs stay.`}
+    keepLabel="Keep them"
+    useAction={useDeactivateUser}
+  />
+);
+
 const MakeAdminButton = ({ member }: { member: UserDTO }) => (
   <ConfirmButton
     member={member}
@@ -108,6 +121,78 @@ const RemoveAdminButton = ({ member }: { member: UserDTO }) => (
     useAction={useRemoveAdmin}
   />
 );
+
+// For a member who signed up twice. The two accounts usually share a name,
+// so the button is named by email and each choice shows one.
+const MergeButton = ({
+  member,
+  accounts,
+  onMerged,
+}: {
+  member: UserDTO;
+  accounts: UserDTO[];
+  onMerged: (message: string) => void;
+}) => {
+  const { mutate, isPending, error } = useMergeAccount();
+  const [confirming, setConfirming] = useState(false);
+  const [keepId, setKeepId] = useState("");
+  const keep = accounts.find((a) => a.id === keepId);
+  const label = `Merge ${member.email}`;
+  const selectId = `merge-${member.id}`;
+
+  if (!confirming) {
+    return (
+      <button
+        type="button"
+        className="button-quiet"
+        aria-label={label}
+        onClick={() => setConfirming(true)}
+      >
+        Merge…
+      </button>
+    );
+  }
+  return (
+    <div className="manage-confirm" role="group" aria-label={label}>
+      <label htmlFor={selectId}>Merge {member.email} into</label>
+      <select id={selectId} value={keepId} onChange={(e) => setKeepId(e.target.value)}>
+        <option value="">Pick the account to keep…</option>
+        {accounts.map((a) => (
+          <option key={a.id} value={a.id}>
+            {fullName(a)} ({a.email})
+          </option>
+        ))}
+      </select>
+      {keep && (
+        <p>
+          Their suggestions, ratings, RSVPs and votes move to {keep.email},
+          along with any profile details it's missing, and {member.email} is
+          deleted. This can't be undone.
+        </p>
+      )}
+      {error && <p role="alert">{error.message}</p>}
+      <div className="manage-confirm-buttons">
+        <button
+          type="button"
+          className="button-primary"
+          disabled={!keep || isPending}
+          onClick={() =>
+            keep &&
+            mutate(
+              { id: member.id, keepId: keep.id },
+              { onSuccess: () => onMerged(`Merged ${member.email} into ${keep.email}.`) },
+            )
+          }
+        >
+          {isPending ? "Merging..." : "Merge"}
+        </button>
+        <button type="button" className="button-quiet" onClick={() => setConfirming(false)}>
+          Cancel
+        </button>
+      </div>
+    </div>
+  );
+};
 
 const UnbanButton = ({ member }: { member: UserDTO }) => {
   const { mutate, isPending, error } = useUnbanUser();
@@ -184,6 +269,7 @@ const ManageMembersPage = () => {
   const { data: session } = authClient.useSession();
   const accounts = useAccounts();
   const invites = useOpenInvites();
+  const [message, setMessage] = useState<string | null>(null);
 
   const members = accounts.data?.filter((u) => u.status !== "BANNED") ?? [];
   const banned = accounts.data?.filter((u) => u.status === "BANNED") ?? [];
@@ -194,6 +280,7 @@ const ManageMembersPage = () => {
         <Link to="/members">← Members</Link>
       </p>
       <h1>Manage members</h1>
+      {message && <p role="status">{message}</p>}
 
       <section aria-labelledby="accounts-title">
         <h2 id="accounts-title">Members</h2>
@@ -207,11 +294,24 @@ const ManageMembersPage = () => {
                 <AccountRow key={member.id} member={member} isMe={isMe}>
                   {member.isAdmin && <span className="badge badge-mine">Admin</span>}
                   {/* Nobody changes their own role, and admins can't be
-                      banned (the API checks both). Only active members can
-                      become admins. */}
+                      banned or merged away (the API checks all three).
+                      Only active members can become admins, be
+                      deactivated, or be merged into. */}
                   {!isMe && member.isAdmin && <RemoveAdminButton member={member} />}
                   {!isMe && !member.isAdmin && member.status === "ACTIVE" && (
                     <MakeAdminButton member={member} />
+                  )}
+                  {!isMe && !member.isAdmin && member.status === "ACTIVE" && (
+                    <DeactivateButton member={member} />
+                  )}
+                  {!isMe && !member.isAdmin && (
+                    <MergeButton
+                      member={member}
+                      accounts={members.filter(
+                        (a) => a.id !== member.id && a.status === "ACTIVE",
+                      )}
+                      onMerged={setMessage}
+                    />
                   )}
                   {!isMe && !member.isAdmin && <BanButton member={member} />}
                 </AccountRow>

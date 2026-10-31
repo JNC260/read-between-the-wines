@@ -1,6 +1,7 @@
 import express from "express";
 import {
   EmailSettingsSchema,
+  MergeAccountSchema,
   MergePlaceholderSchema,
   UpdateProfileSchema,
 } from "shared";
@@ -22,6 +23,7 @@ import {
   userDeactivateSelf,
   userMakeAdmin,
   userList,
+  userMerge,
   userReactivateSelf,
   userRemoveAdmin,
   userRemoveImage,
@@ -63,6 +65,14 @@ router.post(
 router.post("/:id/deactivate", requireAuth, requireAdmin, userDeactivate);
 router.post("/:id/ban", requireAuth, requireAdmin, userBan);
 router.post("/:id/unban", requireAuth, requireAdmin, userUnban);
+// For a member who signed up twice: :id is merged into keepId, then deleted.
+router.post(
+  "/:id/merge",
+  requireAuth,
+  requireAdmin,
+  validate(MergeAccountSchema),
+  userMerge,
+);
 // PUT and DELETE: it's a yes/no setting, and sending either twice is a 409.
 router.put("/:id/admin", requireAuth, requireAdmin, userMakeAdmin);
 router.delete("/:id/admin", requireAuth, requireAdmin, userRemoveAdmin);
