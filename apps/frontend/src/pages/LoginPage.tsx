@@ -1,5 +1,8 @@
 import { type FormEvent, useState } from "react";
 import { Link, Navigate, useLocation, useNavigate } from "react-router-dom";
+import { type SignInDTO, SignInSchema } from "shared";
+import * as z from "zod";
+import Field from "../components/Field";
 import { useSignIn } from "../hooks";
 import { authClient } from "../lib/auth-client";
 
@@ -13,6 +16,9 @@ const LoginPage = () => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<
+    Partial<Record<keyof SignInDTO, string[]>>
+  >({});
   const { mutate, isPending, error } = useSignIn();
 
   // Set by RequireAuth when it redirected a signed-out member.
@@ -27,8 +33,14 @@ const LoginPage = () => {
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    const result = SignInSchema.safeParse({ email, password });
+    if (!result.success) {
+      setFieldErrors(z.flattenError(result.error).fieldErrors);
+      return;
+    }
+    setFieldErrors({});
     mutate(
-      { email, password },
+      result.data,
       {
         // Wait for the session to refresh first. Otherwise RequireAuth on the
         // next page still sees "signed out" and bounces them to "/".
@@ -45,29 +57,25 @@ const LoginPage = () => {
   return (
     <div>
       <h1>Log in</h1>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label htmlFor="email">Email</label>
-          <input
-            id="email"
-            type="email"
-            autoComplete="email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-        </div>
-        <div>
-          <label htmlFor="password">Password</label>
-          <input
-            id="password"
-            type="password"
-            autoComplete="current-password"
-            required
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-        </div>
+      <form onSubmit={handleSubmit} noValidate>
+        <Field
+          id="email"
+          label="Email"
+          type="email"
+          autoComplete="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          error={fieldErrors.email?.[0]}
+        />
+        <Field
+          id="password"
+          label="Password"
+          type="password"
+          autoComplete="current-password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          error={fieldErrors.password?.[0]}
+        />
         {error && <p role="alert">{error.message}</p>}
         <button type="submit" disabled={isPending}>
           {isPending ? "Logging in..." : "Log in"}

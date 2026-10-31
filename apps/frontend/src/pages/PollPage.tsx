@@ -1,6 +1,6 @@
 import { type FormEvent, useId, useState } from "react";
 import { useParams } from "react-router-dom";
-import { type BookDTO, type PollDTO } from "shared";
+import { type BookDTO, CastVotesSchema, type PollDTO } from "shared";
 import BookCover from "../components/BookCover";
 import { AssignBook, PollAdminActions } from "../components/PollAdmin";
 import { useCastVotes, useMeetings, usePoll } from "../hooks";
@@ -88,11 +88,13 @@ const BookDetails = ({ book }: { book: BookDTO }) => {
 const Ballot = ({ poll }: { poll: PollDTO }) => {
   const { mutate, isPending, isSuccess, error, reset } = useCastVotes();
   const [picked, setPicked] = useState<string[]>(poll.myVotes);
+  const [invalid, setInvalid] = useState<string | null>(null);
   const full = picked.length >= poll.votesPerMember;
   const hasVoted = poll.myVotes.length > 0;
 
   const toggle = (id: string) => {
     reset();
+    setInvalid(null);
     setPicked((ids) =>
       ids.includes(id) ? ids.filter((i) => i !== id) : [...ids, id],
     );
@@ -100,7 +102,12 @@ const Ballot = ({ poll }: { poll: PollDTO }) => {
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    mutate({ pollId: poll.id, bookIds: picked });
+    const result = CastVotesSchema.safeParse({ bookIds: picked });
+    if (!result.success) {
+      setInvalid(result.error.issues[0].message);
+      return;
+    }
+    mutate({ pollId: poll.id, ...result.data });
   };
 
   return (
@@ -134,9 +141,9 @@ const Ballot = ({ poll }: { poll: PollDTO }) => {
       </ul>
       {/* Follows the member down the ballot, with any error just above it. */}
       <div className="poll-submit">
-        {error && (
+        {(invalid ?? error) && (
           <p role="alert" className="poll-submit-note">
-            {error.message}
+            {invalid ?? error?.message}
           </p>
         )}
         <div className="pick-bar">

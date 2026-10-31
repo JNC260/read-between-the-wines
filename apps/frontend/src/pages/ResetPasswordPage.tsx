@@ -1,10 +1,9 @@
 import { type FormEvent, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
+import { type ResetPasswordDTO, ResetPasswordSchema } from "shared";
+import * as z from "zod";
+import Field from "../components/Field";
 import { useResetPassword } from "../hooks";
-
-// Better Auth's limits for email and password accounts.
-const MIN_LENGTH = 8;
-const MAX_LENGTH = 128;
 
 // The reset email links to /api/auth/reset-password/<token>, which redirects
 // here with ?token=... or, if the link is bad or expired, ?error=INVALID_TOKEN.
@@ -13,7 +12,9 @@ const ResetPasswordPage = () => {
   const token = searchParams.get("token");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
-  const [mismatch, setMismatch] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<
+    Partial<Record<keyof ResetPasswordDTO, string[]>>
+  >({});
   const { mutate, isPending, isSuccess, error } = useResetPassword();
 
   if (!token || searchParams.get("error")) {
@@ -38,43 +39,37 @@ const ResetPasswordPage = () => {
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (password !== confirm) {
-      setMismatch(true);
+    const result = ResetPasswordSchema.safeParse({ password, confirm });
+    if (!result.success) {
+      setFieldErrors(z.flattenError(result.error).fieldErrors);
       return;
     }
-    setMismatch(false);
-    mutate({ token, newPassword: password });
+    setFieldErrors({});
+    mutate({ token, newPassword: result.data.password });
   };
 
   return (
     <div>
       <h1>Reset password</h1>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label htmlFor="password">New password</label>
-          <input
-            id="password"
-            type="password"
-            autoComplete="new-password"
-            required
-            minLength={MIN_LENGTH}
-            maxLength={MAX_LENGTH}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-        </div>
-        <div>
-          <label htmlFor="confirm">Confirm new password</label>
-          <input
-            id="confirm"
-            type="password"
-            autoComplete="new-password"
-            required
-            value={confirm}
-            onChange={(e) => setConfirm(e.target.value)}
-          />
-        </div>
-        {mismatch && <p role="alert">Passwords don't match.</p>}
+      <form onSubmit={handleSubmit} noValidate>
+        <Field
+          id="password"
+          label="New password"
+          type="password"
+          autoComplete="new-password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          error={fieldErrors.password?.[0]}
+        />
+        <Field
+          id="confirm"
+          label="Confirm new password"
+          type="password"
+          autoComplete="new-password"
+          value={confirm}
+          onChange={(e) => setConfirm(e.target.value)}
+          error={fieldErrors.confirm?.[0]}
+        />
         {error && <p role="alert">{error.message}</p>}
         <button type="submit" disabled={isPending}>
           {isPending ? "Saving..." : "Set new password"}

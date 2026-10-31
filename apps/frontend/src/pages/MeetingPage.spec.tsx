@@ -184,6 +184,26 @@ describe("MeetingPage", () => {
     expect((await screen.findByRole("status")).textContent).toBe("Saved");
   });
 
+  it("checks the guest count before saving", async () => {
+    vi.mocked(getMeetingRsvps).mockResolvedValue(
+      testRsvps({
+        myStatus: "YES",
+        rsvps: [
+          {
+            ...testRsvp("Ada", "YES", 1, { dish: null, guestCount: 0 }),
+            member: { id: testUser().id, firstName: "Ada", lastName: "Reader", image: null },
+          },
+        ],
+      }),
+    );
+    renderPage();
+    fireEvent.click(await screen.findByRole("button", { name: "Change" }));
+    fireEvent.change(screen.getByLabelText("Guests"), { target: { value: "2.5" } });
+    fireEvent.click(screen.getByRole("button", { name: "Save" }));
+    expect(screen.getByRole("alert").textContent).toBe("Enter a whole number");
+    expect(setRsvp).not.toHaveBeenCalled();
+  });
+
   it("shows an earlier answer as one line until they change it", async () => {
     vi.mocked(getMeetingRsvps).mockResolvedValue(
       testRsvps({

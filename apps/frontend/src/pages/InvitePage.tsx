@@ -1,10 +1,9 @@
 import { type FormEvent, useState } from "react";
 import { useParams } from "react-router-dom";
+import { type SignUpDTO, SignUpSchema } from "shared";
+import * as z from "zod";
+import Field from "../components/Field";
 import { useInvite, useSignUpWithInvite } from "../hooks";
-
-// Better Auth's limits for email and password accounts.
-const MIN_LENGTH = 8;
-const MAX_LENGTH = 128;
 
 // Invite links shared by members point here: /invite/<token>.
 const InvitePage = () => {
@@ -15,7 +14,9 @@ const InvitePage = () => {
   const [lastName, setLastName] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
-  const [mismatch, setMismatch] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<
+    Partial<Record<keyof SignUpDTO, string[]>>
+  >({});
   const { mutate, isPending, isSuccess, error } = useSignUpWithInvite();
 
   if (isSuccess) {
@@ -49,74 +50,75 @@ const InvitePage = () => {
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (password !== confirm) {
-      setMismatch(true);
+    const result = SignUpSchema.safeParse({
+      email,
+      firstName,
+      lastName,
+      password,
+      confirm,
+    });
+    if (!result.success) {
+      setFieldErrors(z.flattenError(result.error).fieldErrors);
       return;
     }
-    setMismatch(false);
-    mutate({ token, email, password, firstName, lastName });
+    setFieldErrors({});
+    const { data } = result;
+    mutate({
+      token,
+      email: data.email,
+      password: data.password,
+      firstName: data.firstName,
+      lastName: data.lastName,
+    });
   };
 
   return (
     <div>
       <h1>Join Read Between the Wines</h1>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label htmlFor="email">Email</label>
-          <input
-            id="email"
-            type="email"
-            autoComplete="email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-        </div>
-        <div>
-          <label htmlFor="firstName">First name</label>
-          <input
-            id="firstName"
-            autoComplete="given-name"
-            required
-            value={firstName}
-            onChange={(e) => setFirstName(e.target.value)}
-          />
-        </div>
-        <div>
-          <label htmlFor="lastName">Last name</label>
-          <input
-            id="lastName"
-            autoComplete="family-name"
-            required
-            value={lastName}
-            onChange={(e) => setLastName(e.target.value)}
-          />
-        </div>
-        <div>
-          <label htmlFor="password">Password</label>
-          <input
-            id="password"
-            type="password"
-            autoComplete="new-password"
-            required
-            minLength={MIN_LENGTH}
-            maxLength={MAX_LENGTH}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-        </div>
-        <div>
-          <label htmlFor="confirm">Confirm password</label>
-          <input
-            id="confirm"
-            type="password"
-            autoComplete="new-password"
-            required
-            value={confirm}
-            onChange={(e) => setConfirm(e.target.value)}
-          />
-        </div>
-        {mismatch && <p role="alert">Passwords don't match.</p>}
+      <form onSubmit={handleSubmit} noValidate>
+        <Field
+          id="email"
+          label="Email"
+          type="email"
+          autoComplete="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          error={fieldErrors.email?.[0]}
+        />
+        <Field
+          id="firstName"
+          label="First name"
+          autoComplete="given-name"
+          value={firstName}
+          onChange={(e) => setFirstName(e.target.value)}
+          error={fieldErrors.firstName?.[0]}
+        />
+        <Field
+          id="lastName"
+          label="Last name"
+          autoComplete="family-name"
+          value={lastName}
+          onChange={(e) => setLastName(e.target.value)}
+          error={fieldErrors.lastName?.[0]}
+        />
+        <Field
+          id="password"
+          label="Password"
+          type="password"
+          autoComplete="new-password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          error={fieldErrors.password?.[0]}
+        />
+        <Field
+          id="confirm"
+          label="Confirm password"
+          type="password"
+          autoComplete="new-password"
+          value={confirm}
+          onChange={(e) => setConfirm(e.target.value)}
+          error={fieldErrors.confirm?.[0]}
+        />
         {error && <p role="alert">{error.message}</p>}
         <button type="submit" disabled={isPending}>
           {isPending ? "Creating account..." : "Create account"}
