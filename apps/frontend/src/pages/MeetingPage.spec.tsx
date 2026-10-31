@@ -67,7 +67,7 @@ describe("MeetingPage", () => {
     renderPage();
     const going = (await screen.findByRole("heading", { name: /Going/ }))
       .parentElement as HTMLElement;
-    expect(within(going).getAllByRole("listitem").map((li) => li.textContent))
+    expect(within(going).getAllByRole("listitem").map((li) => li.lastElementChild?.textContent))
       .toEqual(["Priya Reader", "Jen Reader"]);
     expect(screen.getByRole("heading", { name: /Maybe/ })).toBeTruthy();
     expect(screen.queryByRole("heading", { name: /Can't make it/ })).toBeNull();
@@ -124,7 +124,7 @@ describe("MeetingPage", () => {
     const heading = await screen.findByRole("heading", { name: /Going/ });
     expect(heading.textContent).toBe("Going 4");
     const going = heading.parentElement as HTMLElement;
-    expect(within(going).getAllByRole("listitem").map((li) => li.textContent))
+    expect(within(going).getAllByRole("listitem").map((li) => li.lastElementChild?.textContent))
       .toEqual(["Priya Reader +2 guests", "Jen Reader"]);
   });
 

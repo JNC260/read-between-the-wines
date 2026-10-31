@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { type RsvpDTO, type RsvpStatus, type VenueDTO } from "shared";
 import AddToCalendar from "../components/AddToCalendar";
+import Avatar from "../components/Avatar";
 import BookCover from "../components/BookCover";
 import MeetingAdminActions from "../components/MeetingAdmin";
 import { plural, RsvpButtons, RsvpDetails } from "../components/RsvpButtons";
@@ -48,17 +49,20 @@ const WhoIsComing = ({ meetingId }: { meetingId: string }) => {
         const people = members.reduce((sum, r) => sum + 1 + r.guestCount, 0);
         return (
           members.length > 0 && (
-            <div key={status}>
+            <div key={status} className={`rsvp-group rsvp-group-${status.toLowerCase()}`}>
               <h3>
-                {heading} <span className="muted">{people}</span>
+                {heading} <span className="badge">{people}</span>
               </h3>
               <ul>
                 {members.map((r) => (
                   <li key={r.member.id}>
-                    {fullName(r)}
-                    {r.guestCount > 0 && (
-                      <span className="muted"> +{plural(r.guestCount, "guest")}</span>
-                    )}
+                    <Avatar member={r.member} size="small" />
+                    <span>
+                      {fullName(r)}
+                      {r.guestCount > 0 && (
+                        <span className="muted"> +{plural(r.guestCount, "guest")}</span>
+                      )}
+                    </span>
                   </li>
                 ))}
               </ul>
@@ -102,7 +106,7 @@ const YourRsvpPanel = ({
           <strong>{YOUR_ANSWER[myStatus]}</strong>
           {details.length > 0 && ` · ${details.join(" · ")}`}
         </p>
-        <button type="button" onClick={() => setOpen(true)}>
+        <button type="button" className="button-quiet" onClick={() => setOpen(true)}>
           Change
         </button>
       </div>

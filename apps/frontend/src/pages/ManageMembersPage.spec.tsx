@@ -2,9 +2,11 @@ import { fireEvent, screen, within } from "@testing-library/react";
 import { type UserDTO } from "shared";
 import {
   banUser,
+  deactivateUser,
   getAccounts,
   getOpenInvites,
   makeAdmin,
+  mergeAccount,
   removeAdmin,
   revokeInvite,
   unbanUser,
@@ -15,9 +17,11 @@ import ManageMembersPage from "./ManageMembersPage";
 vi.mock("../lib/auth-client", () => ({ authClient: { useSession: vi.fn() } }));
 vi.mock("../api", () => ({
   banUser: vi.fn(),
+  deactivateUser: vi.fn(),
   getAccounts: vi.fn(),
   getOpenInvites: vi.fn(),
   makeAdmin: vi.fn(),
+  mergeAccount: vi.fn(),
   removeAdmin: vi.fn(),
   revokeInvite: vi.fn(),
   unbanUser: vi.fn(),
@@ -161,6 +165,18 @@ describe("ManageMembersPage", () => {
     expect(screen.queryByRole("button", { name: /Make admin: Jen/ })).toBeNull();
   });
 
+  it("deactivates a member, after asking", async () => {
+    vi.mocked(deactivateUser).mockResolvedValue({ ...ada, status: "INACTIVE" });
+    renderPage();
+    fireEvent.click(await screen.findByRole("button", { name: "Deactivate Ada Lovelace" }));
+    const confirm = screen.getByRole("group", { name: "Deactivate Ada Lovelace" });
+    expect(within(confirm).getByText(/until they sign in and reactivate/)).toBeTruthy();
+    fireEvent.click(within(confirm).getByRole("button", { name: "Deactivate" }));
+    await vi.waitFor(() => expect(vi.mocked(deactivateUser).mock.calls[0][0]).toBe(ada.id));
+    expect(screen.queryByRole("button", { name: /Deactivate Otto/ })).toBeNull();
+    expect(screen.queryByRole("button", { name: /Deactivate Jen/ })).toBeNull();
+  });
+
   it("only offers admin to active members", async () => {
     vi.mocked(getAccounts).mockResolvedValue([
       { ...ada, status: "INACTIVE" },
@@ -169,6 +185,38 @@ describe("ManageMembersPage", () => {
     renderPage();
     await screen.findByText("Ada Lovelace");
     expect(screen.queryByRole("button", { name: /Make admin: Ada/ })).toBeNull();
+    expect(screen.queryByRole("button", { name: /Deactivate Ada/ })).toBeNull();
     expect(screen.getByRole("button", { name: "Ban Ada Lovelace" })).toBeTruthy();
+  });
+
+  it("merges a member's duplicate account into the one they keep", async () => {
+    const adaOld = account({
+      id: "00000000-0000-4000-8000-000000000014",
+      firstName: "Ada",
+      lastName: "Lovelace",
+      email: "ada@typo.example.com",
+    });
+    vi.mocked(getAccounts).mockResolvedValue([adaOld, ada, other, self]);
+    vi.mocked(mergeAccount).mockResolvedValue({ suggestions: 2, ratings: 1, rsvps: 0, votes: 0 });
+    renderPage();
+
+    // Both Adas, but not the admins, yourself included.
+    expect(await screen.findAllByRole("button", { name: /^Merge / })).toHaveLength(2);
+    fireEvent.click(screen.getByRole("button", { name: "Merge ada@typo.example.com" }));
+    const confirm = screen.getByRole("group", { name: "Merge ada@typo.example.com" });
+    const merge = within(confirm).getByRole("button", { name: "Merge" }) as HTMLButtonElement;
+    expect(merge.disabled).toBe(true);
+    fireEvent.change(within(confirm).getByLabelText(/Merge ada@typo.example.com into/), {
+      target: { value: ada.id },
+    });
+    expect(within(confirm).getByText(/move to member@example.com/)).toBeTruthy();
+    fireEvent.click(merge);
+
+    await vi.waitFor(() =>
+      expect(vi.mocked(mergeAccount).mock.calls[0][0]).toEqual({ id: adaOld.id, keepId: ada.id }),
+    );
+    expect(
+      (await screen.findByRole("status")).textContent,
+    ).toBe("Merged ada@typo.example.com into member@example.com.");
   });
 });

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { type ReactNode, useEffect, useId, useRef, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import {
   MAX_POLL_BOOKS,
@@ -298,6 +298,181 @@ const Chip = ({
   </button>
 );
 
+// How many genres show before "More genres". The rest are a tap away, so
+// the sidebar fits on screen however many genres books pick up.
+const TOP_GENRES = 8;
+
+type GenreCount = { genre: string; count: number };
+
+// Most books first, then A to Z.
+const countGenres = (books: SuggestedBookDTO[]): GenreCount[] => {
+  const counts = new Map<string, number>();
+  for (const genre of books.flatMap((b) => b.genres)) {
+    counts.set(genre, (counts.get(genre) ?? 0) + 1);
+  }
+  return [...counts]
+    .map(([genre, count]) => ({ genre, count }))
+    .sort((a, b) => b.count - a.count || a.genre.localeCompare(b.genre));
+};
+
+type Update = (changes: Record<string, string | null>) => void;
+
+// Show, length and genre. The same groups sit in the desktop sidebar and
+// the phone's filter sheet; useId keeps their labels apart while both are
+// on the page.
+const FilterGroups = ({
+  filters,
+  update,
+  genres,
+  className,
+}: {
+  filters: Filters;
+  update: Update;
+  genres: GenreCount[];
+  className: string;
+}) => {
+  const id = useId();
+  const [allGenres, setAllGenres] = useState(false);
+  // A picked genre stays in view even when it isn't one of the top ones.
+  const shownGenres = allGenres
+    ? genres
+    : genres.filter((g, i) => i < TOP_GENRES || g.genre === filters.genre);
+  const hidden = genres.length - shownGenres.length;
+
+  return (
+    <div className={className}>
+      <div role="group" aria-labelledby={`${id}-show`}>
+        <span id={`${id}-show`} className="filter-label">
+          Show
+        </span>
+        <Chip
+          pressed={filters.mine}
+          onClick={() => update({ mine: filters.mine ? null : "1" })}
+        >
+          Suggested by me
+        </Chip>
+      </div>
+      <div role="group" aria-labelledby={`${id}-length`}>
+        <span id={`${id}-length`} className="filter-label">
+          Length
+        </span>
+        {Object.entries(LENGTHS).map(([key, { label }]) => (
+          <Chip
+            key={key}
+            pressed={filters.length === key}
+            onClick={() => update({ length: filters.length === key ? null : key })}
+          >
+            {label}
+          </Chip>
+        ))}
+      </div>
+      {genres.length > 0 && (
+        <div role="group" aria-labelledby={`${id}-genre`}>
+          <span id={`${id}-genre`} className="filter-label">
+            Genre
+          </span>
+          {shownGenres.map(({ genre }) => (
+            <Chip
+              key={genre}
+              pressed={filters.genre === genre}
+              onClick={() =>
+                update({ genre: filters.genre === genre ? null : genre })
+              }
+            >
+              {genre}
+            </Chip>
+          ))}
+          {(hidden > 0 || allGenres) && (
+            <button
+              type="button"
+              className="filter-more"
+              aria-expanded={allGenres}
+              onClick={() => setAllGenres(!allGenres)}
+            >
+              {allGenres ? "Fewer genres" : `More genres (${hidden})`}
+            </button>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
+
+// What's filtered, under the search box on a phone. Tapping one turns it off.
+const ActiveFilters = ({ filters, update }: { filters: Filters; update: Update }) => {
+  const active = [
+    filters.mine && { label: "Suggested by me", key: "mine" },
+    filters.length && { label: LENGTHS[filters.length].label, key: "length" },
+    filters.genre && { label: filters.genre, key: "genre" },
+  ].filter((f) => !!f);
+  if (active.length === 0) {
+    return null;
+  }
+  return (
+    <div className="active-filters">
+      {active.map(({ label, key }) => (
+        <button
+          key={key}
+          type="button"
+          className="chip"
+          aria-label={`Remove filter: ${label}`}
+          onClick={() => update({ [key]: null })}
+        >
+          {label} <span aria-hidden="true">×</span>
+        </button>
+      ))}
+    </div>
+  );
+};
+
+// The phone's filters, in a sheet up from the bottom. A modal <dialog>
+// brings focus trapping, Escape to close and the backdrop with it. Filters
+// apply as they're tapped; the button at the bottom just closes it.
+const FilterSheet = ({
+  onClose,
+  onClear,
+  shownCount,
+  children,
+}: {
+  onClose: () => void;
+  onClear: () => void;
+  shownCount: number;
+  children: ReactNode;
+}) => {
+  const dialog = useRef<HTMLDialogElement>(null);
+  const titleId = useId();
+
+  useEffect(() => {
+    dialog.current?.showModal();
+  }, []);
+
+  const close = () => dialog.current?.close();
+
+  return (
+    // A click on the dialog itself, not its contents, is on the backdrop.
+    <dialog
+      ref={dialog}
+      className="filter-sheet"
+      aria-labelledby={titleId}
+      onClose={onClose}
+      onClick={(e) => e.target === e.currentTarget && close()}
+    >
+      <div className="filter-sheet-head">
+        <h2 id={titleId}>Filters</h2>
+        <button type="button" className="button-quiet" onClick={onClear}>
+          Clear all
+        </button>
+      </div>
+      <div className="filter-sheet-body">{children}</div>
+      <div className="filter-sheet-foot">
+        <button type="button" className="button-primary" onClick={close}>
+          Show {shownCount} {shownCount === 1 ? "book" : "books"}
+        </button>
+      </div>
+    </dialog>
+  );
+};
+
 const SuggestionsPage = () => {
   const { data: books, isPending, error } = useBookSuggestions();
   const { data: session } = authClient.useSession();
@@ -307,6 +482,7 @@ const SuggestionsPage = () => {
   // Ids in the order they were picked. Not kept in the URL like the sort,
   // since a poll is created straight after picking.
   const [selected, setSelected] = useState<string[]>([]);
+  const [sheetOpen, setSheetOpen] = useState(false);
 
   const ballot = new Set(currentPoll?.books.map((b) => b.id));
   // Only one poll can be open, so there's nothing to select until it closes.
@@ -344,7 +520,7 @@ const SuggestionsPage = () => {
 
   // Sort and filters live in the URL, so a shared link opens the same view.
   // replace, so each change doesn't pile up history entries.
-  const update = (changes: Record<string, string | null>) => {
+  const update: Update = (changes) => {
     const next = new URLSearchParams(searchParams);
     for (const [key, value] of Object.entries(changes)) {
       if (value === null || value === "") {
@@ -361,7 +537,9 @@ const SuggestionsPage = () => {
     update({ q: null, length: null, genre: null, mine: null });
 
   // Genres only show once some book has them.
-  const genres = [...new Set(books?.flatMap((b) => b.genres))].sort();
+  const genres = countGenres(books ?? []);
+  // The search box is always in view, so only the rest count here.
+  const activeCount = [filters.mine, filters.length, filters.genre].filter(Boolean).length;
   const shown = books && sortBooks(filterBooks(books, filters), field, order);
 
   return (
@@ -405,74 +583,43 @@ const SuggestionsPage = () => {
       {books && books.length > 0 && shown && (
         <div className="catalog">
           <div className="catalog-filters">
-            <label className="search">
-              <span className="visually-hidden">Search titles and authors</span>
-              <svg
-                className="search-icon"
-                viewBox="0 0 24 24"
-                aria-hidden="true"
-              >
-                <circle cx="11" cy="11" r="6.5" />
-                <path d="M20 20l-4.2-4.2" />
-              </svg>
-              <input
-                id="suggestion-search"
-                type="search"
-                placeholder="Title or author"
-                value={filters.q}
-                onChange={(e) => update({ q: e.target.value })}
-              />
-            </label>
-
-            <div className="filter-groups">
-              <div role="group" aria-labelledby="filter-show">
-                <span id="filter-show" className="filter-label">
-                  Show
-                </span>
-                <Chip
-                  pressed={filters.mine}
-                  onClick={() => update({ mine: filters.mine ? null : "1" })}
+            <div className="catalog-search-row">
+              <label className="search">
+                <span className="visually-hidden">Search titles and authors</span>
+                <svg
+                  className="search-icon"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
                 >
-                  Suggested by me
-                </Chip>
-              </div>
-              <div role="group" aria-labelledby="filter-length">
-                <span id="filter-length" className="filter-label">
-                  Length
-                </span>
-                {Object.entries(LENGTHS).map(([key, { label }]) => (
-                  <Chip
-                    key={key}
-                    pressed={filters.length === key}
-                    onClick={() =>
-                      update({ length: filters.length === key ? null : key })
-                    }
-                  >
-                    {label}
-                  </Chip>
-                ))}
-              </div>
-              {genres.length > 0 && (
-                <div role="group" aria-labelledby="filter-genre">
-                  <span id="filter-genre" className="filter-label">
-                    Genre
-                  </span>
-                  {genres.map((genre) => (
-                    <Chip
-                      key={genre}
-                      pressed={filters.genre === genre}
-                      onClick={() =>
-                        update({
-                          genre: filters.genre === genre ? null : genre,
-                        })
-                      }
-                    >
-                      {genre}
-                    </Chip>
-                  ))}
-                </div>
-              )}
+                  <circle cx="11" cy="11" r="6.5" />
+                  <path d="M20 20l-4.2-4.2" />
+                </svg>
+                <input
+                  id="suggestion-search"
+                  type="search"
+                  placeholder="Title or author"
+                  value={filters.q}
+                  onChange={(e) => update({ q: e.target.value })}
+                />
+              </label>
+              <button
+                type="button"
+                className="filters-button button-quiet"
+                aria-haspopup="dialog"
+                aria-label={activeCount > 0 ? `Filters, ${activeCount} on` : undefined}
+                onClick={() => setSheetOpen(true)}
+              >
+                Filters
+                {activeCount > 0 && <span className="badge">{activeCount}</span>}
+              </button>
             </div>
+            <ActiveFilters filters={filters} update={update} />
+            <FilterGroups
+              className="filter-groups filter-groups-sidebar"
+              filters={filters}
+              update={update}
+              genres={genres}
+            />
 
             {books.length > 1 && (
               <div className="sort">
@@ -511,6 +658,21 @@ const SuggestionsPage = () => {
               </div>
             )}
           </div>
+
+          {sheetOpen && (
+            <FilterSheet
+              onClose={() => setSheetOpen(false)}
+              onClear={clearFilters}
+              shownCount={shown.length}
+            >
+              <FilterGroups
+                className="filter-groups"
+                filters={filters}
+                update={update}
+                genres={genres}
+              />
+            </FilterSheet>
+          )}
 
           <div className="catalog-results">
             {shown.length === 0 ? (

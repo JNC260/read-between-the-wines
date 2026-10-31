@@ -39,6 +39,7 @@ import {
   getVenues,
   getInvite,
   getUsersList,
+  mergeAccount,
   mergePlaceholder,
   reactivateAccount,
   requestPasswordReset,
@@ -65,6 +66,7 @@ import {
   unsubscribe,
   getEmailSettings,
   removeAdmin,
+  deactivateUser,
   makeAdmin,
 } from "../api";
 import { authClient } from "../lib/auth-client";
@@ -187,8 +189,23 @@ const useAccountChange = (mutationFn: (id: string) => Promise<UserDTO>) => {
 
 export const useBanUser = () => useAccountChange(banUser);
 export const useUnbanUser = () => useAccountChange(unbanUser);
+export const useDeactivateUser = () => useAccountChange(deactivateUser);
 export const useMakeAdmin = () => useAccountChange(makeAdmin);
 export const useRemoveAdmin = () => useAccountChange(removeAdmin);
+
+// Their suggestions, ratings, RSVPs and votes change hands too.
+export const useMergeAccount = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: mergeAccount,
+    onSuccess: () =>
+      Promise.all(
+        ["users", "books", "meetings", "polls"].map((key) =>
+          queryClient.invalidateQueries({ queryKey: [key] }),
+        ),
+      ),
+  });
+};
 
 export const useSignIn = () => {
   return useMutation({ mutationFn: signIn });
