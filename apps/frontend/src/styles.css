@@ -1807,9 +1807,40 @@ li:has(> :is(h2, h3)) > :last-child {
   min-width: 0;
 }
 
+.catalog-search-row {
+  display: flex;
+  gap: 0.5rem;
+}
+
 .search {
   position: relative;
   display: block;
+  flex: 1;
+  min-width: 0;
+}
+
+.filters-button {
+  flex: none;
+  gap: 0.4rem;
+  padding: 0 1rem;
+  border-radius: var(--radius-pill);
+}
+
+.filters-button .badge {
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+}
+
+.active-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.active-filters .chip {
+  background: var(--color-ink);
+  border-color: var(--color-ink);
+  color: var(--color-paper);
 }
 
 /* Beats the base input rule further down, which sets padding-inline. */
@@ -1832,34 +1863,96 @@ li:has(> :is(h2, h3)) > :last-child {
   pointer-events: none;
 }
 
-/* Phone: every chip in one row that scrolls sideways, running to the screen
-   edges; the group labels are for screen readers only. */
-/* position: relative keeps the hidden labels below inside this scroller.
-   Without it they're placed against the page, out where the off-screen
-   chips are, and the whole page scrolls sideways on a phone. */
+/* Each group's chips wrap under its label, in the sheet and the sidebar. */
 .filter-groups {
-  position: relative;
-  display: flex;
-  gap: 0.4rem;
-  overflow-x: auto;
-  scrollbar-width: none;
-  margin: 0 calc(-1 * var(--gutter));
-  padding: 0.1rem var(--gutter);
+  display: grid;
+  gap: 1.1rem;
 }
 
 .filter-groups > div {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.4rem;
-  flex: none;
 }
 
 .filter-groups .filter-label {
-  position: absolute;
-  width: 1px;
-  height: 1px;
+  flex-basis: 100%;
+}
+
+/* Phones get the Filters button and sheet instead. */
+.filter-groups-sidebar {
+  display: none;
+}
+
+.filter-more {
+  min-height: 2.25rem;
+  padding: 0 0.4rem;
+  border: 0;
+  background: none;
+  color: var(--color-accent);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+/* ---------- Filter sheet (phones) ---------- */
+
+.filter-sheet {
+  width: 100%;
+  max-width: 100%;
+  max-height: 85dvh;
+  margin: auto 0 0;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-card) var(--radius-card) 0 0;
+  background: var(--color-surface);
+  color: var(--color-ink);
+}
+
+.filter-sheet[open] {
+  display: flex;
+  flex-direction: column;
+}
+
+.filter-sheet::backdrop {
+  background: rgb(20 12 30 / 0.5);
+}
+
+/* The page behind stays put while the sheet is open. */
+:root:has(.filter-sheet[open]) {
   overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
+}
+
+.filter-sheet-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem var(--gutter) 0.5rem;
+}
+
+.filter-sheet-head h2 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.filter-sheet-head button {
+  min-height: 2.25rem;
+  padding: 0 0.9rem;
+  font-size: 0.85rem;
+}
+
+.filter-sheet-body {
+  overflow-y: auto;
+  padding: 0.5rem var(--gutter) 1rem;
+}
+
+.filter-sheet-foot {
+  padding: 0.75rem var(--gutter) calc(0.75rem + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--color-line);
+}
+
+.filter-sheet-foot button {
+  width: 100%;
 }
 
 .filter-label {
@@ -2751,9 +2844,13 @@ button:disabled {
     align-items: start;
   }
 
+  /* Scrolls on its own when it's taller than the window, or a sticky
+     sidebar only shows its bottom once the list ends. */
   .catalog-filters {
     position: sticky;
     top: 5rem;
+    max-height: calc(100dvh - 6rem);
+    overflow-y: auto;
     gap: 1.1rem;
     padding: 1rem;
     background: var(--color-surface);
@@ -2761,25 +2858,13 @@ button:disabled {
     border-radius: var(--radius-card);
   }
 
-  .filter-groups {
-    flex-direction: column;
-    gap: 1.1rem;
-    overflow: visible;
-    margin: 0;
-    padding: 0;
+  .filter-groups-sidebar {
+    display: grid;
   }
 
-  .filter-groups > div {
-    flex-wrap: wrap;
-    flex: initial;
-  }
-
-  .filter-groups .filter-label {
-    position: static;
-    width: auto;
-    height: auto;
-    clip-path: none;
-    flex-basis: 100%;
+  .filters-button,
+  .active-filters {
+    display: none;
   }
 
   .sort {

@@ -63,6 +63,17 @@ const books = [
   }),
 ];
 
+// jsdom has no showModal or close, so these do the part the sheet relies on.
+beforeAll(() => {
+  HTMLDialogElement.prototype.showModal = function () {
+    this.setAttribute("open", "");
+  };
+  HTMLDialogElement.prototype.close = function () {
+    this.removeAttribute("open");
+    this.dispatchEvent(new Event("close"));
+  };
+});
+
 // Stands in for NewPollPage and prints the query it was sent.
 const NewPollStub = () => <p>new poll {useLocation().search}</p>;
 
@@ -211,6 +222,65 @@ describe("SuggestionsPage", () => {
       await titles();
       fireEvent.click(screen.getByRole("button", { name: "Fantasy" }));
       expect(await titles()).toEqual(["Piranesi"]);
+    });
+
+    it("shows the most common genres, with the rest behind More genres", async () => {
+      const many = Array.from({ length: 10 }, (_, i) => `Genre ${i}`);
+      vi.mocked(getBookSuggestions).mockResolvedValue([
+        // Genre 9 is on two books, so it comes first.
+        { ...books[0], genres: many },
+        { ...books[1], genres: ["Genre 9"] },
+        books[2],
+      ]);
+      renderPage("/books/suggestions?genre=Genre%208");
+      await titles();
+      const genre = screen.getByRole("group", { name: "Genre" });
+      const chips = () =>
+        within(genre)
+          .getAllByRole("button", { pressed: undefined })
+          .filter((b) => b.hasAttribute("aria-pressed"))
+          .map((b) => b.textContent);
+      // The top eight, plus the picked one from further down.
+      expect(chips()).toEqual(["Genre 9", ...many.slice(0, 7), "Genre 8"]);
+      fireEvent.click(within(genre).getByRole("button", { name: "More genres (1)" }));
+      expect(chips()).toHaveLength(10);
+      fireEvent.click(within(genre).getByRole("button", { name: "Fewer genres" }));
+      expect(chips()).toHaveLength(9);
+    });
+
+    it("lists the active filters, and tapping one turns it off", async () => {
+      vi.mocked(getBookSuggestions).mockResolvedValue(books);
+      renderPage("/books/suggestions?length=short");
+      expect(await titles()).toEqual(["Piranesi"]);
+      expect(screen.getByRole("button", { name: "Filters, 1 on" })).toBeTruthy();
+      fireEvent.click(screen.getByRole("button", { name: "Remove filter: Under 300 pages" }));
+      expect(await titles()).toHaveLength(3);
+      expect(screen.getByRole("button", { name: "Filters" })).toBeTruthy();
+    });
+
+    it("filters from the sheet, which says how many books match", async () => {
+      vi.mocked(getBookSuggestions).mockResolvedValue(books);
+      renderPage();
+      await titles();
+      fireEvent.click(screen.getByRole("button", { name: "Filters" }));
+      const sheet = screen.getByRole("dialog", { name: "Filters" });
+      fireEvent.click(within(sheet).getByRole("button", { name: "Under 300 pages" }));
+      expect(await titles()).toEqual(["Piranesi"]);
+      fireEvent.click(within(sheet).getByRole("button", { name: "Show 1 book" }));
+      expect(screen.queryByRole("dialog")).toBeNull();
+    });
+
+    it("clears every filter from the sheet", async () => {
+      vi.mocked(getBookSuggestions).mockResolvedValue(books);
+      renderPage("/books/suggestions?length=short&mine=1");
+      await screen.findByRole("button", { name: "Filters, 2 on" });
+      fireEvent.click(screen.getByRole("button", { name: "Filters, 2 on" }));
+      fireEvent.click(
+        within(screen.getByRole("dialog", { name: "Filters" })).getByRole("button", {
+          name: "Clear all",
+        }),
+      );
+      expect(await titles()).toHaveLength(3);
     });
 
     it("offers to clear filters when nothing matches", async () => {
