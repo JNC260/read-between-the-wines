@@ -69,6 +69,16 @@ describe("LoginPage", () => {
     );
   });
 
+  it("says what's missing without calling the server", () => {
+    renderLogin();
+    fireEvent.click(screen.getByRole("button", { name: "Log in" }));
+    expect(screen.getAllByRole("alert").map((a) => a.textContent)).toEqual([
+      "Enter an email address, like you@example.com",
+      "Enter your password",
+    ]);
+    expect(signIn).not.toHaveBeenCalled();
+  });
+
   it("skips the form for members who are already signed in", () => {
     mockSession(testUser());
     renderLogin();

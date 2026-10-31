@@ -1,6 +1,7 @@
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { APIError } from "better-auth/api";
+import { MAX_PASSWORD_LENGTH, MIN_PASSWORD_LENGTH } from "shared";
 import { UserStatus } from "../../generated/prisma/client";
 import { config, isProduction } from "./config";
 import { isInviteValid, markInviteUsed } from "../invites/invites.service";
@@ -35,6 +36,9 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: true,
+    // The same limits the sign-up and reset forms check.
+    minPasswordLength: MIN_PASSWORD_LENGTH,
+    maxPasswordLength: MAX_PASSWORD_LENGTH,
     sendResetPassword: async ({ user, url }) => {
       sendInBackground({
         to: user.email,

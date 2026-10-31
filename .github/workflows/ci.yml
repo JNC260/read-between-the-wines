@@ -1,0 +1,53 @@
+# Lint, typecheck, test and build on every pull request and every push to
+# main. The database specs run against the same docker-compose Postgres as
+# local development, so CI and a laptop test the same way.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# A new push to a branch cancels its run that's still going.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NX_DAEMON: false
+  NX_NO_CLOUD: true
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+
+      # Matches the Dockerfile's node:24 image.
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      # The example values are what docker-compose and the server need to
+      # talk to each other; only the auth secret has to be made up.
+      - name: Create .env
+        run: |
+          cp .env.example .env
+          sed -i "s|^BETTER_AUTH_SECRET=.*|BETTER_AUTH_SECRET=$(openssl rand -base64 32)|" .env
+
+      - name: Lint and typecheck
+        run: npx nx run-many -t lint typecheck --output-style=static
+
+      - name: Unit tests
+        run: npx nx run-many -t test --output-style=static
+
+      # Starts Postgres with docker compose (the backend:db target) first.
+      - name: Database tests
+        run: npx nx test-db backend --output-style=static
+
+      - name: Build
+        run: npx nx run-many -t build -p backend frontend --output-style=static

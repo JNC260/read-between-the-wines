@@ -1,8 +1,16 @@
 import { type FormEvent, useState } from "react";
-import { MAX_GUESTS, type RsvpDTO, type RsvpStatus } from "shared";
+import {
+  MAX_GUESTS,
+  type RsvpDTO,
+  type RsvpStatus,
+  type SetRsvpDTO,
+  SetRsvpSchema,
+} from "shared";
+import * as z from "zod";
 import { useMeetingRsvps, useSetRsvp } from "../hooks";
 import { authClient } from "../lib/auth-client";
 import Avatar from "./Avatar";
+import Field from "./Field";
 
 const CHOICES: { status: RsvpStatus; label: string }[] = [
   { status: "YES", label: "I'm in" },
@@ -52,16 +60,25 @@ const RsvpDetailsForm = ({
 }) => {
   const [dish, setDish] = useState(mine?.dish ?? "");
   const [guests, setGuests] = useState(String(mine?.guestCount ?? 0));
+  const [fieldErrors, setFieldErrors] = useState<
+    Partial<Record<keyof SetRsvpDTO, string[]>>
+  >({});
   const { mutate, isPending, isSuccess, error, reset } = useSetRsvp();
 
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    mutate({
-      meetingId,
+    // An empty guests box means none; a typo like "2.5" becomes a message.
+    const result = SetRsvpSchema.safeParse({
       status,
       dish: dish.trim() || null,
-      guestCount: Number(guests) || 0,
+      guestCount: guests.trim() === "" ? 0 : Number(guests),
     });
+    if (!result.success) {
+      setFieldErrors(z.flattenError(result.error).fieldErrors);
+      return;
+    }
+    setFieldErrors({});
+    mutate({ meetingId, ...result.data });
   };
 
   // Editing again hides the "Saved" note until the next save.
@@ -71,30 +88,27 @@ const RsvpDetailsForm = ({
   };
 
   return (
-    <form className="rsvp-details" onSubmit={handleSubmit}>
-      <div>
-        <label htmlFor="rsvp-dish">Bringing food? (optional)</label>
-        <input
-          id="rsvp-dish"
-          maxLength={100}
-          placeholder="Lemon bars, a cheese plate…"
-          value={dish}
-          onChange={(e) => edit(setDish, e.target.value)}
-        />
-      </div>
-      <div>
-        <label htmlFor="rsvp-guests">Guests</label>
-        <input
-          id="rsvp-guests"
-          type="number"
-          inputMode="numeric"
-          min={0}
-          max={MAX_GUESTS}
-          step={1}
-          value={guests}
-          onChange={(e) => edit(setGuests, e.target.value)}
-        />
-      </div>
+    <form className="rsvp-details" onSubmit={handleSubmit} noValidate>
+      <Field
+        id="rsvp-dish"
+        label="Bringing food? (optional)"
+        placeholder="Lemon bars, a cheese plate…"
+        value={dish}
+        onChange={(e) => edit(setDish, e.target.value)}
+        error={fieldErrors.dish?.[0]}
+      />
+      <Field
+        id="rsvp-guests"
+        label="Guests"
+        type="number"
+        inputMode="numeric"
+        min={0}
+        max={MAX_GUESTS}
+        step={1}
+        value={guests}
+        onChange={(e) => edit(setGuests, e.target.value)}
+        error={fieldErrors.guestCount?.[0]}
+      />
       <div className="rsvp-details-actions">
         <button type="submit" disabled={isPending}>
           {isPending ? "Saving..." : "Save"}

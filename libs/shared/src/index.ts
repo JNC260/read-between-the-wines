@@ -4,6 +4,7 @@ export * from "./lib/normalize-title";
 export * from "./lib/phone";
 export * from "./lib/shared";
 export * from "./lib/social";
+export * from "./schemas/auth";
 export * from "./schemas/books";
 export * from "./schemas/invites";
 export * from "./schemas/meetings";

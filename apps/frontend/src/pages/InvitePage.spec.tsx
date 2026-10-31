@@ -56,6 +56,22 @@ describe("InvitePage", () => {
     expect(signUpWithInvite).not.toHaveBeenCalled();
   });
 
+  it("checks the password length before signing up", async () => {
+    validInvite();
+    renderInvite();
+    await screen.findByLabelText("Email");
+    fill("Email", "invitee@example.com");
+    fill("First name", "Ada");
+    fill("Last name", "Lovelace");
+    fill("Password", "short");
+    fill("Confirm password", "short");
+    fireEvent.click(screen.getByRole("button", { name: "Create account" }));
+    expect(screen.getByRole("alert").textContent).toBe(
+      "Use at least 8 characters",
+    );
+    expect(signUpWithInvite).not.toHaveBeenCalled();
+  });
+
   it("signs up with the token and asks them to verify their email", async () => {
     validInvite();
     vi.mocked(signUpWithInvite).mockResolvedValue();
