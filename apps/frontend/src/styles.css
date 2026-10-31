@@ -917,10 +917,49 @@ li:has(> :is(h2, h3)) > :last-child {
   margin-left: -0.5rem;
 }
 
+/* Your answer on one line, with Change at the end of it. */
+.your-rsvp {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  padding: 0.6rem 0.6rem 0.6rem 1rem;
+  border-radius: var(--radius-field);
+  background: var(--color-accent-soft);
+}
+
+.your-rsvp button {
+  min-height: 2.25rem;
+  padding: 0 1rem;
+  font-size: 0.85rem;
+  background: var(--color-surface);
+}
+
+/* Set apart from your own answer above it. */
 .rsvp-groups {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--color-line);
+}
+
+.rsvp-groups h3 .badge {
+  margin-left: 0.25rem;
+  vertical-align: 0.1em;
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+}
+
+/* The ones who can't make it read quieter than the ones coming. */
+.rsvp-group-no h3 .badge {
+  background: var(--color-line);
+  color: var(--color-ink-soft);
+}
+
+.rsvp-group-no li {
+  color: var(--color-ink-soft);
 }
 
 .meeting-page .card {
@@ -935,7 +974,7 @@ li:has(> :is(h2, h3)) > :last-child {
 
 .rsvp-groups h3 {
   font-size: 1rem;
-  margin-bottom: 0.35rem;
+  margin-bottom: 0.6rem;
 }
 
 .rsvp-groups ul {
@@ -943,8 +982,20 @@ li:has(> :is(h2, h3)) > :last-child {
   padding: 0;
   list-style: none;
   display: grid;
-  gap: 0.2rem;
+  gap: 0.5rem;
   font-size: 0.95rem;
+}
+
+.rsvp-groups li {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-width: 0;
+}
+
+.rsvp-groups li .face {
+  flex: none;
+  border: 0;
 }
 
 /* ---------- Poll card ---------- */
